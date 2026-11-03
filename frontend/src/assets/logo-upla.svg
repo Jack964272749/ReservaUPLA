@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" width="120" height="40" aria-label="Logo institucional UPLA">
+  <rect width="120" height="40" rx="8" fill="#0A3D91" />
+  <path d="M12 10 L20 10 L24 22 L28 10 L36 10 L30 30 L18 30 Z" fill="#FFFFFF" opacity="0.15" />
+  <text x="60" y="26" font-family="'Segoe UI', Arial, sans-serif" font-weight="900" font-size="20" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">UPLA</text>
+</svg>
