@@ -1,17 +1,13 @@
-## .NET
 bin/
 obj/
-*.user
-*.suo
-appsettings.Development.json
-
-## Node / React
 node_modules/
 dist/
-.env.local
-npm-debug.log*
-
-## IDE
-.vscode/
 .vs/
 .idea/
+*.user
+*.suo
+appsettings.*.local.json
+appsettings.Development.json
+.env*
+coverage/
+.engram/
