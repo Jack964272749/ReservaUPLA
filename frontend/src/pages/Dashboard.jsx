@@ -1,199 +1,141 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   CalendarDays,
   Clock,
   CheckCircle2,
   XCircle,
-  Building,
-  PlusCircle,
+  Building2,
   RefreshCw,
-  AlertCircle,
 } from 'lucide-react';
 import CardIndicador from '../components/CardIndicador';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
-import TableList from '../components/TableList';
-import { api } from '../services/api';
+import { useDashboard } from '../hooks/useDashboard';
 
-export default function Dashboard({ setActiveTab }) {
-  const [indicadores, setIndicadores] = useState(null);
-  const [recientes, setRecientes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+// Trazabilidad: RF-08 · Nielsen H1 (Visibilidad del estado del sistema), H8 · Shneiderman S1, S3
+export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
+  const { indicadores, cargando, error, recargar } = useDashboard();
 
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [indData, resData] = await Promise.all([
-        api.getIndicadoresDashboard(),
-        api.getReservas(),
-      ]);
-      setIndicadores(indData);
-      setRecientes(resData.slice(0, 5));
-    } catch (err) {
-      setError('No se pudo conectar con el servidor backend. Verifique que la API esté iniciada.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const getStatusBadge = (estado) => {
-    const badges = {
-      Aprobada: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-      Pendiente: 'bg-amber-100 text-amber-800 border-amber-200',
-      Rechazada: 'bg-rose-100 text-rose-800 border-rose-200',
-      Cancelada: 'bg-slate-100 text-slate-700 border-slate-200',
-    };
+  if (cargando) {
     return (
-      <span
-        className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${
-          badges[estado] || badges.Pendiente
-        }`}
+      <div
+        role="status"
+        aria-live="polite"
+        className="p-16 text-center text-slate-500 dark:text-slate-400"
       >
-        {estado}
-      </span>
+        <span
+          className="inline-block animate-spin rounded-full h-8 w-8 border-3 border-sky-600 border-t-transparent mb-3"
+          aria-hidden="true"
+        />
+        <p className="text-sm font-medium">Cargando indicadores del dashboard…</p>
+      </div>
     );
-  };
-
-  const columns = [
-    {
-      header: 'Ambiente',
-      render: (r) => (
-        <div>
-          <span className="font-semibold text-slate-800">{r.ambienteNombre}</span>
-          <p className="text-xs text-slate-400">{r.ambienteUbicacion}</p>
-        </div>
-      ),
-    },
-    {
-      header: 'Solicitante',
-      render: (r) => (
-        <div>
-          <span className="text-slate-800">{r.usuarioNombre}</span>
-          <p className="text-xs text-slate-400">{r.usuarioCorreo}</p>
-        </div>
-      ),
-    },
-    {
-      header: 'Fecha',
-      render: (r) => <span className="font-mono text-xs">{r.fecha}</span>,
-    },
-    {
-      header: 'Horario',
-      render: (r) => (
-        <span className="font-mono text-xs text-slate-600">
-          {r.horaInicio.slice(0, 5)} - {r.horaFin.slice(0, 5)}
-        </span>
-      ),
-    },
-    {
-      header: 'Estado',
-      align: 'center',
-      render: (r) => getStatusBadge(r.estado),
-    },
-  ];
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header and Refresh */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard de Reservas</h1>
-          <p className="text-sm text-slate-500">
-            Indicadores en tiempo real y disponibilidad de ambientes de la Universidad.
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
+            Panel de Control Institucional
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Resumen estadístico y estado general del uso de ambientes universitarios.
           </p>
         </div>
+
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
+            onClick={recargar}
             icon={RefreshCw}
-            onClick={fetchDashboardData}
-            loading={loading}
+            ariaLabel="Actualizar indicadores"
           >
             Actualizar
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={PlusCircle}
-            onClick={() => setActiveTab('nueva-reserva')}
-          >
-            Nueva Reserva
-          </Button>
-        </div>
-      </div>
-
-      {error && <AlertMessage type="error" message={error} onClose={() => setError(null)} />}
-
-      {/* Indicadores Cards (RF-08) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <CardIndicador
-          title="Total Reservas"
-          value={loading ? '...' : indicadores?.totalReservas ?? 0}
-          subtitle="Registradas en el sistema"
-          icon={CalendarDays}
-          variant="blue"
-        />
-        <CardIndicador
-          title="Pendientes"
-          value={loading ? '...' : indicadores?.reservasPendientes ?? 0}
-          subtitle="En espera de aprobación"
-          icon={Clock}
-          variant="amber"
-        />
-        <CardIndicador
-          title="Aprobadas"
-          value={loading ? '...' : indicadores?.reservasAprobadas ?? 0}
-          subtitle="Disponibilidad confirmada"
-          icon={CheckCircle2}
-          variant="green"
-        />
-        <CardIndicador
-          title="Rechazadas"
-          value={loading ? '...' : indicadores?.reservasRechazadas ?? 0}
-          subtitle="Conflicto o no apto"
-          icon={XCircle}
-          variant="red"
-        />
-        <CardIndicador
-          title="Ambiente Más Usado"
-          value={loading ? '...' : indicadores?.ambienteMasUtilizado || 'N/A'}
-          subtitle={`${indicadores?.totalAmbienteMasUtilizado ?? 0} reservas`}
-          icon={Building}
-          variant="purple"
-        />
-      </div>
-
-      {/* Quick Overview & Recent Reservations */}
-      <div className="grid grid-cols-1 gap-6">
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Últimas Solicitudes Registradas</h2>
-              <p className="text-xs text-slate-500">Visualice el estado de las reservas recientes</p>
-            </div>
+          {alIrANuevaReserva && (
             <Button
-              variant="outline"
+              variant="primary"
               size="sm"
-              onClick={() => setActiveTab('reservas')}
+              onClick={alIrANuevaReserva}
             >
-              Ver Todas las Reservas
+              Nueva Reserva
             </Button>
-          </div>
-
-          <TableList
-            columns={columns}
-            data={recientes}
-            loading={loading}
-            emptyMessage="No hay reservas registradas en este momento."
-          />
+          )}
         </div>
+      </div>
+
+      {error && (
+        <AlertMessage
+          type="error"
+          message={error}
+        />
+      )}
+
+      {/* Grid de Tarjetas KPI */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <CardIndicador
+          titulo="Total de Reservas"
+          valor={indicadores?.totalReservas ?? 0}
+          descripcion="Histórico registrado en el sistema"
+          icon={CalendarDays}
+          color="sky"
+        />
+        <CardIndicador
+          titulo="Reservas Pendientes"
+          valor={indicadores?.reservasPendientes ?? 0}
+          descripcion="En espera de aprobación administrativa"
+          icon={Clock}
+          color="amber"
+        />
+        <CardIndicador
+          titulo="Reservas Aprobadas"
+          valor={indicadores?.reservasAprobadas ?? 0}
+          descripcion="Confirmadas sin cruces horarios"
+          icon={CheckCircle2}
+          color="emerald"
+        />
+        <CardIndicador
+          titulo="Reservas Rechazadas"
+          valor={indicadores?.reservasRechazadas ?? 0}
+          descripcion="Rechazadas por la administración"
+          icon={XCircle}
+          color="rose"
+        />
+      </div>
+
+      {/* Tarjeta de Ambiente Más Utilizado */}
+      <div className="p-6 rounded-2xl bg-gradient-to-r from-sky-900 via-sky-800 to-indigo-900 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div className="flex items-start gap-4">
+          <div className="p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-sky-200 flex-shrink-0">
+            <Building2 className="w-8 h-8" aria-hidden="true" />
+          </div>
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-sky-300">
+              Ambiente de Mayor Demanda Académica
+            </span>
+            <h2 className="text-2xl font-bold mt-1 text-white">
+              {indicadores?.ambienteMasUtilizado || 'Sin registros suficientes'}
+            </h2>
+            <p className="text-xs sm:text-sm text-sky-200/80 mt-1">
+              {indicadores?.cantidadAmbienteMasUtilizado
+                ? `${indicadores.cantidadAmbienteMasUtilizado} reservas aprobadas acumuladas.`
+                : 'Aún no se registran reservas aprobadas para determinar el ambiente líder.'}
+            </p>
+          </div>
+        </div>
+
+        {alIrAReservas && (
+          <Button
+            variant="outline"
+            size="md"
+            onClick={alIrAReservas}
+            className="border-white/30 text-white hover:bg-white/10 bg-transparent flex-shrink-0"
+          >
+            Ver todas las reservas
+          </Button>
+        )}
       </div>
     </div>
   );

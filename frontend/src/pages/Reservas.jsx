@@ -1,137 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   CalendarDays,
   Filter,
-  Check,
-  X,
-  Ban,
+  CheckCircle2,
+  XCircle,
   Eye,
   RefreshCw,
-  Search,
-  CheckCircle2,
-  AlertTriangle,
 } from 'lucide-react';
 import TableList from '../components/TableList';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import ModalConfirmacion from '../components/ModalConfirmacion';
-import SelectInput from '../components/SelectInput';
-import DateInput from '../components/DateInput';
 import TextInput from '../components/TextInput';
-import { api } from '../services/api';
+import { useReservas } from '../hooks/useReservas';
+import { useAuth } from '../hooks/useAuth';
 
-export default function Reservas({ setActiveTab }) {
-  const [reservas, setReservas] = useState([]);
-  const [ambientes, setAmbientes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [alert, setAlert] = useState(null);
+// Trazabilidad: RF-05, RF-06, RF-07 · RN-05, RN-06 · Nielsen H1, H3, H5, H6, H7, H9 · Shneiderman S1..S5 · ISO 9241-11
+export default function Reservas({ alIrANuevaReserva }) {
+  const { usuario } = useAuth();
+  const rol = usuario?.rol || 'Solicitante';
 
-  // Filters
-  const [filtroFecha, setFiltroFecha] = useState('');
-  const [filtroAmbiente, setFiltroAmbiente] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('');
+  const {
+    reservas,
+    totalRegistros,
+    paginaActual,
+    totalPaginas,
+    setPaginaActual,
+    cargando,
+    error,
+    filtroFecha,
+    setFiltroFecha,
+    filtroEstado,
+    setFiltroEstado,
+    recargar,
+    modalAccion,
+    abrirModalAccion,
+    cerrarModalAccion,
+    confirmarAccion,
+    procesandoAccion,
+    motivoRechazo,
+    setMotivoRechazo,
+    ultimoBotonAccionRef,
+  } = useReservas();
 
-  // Modal State for Action (Aprobar, Rechazar, Cancelar)
-  const [selectedReserva, setSelectedReserva] = useState(null);
-  const [modalAction, setModalAction] = useState(null); // 'Aprobada' | 'Rechazada' | 'Cancelada'
-  const [observacion, setObservacion] = useState('');
-  const [actionLoading, setActionLoading] = useState(false);
+  // Modal para Detalle de Reserva (RF-06)
+  const [reservaDetalle, setReservaDetalle] = useState(null);
 
-  // Modal Detail State
-  const [detailReserva, setDetailReserva] = useState(null);
+  const badgeEstado = (estado) => {
+    const config = {
+      Pendiente: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800',
+      Aprobada: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800',
+      Rechazada: 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300 dark:border-rose-800',
+      Cancelada: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700',
+    }[estado] || 'bg-slate-100 text-slate-800 border-slate-300';
 
-  const fetchAmbientes = async () => {
-    try {
-      const data = await api.getAmbientes();
-      setAmbientes(data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const fetchReservas = async () => {
-    setLoading(true);
-    try {
-      const data = await api.getReservas({
-        fecha: filtroFecha || undefined,
-        ambienteId: filtroAmbiente || undefined,
-        estado: filtroEstado || undefined,
-      });
-      setReservas(data);
-    } catch (err) {
-      setAlert({ type: 'error', message: err.message || 'Error al cargar las reservas.' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAmbientes();
-  }, []);
-
-  useEffect(() => {
-    fetchReservas();
-  }, [filtroFecha, filtroAmbiente, filtroEstado]);
-
-  const handleOpenActionModal = (reserva, action) => {
-    setSelectedReserva(reserva);
-    setModalAction(action);
-    setObservacion('');
-  };
-
-  const handleConfirmAction = async () => {
-    if (!selectedReserva || !modalAction) return;
-
-    if (modalAction === 'Rechazada' && !observacion.trim()) {
-      setAlert({ type: 'warning', message: 'Debe ingresar el motivo de rechazo en la observación.' });
-      return;
-    }
-
-    setActionLoading(true);
-    try {
-      await api.cambiarEstadoReserva(selectedReserva.id, {
-        nuevoEstado: modalAction,
-        observacionAdmin: observacion,
-      });
-      setAlert({
-        type: 'success',
-        message: `La reserva ha sido marcada como ${modalAction} exitosamente.`,
-      });
-      setSelectedReserva(null);
-      setModalAction(null);
-      fetchReservas();
-    } catch (err) {
-      setAlert({ type: 'error', message: err.message });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const getStatusBadge = (estado) => {
-    const badges = {
-      Aprobada: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-      Pendiente: 'bg-amber-100 text-amber-800 border-amber-300',
-      Rechazada: 'bg-rose-100 text-rose-800 border-rose-300',
-      Cancelada: 'bg-slate-100 text-slate-700 border-slate-300',
-    };
     return (
-      <span
-        className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold border ${
-          badges[estado] || badges.Pendiente
-        }`}
-      >
+      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${config}`}>
         {estado}
       </span>
     );
   };
 
-  const columns = [
+  const columnas = [
     {
       header: 'Ambiente',
       render: (r) => (
         <div>
-          <p className="font-semibold text-slate-800">{r.ambienteNombre}</p>
-          <span className="text-xs text-slate-400">{r.ambienteTipo}</span>
+          <p className="font-semibold text-slate-900 dark:text-slate-100">{r.ambienteNombre}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">ID: {r.id.substring(0, 8)}…</p>
+        </div>
+      ),
+    },
+    {
+      header: 'Fecha y Horario',
+      render: (r) => (
+        <div>
+          <p className="font-medium text-slate-800 dark:text-slate-200">{r.fecha}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+            {r.horaInicio} – {r.horaFin}
+          </p>
         </div>
       ),
     },
@@ -139,89 +86,69 @@ export default function Reservas({ setActiveTab }) {
       header: 'Solicitante',
       render: (r) => (
         <div>
-          <p className="font-medium text-slate-800">{r.usuarioNombre}</p>
-          <span className="text-xs text-slate-400">{r.usuarioCorreo}</span>
+          <p className="font-medium text-slate-800 dark:text-slate-200">{r.solicitanteNombre}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{r.solicitanteCorreo}</p>
         </div>
-      ),
-    },
-    {
-      header: 'Fecha & Horario',
-      render: (r) => (
-        <div>
-          <p className="font-mono text-xs font-semibold text-slate-700">{r.fecha}</p>
-          <p className="font-mono text-xs text-slate-500">
-            {r.horaInicio.slice(0, 5)} - {r.horaFin.slice(0, 5)}
-          </p>
-        </div>
-      ),
-    },
-    {
-      header: 'Motivo',
-      render: (r) => (
-        <p className="truncate max-w-[200px] text-xs text-slate-600" title={r.motivo}>
-          {r.motivo}
-        </p>
       ),
     },
     {
       header: 'Estado',
-      align: 'center',
-      render: (r) => getStatusBadge(r.estado),
+      render: (r) => badgeEstado(r.estado),
     },
     {
       header: 'Acciones',
-      align: 'right',
+      className: 'text-right',
       render: (r) => (
         <div className="flex items-center justify-end gap-1.5">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setDetailReserva(r)}
-            className="p-1.5"
-            title="Ver detalle"
+          {/* Botón Ver Detalle (RF-06) */}
+          <button
+            type="button"
+            onClick={() => setReservaDetalle(r)}
+            aria-label={`Ver detalles de la reserva de ${r.solicitanteNombre}`}
+            title="Ver detalles"
+            className="p-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
           >
-            <Eye className="w-3.5 h-3.5" />
-          </Button>
+            <Eye className="w-4 h-4" />
+          </button>
 
-          {/* RN-06: Una reserva rechazada no podrá modificarse */}
-          {r.estado !== 'Rechazada' && (
+          {/* Acciones de Administrador (RN-05): Aprobar / Rechazar */}
+          {rol === 'Administrador' && r.estado === 'Pendiente' && (
             <>
-              {r.estado === 'Pendiente' && (
-                <>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => handleOpenActionModal(r, 'Aprobada')}
-                    className="p-1.5"
-                    title="Aprobar reserva"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleOpenActionModal(r, 'Rechazada')}
-                    className="p-1.5"
-                    title="Rechazar reserva"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </Button>
-                </>
-              )}
-
-              {r.estado === 'Aprobada' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleOpenActionModal(r, 'Cancelada')}
-                  className="p-1.5 text-slate-500 hover:text-rose-600"
-                  title="Cancelar reserva"
-                >
-                  <Ban className="w-3.5 h-3.5" />
-                </Button>
-              )}
+              <button
+                type="button"
+                onClick={(e) => abrirModalAccion(r, 'Aprobada', e.currentTarget)}
+                aria-label={`Aprobar reserva de ${r.solicitanteNombre}`}
+                title="Aprobar reserva"
+                className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-md min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => abrirModalAccion(r, 'Rechazada', e.currentTarget)}
+                aria-label={`Rechazar reserva de ${r.solicitanteNombre}`}
+                title="Rechazar reserva"
+                className="p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-md min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
             </>
           )}
+
+          {/* Cancelación (Solicitante o Admin sobre reservas no rechazadas) */}
+          {(rol === 'Administrador' || rol === 'Solicitante') &&
+            r.estado !== 'Rechazada' &&
+            r.estado !== 'Cancelada' && (
+              <button
+                type="button"
+                onClick={(e) => abrirModalAccion(r, 'Cancelada', e.currentTarget)}
+                aria-label="Cancelar esta reserva"
+                title="Cancelar reserva"
+                className="text-xs text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 px-2 py-1.5 rounded hover:bg-rose-50 dark:hover:bg-rose-950/20 min-h-[44px] flex items-center"
+              >
+                Cancelar
+              </button>
+            )}
         </div>
       ),
     },
@@ -229,199 +156,229 @@ export default function Reservas({ setActiveTab }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Gestión de Reservas</h1>
-          <p className="text-sm text-slate-500">
-            Listado completo, validaciones y aprobación administrativa de reservas.
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <CalendarDays className="w-6 h-6 text-sky-700 dark:text-sky-400" aria-hidden="true" />
+            <span>
+              {rol === 'Solicitante'
+                ? 'Mis Reservas Institucionales'
+                : rol === 'Responsable'
+                ? 'Reservas de Ambiente Asignado'
+                : 'Gestión General de Reservas'}
+            </span>
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            {totalRegistros} reserva(s) encontrada(s) en total.
           </p>
         </div>
+
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" icon={RefreshCw} onClick={fetchReservas} loading={loading}>
-            Refrescar
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={recargar}
+            icon={RefreshCw}
+            ariaLabel="Refrescar listado"
+          >
+            Actualizar
           </Button>
-          <Button variant="primary" size="sm" onClick={() => setActiveTab('nueva-reserva')}>
-            Nueva Reserva
-          </Button>
+          {alIrANuevaReserva && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={alIrANuevaReserva}
+            >
+              Nueva Reserva
+            </Button>
+          )}
         </div>
       </div>
 
-      {alert && (
+      {error && (
         <AlertMessage
-          type={alert.type}
-          message={alert.message}
-          onClose={() => setAlert(null)}
+          type="error"
+          message={error}
         />
       )}
 
-      {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
-        <DateInput
-          label="Filtrar por Fecha"
-          value={filtroFecha}
-          onChange={(e) => setFiltroFecha(e.target.value)}
-        />
-
-        <SelectInput
-          label="Filtrar por Ambiente"
-          value={filtroAmbiente}
-          onChange={(e) => setFiltroAmbiente(e.target.value)}
-          placeholder="Todos los ambientes"
-          options={ambientes.map((a) => ({ value: a.id, label: a.nombre }))}
-        />
-
-        <SelectInput
-          label="Filtrar por Estado"
-          value={filtroEstado}
-          onChange={(e) => setFiltroEstado(e.target.value)}
-          placeholder="Todos los estados"
-          options={[
-            { value: 'Pendiente', label: 'Pendiente' },
-            { value: 'Aprobada', label: 'Aprobada' },
-            { value: 'Rechazada', label: 'Rechazada' },
-            { value: 'Cancelada', label: 'Cancelada' },
-          ]}
-        />
-
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="md"
-            className="w-full"
-            onClick={() => {
-              setFiltroFecha('');
-              setFiltroAmbiente('');
-              setFiltroEstado('');
-            }}
-          >
-            Limpiar Filtros
-          </Button>
+      {/* Barra de Filtros Accesible (RF-05 · Nielsen H7) */}
+      <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-center gap-4">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 w-full sm:w-auto">
+          <Filter className="w-4 h-4 text-sky-600" aria-hidden="true" />
+          <span>Filtros:</span>
         </div>
-      </div>
 
-      {/* Table */}
-      <TableList
-        columns={columns}
-        data={reservas}
-        loading={loading}
-        emptyMessage="No se encontraron reservas con los filtros seleccionados."
-      />
-
-      {/* Modal Confirmación de Cambio de Estado (RF-07, RN-05, RN-06) */}
-      <ModalConfirmacion
-        isOpen={!!selectedReserva}
-        onClose={() => setSelectedReserva(null)}
-        onConfirm={handleConfirmAction}
-        loading={actionLoading}
-        title={
-          modalAction === 'Aprobada'
-            ? 'Aprobar Solicitud de Reserva'
-            : modalAction === 'Rechazada'
-            ? 'Rechazar Solicitud de Reserva'
-            : 'Cancelar Reserva'
-        }
-        message={
-          modalAction === 'Aprobada'
-            ? `¿Desea aprobar la reserva para el ambiente "${selectedReserva?.ambienteNombre}" en la fecha ${selectedReserva?.fecha}?`
-            : modalAction === 'Rechazada'
-            ? `¿Desea rechazar esta solicitud? Tenga en cuenta que según la regla RN-06, una reserva rechazada no podrá modificarse posteriormente.`
-            : `¿Desea cancelar esta reserva ya aprobada?`
-        }
-        variant={modalAction === 'Aprobada' ? 'success' : 'danger'}
-        confirmText={
-          modalAction === 'Aprobada'
-            ? 'Sí, Aprobar'
-            : modalAction === 'Rechazada'
-            ? 'Sí, Rechazar'
-            : 'Sí, Cancelar'
-        }
-      >
-        <div className="mt-3">
-          <TextInput
-            label="Observación / Motivo administrativo"
-            placeholder={
-              modalAction === 'Rechazada'
-                ? 'Ej. Conflicto con evento institucional'
-                : 'Opcional (Ej. Verificado por decanatura)'
-            }
-            value={observacion}
-            onChange={(e) => setObservacion(e.target.value)}
-            required={modalAction === 'Rechazada'}
+        <div className="w-full sm:w-48">
+          <label htmlFor="filtro-fecha" className="sr-only">Filtrar por fecha</label>
+          <input
+            id="filtro-fecha"
+            type="date"
+            value={filtroFecha}
+            onChange={(e) => {
+              setFiltroFecha(e.target.value);
+              setPaginaActual(1);
+            }}
+            className="w-full min-h-[44px] px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
           />
         </div>
-      </ModalConfirmacion>
 
-      {/* Modal Detalle de Reserva (RF-06) */}
-      {detailReserva && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
-              <h3 className="font-bold text-slate-800 text-base">Detalle de la Reserva</h3>
-              <button
-                onClick={() => setDetailReserva(null)}
-                className="text-slate-400 hover:text-slate-600 p-1"
+        <div className="w-full sm:w-48">
+          <label htmlFor="filtro-estado" className="sr-only">Filtrar por estado</label>
+          <select
+            id="filtro-estado"
+            value={filtroEstado}
+            onChange={(e) => {
+              setFiltroEstado(e.target.value);
+              setPaginaActual(1);
+            }}
+            className="w-full min-h-[44px] px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+          >
+            <option value="">Todos los estados</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Aprobada">Aprobada</option>
+            <option value="Rechazada">Rechazada</option>
+            <option value="Cancelada">Cancelada</option>
+          </select>
+        </div>
+
+        {(filtroFecha || filtroEstado) && (
+          <button
+            type="button"
+            onClick={() => {
+              setFiltroFecha('');
+              setFiltroEstado('');
+              setPaginaActual(1);
+            }}
+            className="text-xs text-sky-700 dark:text-sky-400 hover:underline min-h-[44px] px-2 flex items-center"
+          >
+            Limpiar filtros
+          </button>
+        )}
+      </div>
+
+      {/* Tabla de Reservas */}
+      <TableList
+        caption="Listado de reservas de ambientes institucionales"
+        columns={columnas}
+        data={reservas}
+        loading={cargando}
+        emptyMessage="No se encontraron reservas con los criterios seleccionados."
+        renderMobileCard={(r) => (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-sm text-slate-900 dark:text-slate-100">{r.ambienteNombre}</span>
+              {badgeEstado(r.estado)}
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400">
+              📅 {r.fecha} · ⏰ {r.horaInicio} – {r.horaFin}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              👤 Solicitado por: {r.solicitanteNombre}
+            </p>
+            <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-700">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setReservaDetalle(r)}
               >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Ambiente</p>
-                  <p className="font-bold text-slate-800">{detailReserva.ambienteNombre}</p>
-                  <p className="text-xs text-slate-500">{detailReserva.ambienteTipo} - {detailReserva.ambienteUbicacion}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Estado</p>
-                  <div className="mt-1">{getStatusBadge(detailReserva.estado)}</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 border-t pt-3">
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Fecha</p>
-                  <p className="font-mono font-medium text-slate-800">{detailReserva.fecha}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Horario</p>
-                  <p className="font-mono font-medium text-slate-800">
-                    {detailReserva.horaInicio.slice(0, 5)} - {detailReserva.horaFin.slice(0, 5)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="border-t pt-3">
-                <p className="text-xs text-slate-400 font-semibold uppercase">Solicitante</p>
-                <p className="font-semibold text-slate-800">{detailReserva.usuarioNombre}</p>
-                <p className="text-xs text-slate-500">{detailReserva.usuarioCorreo}</p>
-              </div>
-
-              <div className="border-t pt-3">
-                <p className="text-xs text-slate-400 font-semibold uppercase">Motivo de Reserva</p>
-                <p className="text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200 mt-1">
-                  {detailReserva.motivo}
-                </p>
-              </div>
-
-              {detailReserva.observacionAdmin && (
-                <div className="border-t pt-3">
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Observación Administrativa</p>
-                  <p className="text-rose-800 bg-rose-50 p-2.5 rounded-lg border border-rose-200 mt-1">
-                    {detailReserva.observacionAdmin}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex justify-end">
-              <Button variant="outline" size="sm" onClick={() => setDetailReserva(null)}>
-                Cerrar
+                Ver detalle
               </Button>
             </div>
           </div>
+        )}
+      />
+
+      {/* Paginación Accesible */}
+      {totalPaginas > 1 && (
+        <div className="flex items-center justify-between pt-4 text-xs text-slate-600 dark:text-slate-400">
+          <p>
+            Página {paginaActual} de {totalPaginas}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={paginaActual <= 1}
+              onClick={() => setPaginaActual((p) => Math.max(1, p - 1))}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={paginaActual >= totalPaginas}
+              onClick={() => setPaginaActual((p) => Math.min(totalPaginas, p + 1))}
+            >
+              Siguiente
+            </Button>
+          </div>
         </div>
       )}
+
+      {/* Modal de Detalle de Reserva (RF-06) */}
+      {reservaDetalle && (
+        <ModalConfirmacion
+          isOpen={Boolean(reservaDetalle)}
+          onClose={() => setReservaDetalle(null)}
+          onConfirm={() => setReservaDetalle(null)}
+          title="Detalle de Solicitud de Reserva"
+          message={`Información registrada para la reserva del ambiente ${reservaDetalle.ambienteNombre}.`}
+          confirmText="Cerrar detalle"
+          cancelText="Volver"
+          variant="primary"
+        >
+          <div className="space-y-2 text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600 font-medium">
+            <p><strong>ID:</strong> {reservaDetalle.id}</p>
+            <p><strong>Ambiente:</strong> {reservaDetalle.ambienteNombre}</p>
+            <p><strong>Fecha programada:</strong> {reservaDetalle.fecha}</p>
+            <p><strong>Horario:</strong> {reservaDetalle.horaInicio} – {reservaDetalle.horaFin}</p>
+            <p><strong>Estado:</strong> {badgeEstado(reservaDetalle.estado)}</p>
+            <p><strong>Solicitante:</strong> {reservaDetalle.solicitanteNombre} ({reservaDetalle.solicitanteCorreo})</p>
+            <p><strong>Motivo:</strong> {reservaDetalle.motivo}</p>
+            {reservaDetalle.motivoRechazo && (
+              <p className="text-rose-600 dark:text-rose-400">
+                <strong>Motivo de rechazo:</strong> {reservaDetalle.motivoRechazo}
+              </p>
+            )}
+            <p className="text-slate-400"><strong>Fecha de registro:</strong> {new Date(reservaDetalle.fechaRegistro).toLocaleString()}</p>
+          </div>
+        </ModalConfirmacion>
+      )}
+
+      {/* Modal de Acción (Aprobar / Rechazar / Cancelar) con focus return (E-33) */}
+      <ModalConfirmacion
+        isOpen={Boolean(modalAccion)}
+        onClose={cerrarModalAccion}
+        onConfirm={confirmarAccion}
+        title={modalAccion?.titulo || 'Confirmar acción'}
+        message={modalAccion?.mensaje || ''}
+        confirmText={
+          modalAccion?.nuevoEstado === 'Aprobada'
+            ? 'Aprobar Reserva'
+            : modalAccion?.nuevoEstado === 'Rechazada'
+            ? 'Rechazar Reserva'
+            : 'Cancelar Reserva'
+        }
+        cancelText="Descartar"
+        variant={modalAccion?.variante || 'primary'}
+        loading={procesandoAccion}
+        triggerRef={ultimoBotonAccionRef}
+      >
+        {modalAccion?.nuevoEstado === 'Rechazada' && (
+          <div className="mt-3">
+            <TextInput
+              id="motivo-rechazo-input"
+              label="Motivo del rechazo"
+              placeholder="Ej. Conflicto con evento institucional de rectoría"
+              value={motivoRechazo}
+              onChange={(e) => setMotivoRechazo(e.target.value)}
+              obligatorio
+              autoFocus
+            />
+          </div>
+        )}
+      </ModalConfirmacion>
     </div>
   );
 }
