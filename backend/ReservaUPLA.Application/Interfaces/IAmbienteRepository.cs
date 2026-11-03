@@ -1,11 +1,12 @@
-using ReservaUPLA.Domain.Entities;
+using ReservaUpla.Domain.Entities;
 
-namespace ReservaUPLA.Application.Interfaces;
+namespace ReservaUpla.Application.Interfaces;
 
 public interface IAmbienteRepository
 {
-    Task<Ambiente?> GetByIdAsync(Guid id);
-    Task<IEnumerable<Ambiente>> GetAllAsync();
-    Task<Ambiente> AddAsync(Ambiente ambiente);
-    Task<Ambiente> UpdateAsync(Ambiente ambiente);
+    Task<Ambiente?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Ambiente>> ObtenerTodosAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<Ambiente>> ObtenerPorResponsableAsync(Guid idResponsable, CancellationToken cancellationToken = default);
+    Task AgregarAsync(Ambiente ambiente, CancellationToken cancellationToken = default);
+    Task ActualizarAsync(Ambiente ambiente, CancellationToken cancellationToken = default);
 }

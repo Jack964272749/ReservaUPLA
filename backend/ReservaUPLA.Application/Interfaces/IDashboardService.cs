@@ -1,8 +1,8 @@
-using ReservaUPLA.Application.DTOs;
+using ReservaUpla.Application.DTOs;
 
-namespace ReservaUPLA.Application.Interfaces;
+namespace ReservaUpla.Application.Interfaces;
 
 public interface IDashboardService
 {
-    Task<DashboardIndicadoresDto> ObtenerIndicadoresAsync();
+    Task<DashboardDto> ObtenerIndicadoresAsync(CancellationToken cancellationToken = default);
 }

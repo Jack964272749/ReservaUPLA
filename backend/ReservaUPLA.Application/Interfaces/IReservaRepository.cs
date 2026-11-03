@@ -1,14 +1,37 @@
-using ReservaUPLA.Domain.Entities;
+using ReservaUpla.Domain.Entities;
+using ReservaUpla.Domain.Enums;
 
-namespace ReservaUPLA.Application.Interfaces;
+namespace ReservaUpla.Application.Interfaces;
 
 public interface IReservaRepository
 {
-    Task<Reserva?> GetByIdAsync(Guid id);
-    Task<IEnumerable<Reserva>> GetAllAsync(DateOnly? fecha = null, Guid? ambienteId = null, string? estado = null);
-    Task<Reserva> AddAsync(Reserva reserva);
-    Task<Reserva> UpdateAsync(Reserva reserva);
-    Task<bool> ExisteConflictoAprobadoAsync(Guid ambienteId, DateOnly fecha, TimeSpan horaInicio, TimeSpan horaFin, Guid? excludeReservaId = null);
-    Task<int> CountByEstadoAsync(string? estado);
-    Task<(string AmbienteNombre, int Cantidad)?> GetAmbienteMasUtilizadoAsync();
+    Task<Reserva?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<Reserva> Items, int Total)> ObtenerPaginadoAsync(
+        DateOnly? fecha,
+        Guid? ambienteId,
+        EstadoReserva? estado,
+        Guid? usuarioId,
+        IEnumerable<Guid>? ambientesPermitidos,
+        int pagina,
+        int tamanoPagina,
+        CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<Reserva>> ObtenerPorAmbienteYFechaAsync(
+        Guid ambienteId,
+        DateOnly fecha,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> HayConflictoAprobadoAsync(
+        Guid ambienteId,
+        DateOnly fecha,
+        TimeSpan inicio,
+        TimeSpan fin,
+        Guid? excluirReservaId = null,
+        CancellationToken cancellationToken = default);
+
+    Task AgregarAsync(Reserva reserva, CancellationToken cancellationToken = default);
+    Task ActualizarAsync(Reserva reserva, CancellationToken cancellationToken = default);
+    Task<int> ContarPorEstadoAsync(EstadoReserva? estado, CancellationToken cancellationToken = default);
+    Task<(string NombreAmbiente, int Cantidad)?> ObtenerAmbienteMasUtilizadoAsync(CancellationToken cancellationToken = default);
+    Task EjecutarEnTransaccionSerializableAsync(Func<Task> accion, CancellationToken cancellationToken = default);
 }

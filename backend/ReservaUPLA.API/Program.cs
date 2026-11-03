@@ -1,69 +1,50 @@
-using Microsoft.EntityFrameworkCore;
-using ReservaUPLA.Application.Interfaces;
-using ReservaUPLA.Application.Services;
-using ReservaUPLA.Infrastructure.Data;
-using ReservaUPLA.Infrastructure.Repositories;
+using ReservaUpla.API.Extensions;
+using ReservaUpla.API.Middleware;
+using ReservaUpla.Application.Interfaces;
+using ReservaUpla.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Trazabilidad: POO - Composición con métodos de extensión
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "ReservaUPLA API", Version = "v1", Description = "Sistema de Gestión de Reservas de Ambientes Universitarios - UPLA" });
+    c.SwaggerDoc("v1", new() { Title = "ReservaUPLA Web API", Version = "v1" });
 });
 
-// Configure Database Connection
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Dependency Injection - Clean Architecture
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<IAmbienteRepository, AmbienteRepository>();
-builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
-builder.Services.AddScoped<IReservaService, ReservaService>();
-builder.Services.AddScoped<IDashboardService, DashboardService>();
-
-// CORS configuration for frontend clients
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddFrontendCors();
+builder.Services.AddAuthCookie(builder.Environment);
+builder.Services.AddRateLimitingPolicy();
 
 var app = builder.Build();
 
-// Ensure Database is Created & Seeded
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasherService>();
     try
     {
-        db.Database.EnsureCreated();
+        await DatabaseSeeder.InicializarAsync(context, hasher, builder.Configuration);
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[DB INIT] Note: {ex.Message}");
+        app.Logger.LogWarning("Inicialización BD: {Message}", ex.Message);
     }
 }
 
-// Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ReservaUPLA API v1");
-    });
+    app.UseSwaggerUI();
 }
 
-app.UseCors("AllowFrontend");
-app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseCors("FrontendPolicy");
+app.UseRateLimiter();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using ReservaUPLA.Application.Interfaces;
-using ReservaUPLA.Domain.Entities;
-using ReservaUPLA.Infrastructure.Data;
+using ReservaUpla.Application.Interfaces;
+using ReservaUpla.Domain.Entities;
+using ReservaUpla.Infrastructure.Data;
 
-namespace ReservaUPLA.Infrastructure.Repositories;
+namespace ReservaUpla.Infrastructure.Repositories;
 
 public class UsuarioRepository : IUsuarioRepository
 {
@@ -14,28 +14,31 @@ public class UsuarioRepository : IUsuarioRepository
         _context = context;
     }
 
-    public async Task<Usuario?> GetByIdAsync(Guid id)
-    {
-        return await _context.Usuarios.FindAsync(id);
-    }
-
-    public async Task<IEnumerable<Usuario>> GetAllAsync()
+    public async Task<Usuario?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Usuarios
-            .OrderBy(u => u.NombreCompleto)
-            .ToListAsync();
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id_Usuario == id, cancellationToken);
     }
 
-    public async Task<Usuario?> GetByCorreoAsync(string correo)
+    public async Task<Usuario?> ObtenerPorCorreoAsync(string correo, CancellationToken cancellationToken = default)
+    {
+        var correoNorm = correo.Trim().ToLowerInvariant();
+        return await _context.Usuarios
+            .FirstOrDefaultAsync(u => u.Cor_Usuario == correoNorm, cancellationToken);
+    }
+
+    public async Task<IEnumerable<Usuario>> ObtenerTodosAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Usuarios
-            .FirstOrDefaultAsync(u => u.Correo.ToLower() == correo.ToLower());
+            .AsNoTracking()
+            .OrderBy(u => u.Nom_Usuario)
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<Usuario> AddAsync(Usuario usuario)
+    public async Task AgregarAsync(Usuario usuario, CancellationToken cancellationToken = default)
     {
-        await _context.Usuarios.AddAsync(usuario);
-        await _context.SaveChangesAsync();
-        return usuario;
+        await _context.Usuarios.AddAsync(usuario, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -1,86 +1,53 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ReservaUPLA.Application.DTOs;
-using ReservaUPLA.Application.Interfaces;
-using ReservaUPLA.Domain.Entities;
+using ReservaUpla.Application.DTOs;
+using ReservaUpla.Application.Interfaces;
 
-namespace ReservaUPLA.API.Controllers;
+namespace ReservaUpla.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AmbientesController : ControllerBase
 {
-    private readonly IAmbienteRepository _ambienteRepository;
+    private readonly IAmbienteService _ambienteService;
 
-    public AmbientesController(IAmbienteRepository ambienteRepository)
+    public AmbientesController(IAmbienteService ambienteService)
     {
-        _ambienteRepository = ambienteRepository;
+        _ambienteService = ambienteService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AmbienteResponseDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<AmbienteDto>>> ObtenerTodos(CancellationToken cancellationToken)
     {
-        var ambientes = await _ambienteRepository.GetAllAsync();
-        var dtos = ambientes.Select(a => new AmbienteResponseDto(
-            a.Id,
-            a.Nombre,
-            a.Tipo,
-            a.Capacidad,
-            a.Ubicacion,
-            a.Estado,
-            a.FechaCreacion
-        ));
-        return Ok(dtos);
+        var ambientes = await _ambienteService.ObtenerTodosAsync(cancellationToken);
+        return Ok(ambientes);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<AmbienteResponseDto>> GetById(Guid id)
+    public async Task<ActionResult<AmbienteDto>> ObtenerPorId(Guid id, CancellationToken cancellationToken)
     {
-        var a = await _ambienteRepository.GetByIdAsync(id);
-        if (a is null) return NotFound(new { message = $"Ambiente con ID {id} no encontrado." });
-
-        return Ok(new AmbienteResponseDto(
-            a.Id,
-            a.Nombre,
-            a.Tipo,
-            a.Capacidad,
-            a.Ubicacion,
-            a.Estado,
-            a.FechaCreacion
-        ));
+        var ambiente = await _ambienteService.ObtenerPorIdAsync(id, cancellationToken);
+        return Ok(ambiente);
     }
 
+    // Trazabilidad: RF-02 · Solo Administrador registra ambientes
     [HttpPost]
-    public async Task<ActionResult<AmbienteResponseDto>> Create([FromBody] CreateAmbienteDto dto)
+    [Authorize(Roles = "Administrador")]
+    public async Task<ActionResult<AmbienteDto>> Crear([FromBody] CrearAmbienteDto dto, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(dto.Nombre))
-            return BadRequest(new { message = "El nombre del ambiente es obligatorio." });
-        if (string.IsNullOrWhiteSpace(dto.Tipo))
-            return BadRequest(new { message = "El tipo de ambiente es obligatorio." });
-        if (dto.Capacidad <= 0)
-            return BadRequest(new { message = "La capacidad debe ser un número entero positivo mayor a cero." });
+        var creado = await _ambienteService.CrearAsync(dto, cancellationToken);
+        return CreatedAtAction(nameof(ObtenerPorId), new { id = creado.Id }, creado);
+    }
 
-        var ambiente = new Ambiente
-        {
-            Nombre = dto.Nombre.Trim(),
-            Tipo = dto.Tipo.Trim(),
-            Capacidad = dto.Capacidad,
-            Ubicacion = dto.Ubicacion?.Trim() ?? string.Empty,
-            Estado = "Disponible",
-            FechaCreacion = DateTime.UtcNow
-        };
-
-        var creado = await _ambienteRepository.AddAsync(ambiente);
-
-        var responseDto = new AmbienteResponseDto(
-            creado.Id,
-            creado.Nombre,
-            creado.Tipo,
-            creado.Capacidad,
-            creado.Ubicacion,
-            creado.Estado,
-            creado.FechaCreacion
-        );
-
-        return CreatedAtAction(nameof(GetById), new { id = responseDto.Id }, responseDto);
+    // Trazabilidad: RF-04 · Consulta de disponibilidad por fecha
+    [HttpGet("{id:guid}/disponibilidad")]
+    public async Task<ActionResult<IEnumerable<DisponibilidadDiaDto>>> ConsultarDisponibilidad(
+        Guid id,
+        [FromQuery] DateOnly fecha,
+        CancellationToken cancellationToken)
+    {
+        var disponibilidad = await _ambienteService.ConsultarDisponibilidadAsync(id, fecha, cancellationToken);
+        return Ok(disponibilidad);
     }
 }

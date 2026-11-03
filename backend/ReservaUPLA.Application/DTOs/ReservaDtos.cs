@@ -1,45 +1,43 @@
-namespace ReservaUPLA.Application.DTOs;
+namespace ReservaUpla.Application.DTOs;
 
-public record CreateReservaDto(
+public record CrearReservaDto(
     DateOnly Fecha,
     TimeSpan HoraInicio,
     TimeSpan HoraFin,
     string Motivo,
-    Guid UsuarioId,
     Guid AmbienteId
 );
 
-public record CambiarEstadoReservaDto(
-    string NuevoEstado, // Aprobada, Rechazada, Cancelada
-    string? ObservacionAdmin
+public record CambiarEstadoDto(
+    string NuevoEstado
 );
 
-public record ValidarDisponibilidadDto(
-    Guid AmbienteId,
-    DateOnly Fecha,
+public record DisponibilidadDiaDto(
     TimeSpan HoraInicio,
-    TimeSpan HoraFin
+    TimeSpan HoraFin,
+    string Estado
 );
 
-public record DisponibilidadResponseDto(
-    bool Disponible,
-    string Mensaje
-);
-
-public record ReservaResponseDto(
+public record ReservaDto(
     Guid Id,
     DateOnly Fecha,
     TimeSpan HoraInicio,
     TimeSpan HoraFin,
     string Motivo,
     string Estado,
-    string? ObservacionAdmin,
-    DateTime FechaRegistro,
     Guid UsuarioId,
     string UsuarioNombre,
     string UsuarioCorreo,
     Guid AmbienteId,
     string AmbienteNombre,
     string AmbienteTipo,
-    string AmbienteUbicacion
+    string AmbienteUbicacion,
+    DateTime FechaRegistro
+);
+
+public record PaginaReservasDto(
+    IEnumerable<ReservaDto> Items,
+    int TotalItems,
+    int Pagina,
+    int TamanoPagina
 );
