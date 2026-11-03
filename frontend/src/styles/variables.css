@@ -1,0 +1,60 @@
+/* REEMPLAZAR por HEX oficial del Manual de Marca UPLA pág. 17 */
+:root {
+  --color-primario: #0A3D91;
+  --color-primario-oscuro: #072B66;
+  --color-primario-claro: #E8EEF9;
+  --color-superficie: #FFFFFF;
+  --color-texto: #1A1F2B;
+  --color-texto-secundario: #475569;
+  --color-borde: #CBD5E1;
+  --color-fondo: #F8FAFC;
+
+  /* Estados semánticos (Texto + Ícono obligatorio · Nielsen H2) */
+  --color-pendiente-bg: #FEF3C7;
+  --color-pendiente-txt: #92400E;
+  --color-aprobada-bg: #D1FAE5;
+  --color-aprobada-txt: #065F46;
+  --color-rechazada-bg: #FEE2E2;
+  --color-rechazada-txt: #991B1B;
+  --color-cancelada-bg: #F1F5F9;
+  --color-cancelada-txt: #475569;
+
+  --focus-ring: 0 0 0 3px rgba(10, 61, 145, 0.45);
+}
+
+[data-theme="dark"] {
+  --color-primario: #38BDF8;
+  --color-primario-oscuro: #0284C7;
+  --color-primario-claro: #0C4A6E;
+  --color-superficie: #0F172A;
+  --color-texto: #F8FAFC;
+  --color-texto-secundario: #94A3B8;
+  --color-borde: #334155;
+  --color-fondo: #020617;
+
+  --color-pendiente-bg: #78350F;
+  --color-pendiente-txt: #FDE68A;
+  --color-aprobada-bg: #064E3B;
+  --color-aprobada-txt: #A7F3D0;
+  --color-rechazada-bg: #7F1D1D;
+  --color-rechazada-txt: #FECACA;
+  --color-cancelada-bg: #1E293B;
+  --color-cancelada-txt: #94A3B8;
+
+  --focus-ring: 0 0 0 3px rgba(56, 189, 248, 0.6);
+}
+
+/* Trazabilidad: Shneiderman 2 · Estilos de foco visible contrastados */
+*:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
