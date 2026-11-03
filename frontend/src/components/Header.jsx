@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Building2, Sun, Moon, LogOut, HelpCircle, User } from 'lucide-react';
+import { Sun, Moon, LogOut, HelpCircle, User } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useTema } from '../hooks/useTema';
 import PanelAyuda from './PanelAyuda';
+import Logo from './Logo';
 
 // Trazabilidad: Nielsen H2 (Correspondencia), H3 (Control del usuario), H10 (Ayuda) · Shneiderman S1, S4 · ISO 9241-11
 export default function Header() {
@@ -11,14 +12,12 @@ export default function Header() {
   const [ayudaAbierta, setAyudaAbierta] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-tr from-sky-800 to-sky-600 text-white p-2.5 rounded-xl shadow-md shadow-sky-800/20 flex items-center justify-center">
-              <Building2 className="w-6 h-6" aria-hidden="true" />
-            </div>
-            <div>
+            <Logo className="h-9 w-auto" />
+            <div className="hidden sm:block border-l border-slate-300 dark:border-slate-700 pl-3">
               <span className="text-lg font-bold bg-gradient-to-r from-sky-800 to-sky-600 dark:from-sky-400 dark:to-sky-200 bg-clip-text text-transparent">
                 ReservaUPLA
               </span>

@@ -28,7 +28,7 @@ export default function RegistroSolicitante({ alVolverALogin }) {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-50 dark:bg-slate-950 transition-colors">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#EDF3F9] dark:bg-slate-950 transition-colors">
       <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xl">
         <div className="mb-6 flex items-center justify-between">
           <Logo />

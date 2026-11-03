@@ -22,7 +22,7 @@ function ContenidoApp() {
       <div
         role="status"
         aria-live="polite"
-        className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300"
+        className="min-h-screen flex flex-col items-center justify-center bg-[#EDF3F9] dark:bg-slate-950 text-slate-700 dark:text-slate-300"
       >
         <span
           className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-sky-600 border-t-transparent mb-4"

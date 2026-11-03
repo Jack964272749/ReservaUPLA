@@ -7,7 +7,8 @@
   --color-texto: #1A1F2B;
   --color-texto-secundario: #475569;
   --color-borde: #CBD5E1;
-  --color-fondo: #F8FAFC;
+  /* Fondo azul suave descansable para la vista (ISO 9241-11 Ergonomía visual) */
+  --color-fondo: #EDF3F9;
 
   /* Estados semánticos (Texto + Ícono obligatorio · Nielsen H2) */
   --color-pendiente-bg: #FEF3C7;

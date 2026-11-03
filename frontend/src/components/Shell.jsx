@@ -7,7 +7,7 @@ const anioActual = new Date().getFullYear();
 // Trazabilidad: Nielsen H4 (Consistencia), H8 (Estética y minimalismo) · Shneiderman S1, S2 · WCAG 2.1 AA
 export default function Shell({ activeTab, setActiveTab, children }) {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen flex flex-col bg-[#EDF3F9] dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors">
       {/* Enlace de salto accesible para lectores de pantalla y navegación por teclado (WCAG 2.4.1) */}
       <a
         href="#contenido-principal"
@@ -27,7 +27,7 @@ export default function Shell({ activeTab, setActiveTab, children }) {
         {children}
       </main>
 
-      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+      <footer className="border-t border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto px-4">
           <p>© {anioActual} Universidad Peruana Los Andes — Sistema de Reserva de Ambientes Institucionales</p>
           <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
