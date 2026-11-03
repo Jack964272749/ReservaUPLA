@@ -15,8 +15,10 @@ export function useTema() {
   useEffect(() => {
     const root = document.documentElement;
     if (tema === 'dark') {
+      root.classList.add('dark');
       root.setAttribute('data-theme', 'dark');
     } else {
+      root.classList.remove('dark');
       root.removeAttribute('data-theme');
     }
 
@@ -31,5 +33,9 @@ export function useTema() {
     setTema((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  return { tema, toggleTema };
+  return {
+    tema,
+    alternarTema: toggleTema,
+    toggleTema,
+  };
 }
