@@ -40,7 +40,7 @@ export default function Login({ alIrARegistro }) {
   const { tema, alternarTema } = useTema();
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50 dark:bg-slate-950 transition-colors">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#EDF3F9] dark:bg-slate-950 transition-colors">
       {/* Panel Izquierdo: Formulario de Autenticación (~35-40% en desktop) */}
       <div className="flex-1 lg:max-w-md xl:max-w-lg w-full flex flex-col justify-between p-6 sm:p-10 lg:p-12 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xl lg:shadow-none z-10">
         <div>
