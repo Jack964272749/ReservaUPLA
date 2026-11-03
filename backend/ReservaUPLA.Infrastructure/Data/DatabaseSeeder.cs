@@ -26,8 +26,8 @@ public static class DatabaseSeeder
         var userHash = passwordHasher.Hash(claveUser);
 
         var admin = Usuario.Crear("Administrador Central", "admin@upla.edu.pe", adminHash, RolUsuario.Administrador);
-        var responsable = Usuario.Crear("Ing. Roberto Salazar", "responsable@upla.edu.pe", userHash, RolUsuario.Responsable);
-        var solicitante = Usuario.Crear("Lic. Carmen Flores", "solicitante@upla.edu.pe", userHash, RolUsuario.Solicitante);
+        var responsable = Usuario.Crear("Roberto Salazar Mendoza", "responsable@upla.edu.pe", userHash, RolUsuario.Responsable);
+        var solicitante = Usuario.Crear("Carmen Flores Quispe", "solicitante@upla.edu.pe", userHash, RolUsuario.Solicitante);
 
         await context.Usuarios.AddRangeAsync(admin, responsable, solicitante);
         await context.SaveChangesAsync();
