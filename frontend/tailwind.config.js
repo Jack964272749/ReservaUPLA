@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+      },
       colors: {
         upla: {
           50: '#f0f7ff',
@@ -15,7 +18,8 @@ export default {
           600: '#0369a1',
           700: '#075985',
           800: '#0c4a6e',
-          900: '#082f49'
+          900: '#082f49',
+          fondo: '#EDF3F9',
         }
       }
     },

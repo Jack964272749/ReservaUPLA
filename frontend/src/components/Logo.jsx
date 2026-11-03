@@ -1,15 +1,15 @@
 import React from 'react';
-import logoUpla from '../assets/logo-upla.svg';
+import logoUpla from '../assets/logo-upla.png';
 
-// Trazabilidad: Nielsen H4 - Consistencia · Recurso único reemplazable con ancho mínimo >= 25px
+// Trazabilidad: Nielsen H4 - Consistencia · Logo oficial institucional UPLA
 export default function Logo({ className = 'h-10 min-w-[25px]', alt = 'Logo Universidad Peruana Los Andes' }) {
   return (
     <img
       src={logoUpla}
       alt={alt}
       className={`object-contain ${className}`}
-      width="120"
-      height="40"
+      width="140"
+      height="44"
     />
   );
 }

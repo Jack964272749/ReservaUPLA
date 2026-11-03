@@ -6,6 +6,7 @@ import {
   XCircle,
   Building2,
   RefreshCw,
+  ArrowRight,
 } from 'lucide-react';
 import CardIndicador from '../components/CardIndicador';
 import Button from '../components/Button';
@@ -34,12 +35,12 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
             Panel de Control Institucional
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
             Resumen estadístico y estado general del uso de ambientes universitarios.
           </p>
         </div>
@@ -106,19 +107,19 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
       </div>
 
       {/* Tarjeta de Ambiente Más Utilizado */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-sky-900 via-sky-800 to-indigo-900 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-sky-950 via-sky-900 to-indigo-950 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6 border border-sky-800/40">
         <div className="flex items-start gap-4">
-          <div className="p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-sky-200 flex-shrink-0">
+          <div className="p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-sky-300 flex-shrink-0">
             <Building2 className="w-8 h-8" aria-hidden="true" />
           </div>
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-sky-300">
+            <span className="text-xs font-bold uppercase tracking-wider text-sky-400">
               Ambiente de Mayor Demanda Académica
             </span>
-            <h2 className="text-2xl font-bold mt-1 text-white">
+            <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 text-white">
               {indicadores?.ambienteMasUtilizado || 'Sin registros suficientes'}
             </h2>
-            <p className="text-xs sm:text-sm text-sky-200/80 mt-1">
+            <p className="text-xs sm:text-sm text-sky-200/90 mt-1.5 font-medium">
               {indicadores?.cantidadAmbienteMasUtilizado
                 ? `${indicadores.cantidadAmbienteMasUtilizado} reservas aprobadas acumuladas.`
                 : 'Aún no se registran reservas aprobadas para determinar el ambiente líder.'}
@@ -127,14 +128,14 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
         </div>
 
         {alIrAReservas && (
-          <Button
-            variant="outline"
-            size="md"
+          <button
+            type="button"
             onClick={alIrAReservas}
-            className="border-white/30 text-white hover:bg-white/10 bg-transparent flex-shrink-0"
+            className="inline-flex items-center justify-center gap-2 font-bold text-sm px-6 py-3 rounded-xl bg-white hover:bg-sky-50 text-sky-950 shadow-lg hover:shadow-xl transition-all duration-150 flex-shrink-0 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-sky-900 cursor-pointer"
           >
-            Ver todas las reservas
-          </Button>
+            <span>Ver todas las reservas</span>
+            <ArrowRight className="w-4 h-4 text-sky-900" aria-hidden="true" />
+          </button>
         )}
       </div>
     </div>
