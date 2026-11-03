@@ -1,10 +1,13 @@
+using System.Data;
 using Microsoft.EntityFrameworkCore;
-using ReservaUPLA.Application.Interfaces;
-using ReservaUPLA.Domain.Entities;
-using ReservaUPLA.Infrastructure.Data;
+using ReservaUpla.Application.Interfaces;
+using ReservaUpla.Domain.Entities;
+using ReservaUpla.Domain.Enums;
+using ReservaUpla.Infrastructure.Data;
 
-namespace ReservaUPLA.Infrastructure.Repositories;
+namespace ReservaUpla.Infrastructure.Repositories;
 
+// Trazabilidad: RN-01 · Transacción Serializable y consultas optimizadas AsNoTracking
 public class ReservaRepository : IReservaRepository
 {
     private readonly AppDbContext _context;
@@ -14,106 +17,142 @@ public class ReservaRepository : IReservaRepository
         _context = context;
     }
 
-    public async Task<Reserva?> GetByIdAsync(Guid id)
+    public async Task<Reserva?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Reservas
             .Include(r => r.Usuario)
             .Include(r => r.Ambiente)
-            .FirstOrDefaultAsync(r => r.Id == id);
+            .FirstOrDefaultAsync(r => r.Id_Reserva == id, cancellationToken);
     }
 
-    public async Task<IEnumerable<Reserva>> GetAllAsync(DateOnly? fecha = null, Guid? ambienteId = null, string? estado = null)
+    public async Task<(IEnumerable<Reserva> Items, int Total)> ObtenerPaginadoAsync(
+        DateOnly? fecha,
+        Guid? ambienteId,
+        EstadoReserva? estado,
+        Guid? usuarioId,
+        IEnumerable<Guid>? ambientesPermitidos,
+        int pagina,
+        int tamanoPagina,
+        CancellationToken cancellationToken = default)
     {
         var query = _context.Reservas
             .Include(r => r.Usuario)
             .Include(r => r.Ambiente)
+            .AsNoTracking()
             .AsQueryable();
 
         if (fecha.HasValue)
-        {
-            query = query.Where(r => r.Fecha == fecha.Value);
-        }
+            query = query.Where(r => r.Fec_Reserva == fecha.Value);
 
         if (ambienteId.HasValue && ambienteId.Value != Guid.Empty)
+            query = query.Where(r => r.Ida_Reserva == ambienteId.Value);
+
+        if (estado.HasValue)
+            query = query.Where(r => r.Est_Reserva == estado.Value);
+
+        if (usuarioId.HasValue && usuarioId.Value != Guid.Empty)
+            query = query.Where(r => r.Idu_Reserva == usuarioId.Value);
+
+        if (ambientesPermitidos != null)
         {
-            query = query.Where(r => r.AmbienteId == ambienteId.Value);
+            var permitidos = ambientesPermitidos.ToList();
+            query = query.Where(r => permitidos.Contains(r.Ida_Reserva));
         }
 
-        if (!string.IsNullOrWhiteSpace(estado))
-        {
-            var est = estado.Trim();
-            query = query.Where(r => r.Estado.ToLower() == est.ToLower());
-        }
+        var total = await query.CountAsync(cancellationToken);
 
-        return await query
-            .OrderByDescending(r => r.Fecha)
-            .ThenBy(r => r.HoraInicio)
-            .ToListAsync();
+        var paginaValida = pagina < 1 ? 1 : pagina;
+        var tamanoValido = tamanoPagina < 1 ? 10 : (tamanoPagina > 50 ? 50 : tamanoPagina);
+
+        var items = await query
+            .OrderByDescending(r => r.Fec_Reserva)
+            .ThenBy(r => r.Hin_Reserva)
+            .Skip((paginaValida - 1) * tamanoValido)
+            .Take(tamanoValido)
+            .ToListAsync(cancellationToken);
+
+        return (items, total);
     }
 
-    public async Task<Reserva> AddAsync(Reserva reserva)
-    {
-        await _context.Reservas.AddAsync(reserva);
-        await _context.SaveChangesAsync();
-
-        // Reload navigation properties
-        await _context.Entry(reserva).Reference(r => r.Usuario).LoadAsync();
-        await _context.Entry(reserva).Reference(r => r.Ambiente).LoadAsync();
-
-        return reserva;
-    }
-
-    public async Task<Reserva> UpdateAsync(Reserva reserva)
-    {
-        _context.Reservas.Update(reserva);
-        await _context.SaveChangesAsync();
-
-        await _context.Entry(reserva).Reference(r => r.Usuario).LoadAsync();
-        await _context.Entry(reserva).Reference(r => r.Ambiente).LoadAsync();
-
-        return reserva;
-    }
-
-    public async Task<bool> ExisteConflictoAprobadoAsync(
+    public async Task<IEnumerable<Reserva>> ObtenerPorAmbienteYFechaAsync(
         Guid ambienteId,
         DateOnly fecha,
-        TimeSpan horaInicio,
-        TimeSpan horaFin,
-        Guid? excludeReservaId = null)
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Reservas
+            .Where(r => r.Ida_Reserva == ambienteId && r.Fec_Reserva == fecha && r.Est_Reserva != EstadoReserva.Cancelada)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
+    // Trazabilidad: RN-01 · Formula estricta de colisión con reservas Aprobadas
+    public async Task<bool> HayConflictoAprobadoAsync(
+        Guid ambienteId,
+        DateOnly fecha,
+        TimeSpan inicio,
+        TimeSpan fin,
+        Guid? excluirReservaId = null,
+        CancellationToken cancellationToken = default)
     {
         var query = _context.Reservas
-            .Where(r => r.AmbienteId == ambienteId
-                        && r.Fecha == fecha
-                        && r.Estado == "Aprobada");
+            .Where(r => r.Ida_Reserva == ambienteId
+                        && r.Fec_Reserva == fecha
+                        && r.Est_Reserva == EstadoReserva.Aprobada);
 
-        if (excludeReservaId.HasValue)
-        {
-            query = query.Where(r => r.Id != excludeReservaId.Value);
-        }
+        if (excluirReservaId.HasValue)
+            query = query.Where(r => r.Id_Reserva != excluirReservaId.Value);
 
-        // Overlap: existing.Start < new.End && existing.End > new.Start
-        return await query.AnyAsync(r => r.HoraInicio < horaFin && r.HoraFin > horaInicio);
+        return await query.AnyAsync(
+            r => r.Hin_Reserva < fin && r.Hfi_Reserva > inicio,
+            cancellationToken);
     }
 
-    public async Task<int> CountByEstadoAsync(string? estado)
+    public async Task AgregarAsync(Reserva reserva, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(estado))
-        {
-            return await _context.Reservas.CountAsync();
-        }
-        return await _context.Reservas.CountAsync(r => r.Estado.ToLower() == estado.ToLower());
+        await _context.Reservas.AddAsync(reserva, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<(string AmbienteNombre, int Cantidad)?> GetAmbienteMasUtilizadoAsync()
+    public async Task ActualizarAsync(Reserva reserva, CancellationToken cancellationToken = default)
     {
-        var item = await _context.Reservas
+        _context.Reservas.Update(reserva);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<int> ContarPorEstadoAsync(EstadoReserva? estado, CancellationToken cancellationToken = default)
+    {
+        if (!estado.HasValue)
+            return await _context.Reservas.CountAsync(cancellationToken);
+
+        return await _context.Reservas.CountAsync(r => r.Est_Reserva == estado.Value, cancellationToken);
+    }
+
+    public async Task<(string NombreAmbiente, int Cantidad)?> ObtenerAmbienteMasUtilizadoAsync(CancellationToken cancellationToken = default)
+    {
+        var resultado = await _context.Reservas
             .Include(r => r.Ambiente)
             .Where(r => r.Ambiente != null)
-            .GroupBy(r => r.Ambiente!.Nombre)
+            .GroupBy(r => r.Ambiente!.Nom_Ambiente)
             .Select(g => new { Nombre = g.Key, Cantidad = g.Count() })
-            .OrderByDescending(g => g.Cantidad)
-            .FirstOrDefaultAsync();
+            .OrderByDescending(x => x.Cantidad)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        return item is null ? null : (item.Nombre, item.Cantidad);
+        return resultado is null ? null : (resultado.Nombre, resultado.Cantidad);
+    }
+
+    // Trazabilidad: E-17 · E-31 · Aislamiento Serializable para concurrencia
+    public async Task EjecutarEnTransaccionSerializableAsync(Func<Task> accion, CancellationToken cancellationToken = default)
+    {
+        using var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+        try
+        {
+            await accion();
+            await tx.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await tx.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 }
