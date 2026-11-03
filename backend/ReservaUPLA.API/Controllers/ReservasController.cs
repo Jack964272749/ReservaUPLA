@@ -1,11 +1,15 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ReservaUPLA.Application.DTOs;
-using ReservaUPLA.Application.Interfaces;
+using ReservaUpla.Application.DTOs;
+using ReservaUpla.Application.Interfaces;
+using ReservaUpla.Domain.Enums;
 
-namespace ReservaUPLA.API.Controllers;
+namespace ReservaUpla.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ReservasController : ControllerBase
 {
     private readonly IReservaService _reservaService;
@@ -15,79 +19,67 @@ public class ReservasController : ControllerBase
         _reservaService = reservaService;
     }
 
-    // RF-05: Listar reservas registradas con filtros opcionales
+    // Trazabilidad: RF-03 · Solicitante registra solicitudes de reserva
+    [HttpPost]
+    [Authorize(Roles = "Solicitante")]
+    public async Task<ActionResult<ReservaDto>> Crear([FromBody] CrearReservaDto dto, CancellationToken cancellationToken)
+    {
+        var idUsuario = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var creada = await _reservaService.CrearAsync(dto, idUsuario, cancellationToken);
+        return CreatedAtAction(nameof(ObtenerPorId), new { id = creada.Id }, creada);
+    }
+
+    // Trazabilidad: RF-05 · Listado con filtros y paginación
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ReservaResponseDto>>> GetAll(
+    public async Task<ActionResult<PaginaReservasDto>> ObtenerTodos(
         [FromQuery] DateOnly? fecha,
         [FromQuery] Guid? ambienteId,
-        [FromQuery] string? estado)
+        [FromQuery] string? estado,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 10,
+        CancellationToken cancellationToken = default)
     {
-        var reservas = await _reservaService.ListarReservasAsync(fecha, ambienteId, estado);
-        return Ok(reservas);
-    }
+        var idUsuario = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var rolStr = User.FindFirstValue(ClaimTypes.Role)!;
+        var rol = Enum.Parse<RolUsuario>(rolStr);
 
-    // RF-06: Consultar detalle de una reserva
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<ReservaResponseDto>> GetById(Guid id)
-    {
-        var reserva = await _reservaService.ObtenerPorIdAsync(id);
-        if (reserva is null)
-            return NotFound(new { message = $"Reserva con ID {id} no encontrada." });
+        var resultado = await _reservaService.ObtenerPaginadoAsync(
+            fecha,
+            ambienteId,
+            estado,
+            idUsuario,
+            rol,
+            pagina,
+            tamanoPagina,
+            cancellationToken);
 
-        return Ok(reserva);
-    }
-
-    // RF-03: Registrar solicitudes de reserva (con validaciones RN-01 a RN-04)
-    [HttpPost]
-    public async Task<ActionResult<ReservaResponseDto>> Create([FromBody] CreateReservaDto dto)
-    {
-        try
-        {
-            var creada = await _reservaService.CrearReservaAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = creada.Id }, creada);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-    }
-
-    // RF-04: Validar disponibilidad del ambiente antes de registrar la reserva
-    [HttpPost("validar-disponibilidad")]
-    public async Task<ActionResult<DisponibilidadResponseDto>> ValidarDisponibilidad([FromBody] ValidarDisponibilidadDto dto)
-    {
-        var resultado = await _reservaService.ValidarDisponibilidadAsync(dto);
         return Ok(resultado);
     }
 
-    // RF-07: Cambiar estado (Pendiente, Aprobada, Rechazada, Cancelada) - RN-05, RN-06
-    [HttpPatch("{id:guid}/estado")]
-    public async Task<ActionResult<ReservaResponseDto>> CambiarEstado(Guid id, [FromBody] CambiarEstadoReservaDto dto)
+    // Trazabilidad: RF-06 · Detalle de una reserva
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<ReservaDto>> ObtenerPorId(Guid id, CancellationToken cancellationToken)
     {
-        try
-        {
-            var actualizada = await _reservaService.CambiarEstadoAsync(id, dto);
-            return Ok(actualizada);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+        var idUsuario = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var rolStr = User.FindFirstValue(ClaimTypes.Role)!;
+        var rol = Enum.Parse<RolUsuario>(rolStr);
+
+        var reserva = await _reservaService.ObtenerPorIdAsync(id, idUsuario, rol, cancellationToken);
+        return Ok(reserva);
+    }
+
+    // Trazabilidad: RF-07 · Cambiar estado de reserva
+    [HttpPatch("{id:guid}/estado")]
+    public async Task<ActionResult<ReservaDto>> CambiarEstado(
+        Guid id,
+        [FromBody] CambiarEstadoDto dto,
+        CancellationToken cancellationToken)
+    {
+        var idActor = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var rolStr = User.FindFirstValue(ClaimTypes.Role)!;
+        var rolActor = Enum.Parse<RolUsuario>(rolStr);
+
+        var actualizada = await _reservaService.CambiarEstadoAsync(id, dto.NuevoEstado, idActor, rolActor, cancellationToken);
+        return Ok(actualizada);
     }
 }

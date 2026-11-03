@@ -1,12 +1,31 @@
-using ReservaUPLA.Application.DTOs;
+using ReservaUpla.Application.DTOs;
+using ReservaUpla.Domain.Enums;
 
-namespace ReservaUPLA.Application.Interfaces;
+namespace ReservaUpla.Application.Interfaces;
 
 public interface IReservaService
 {
-    Task<ReservaResponseDto> CrearReservaAsync(CreateReservaDto dto);
-    Task<IEnumerable<ReservaResponseDto>> ListarReservasAsync(DateOnly? fecha = null, Guid? ambienteId = null, string? estado = null);
-    Task<ReservaResponseDto?> ObtenerPorIdAsync(Guid id);
-    Task<ReservaResponseDto> CambiarEstadoAsync(Guid id, CambiarEstadoReservaDto dto);
-    Task<DisponibilidadResponseDto> ValidarDisponibilidadAsync(ValidarDisponibilidadDto dto);
+    Task<ReservaDto> CrearAsync(CrearReservaDto dto, Guid idUsuario, CancellationToken cancellationToken = default);
+    Task<PaginaReservasDto> ObtenerPaginadoAsync(
+        DateOnly? fecha,
+        Guid? ambienteId,
+        string? estado,
+        Guid idUsuario,
+        RolUsuario rolUsuario,
+        int pagina = 1,
+        int tamanoPagina = 10,
+        CancellationToken cancellationToken = default);
+
+    Task<ReservaDto> ObtenerPorIdAsync(
+        Guid id,
+        Guid idUsuario,
+        RolUsuario rolUsuario,
+        CancellationToken cancellationToken = default);
+
+    Task<ReservaDto> CambiarEstadoAsync(
+        Guid id,
+        string nuevoEstadoStr,
+        Guid idActor,
+        RolUsuario rolActor,
+        CancellationToken cancellationToken = default);
 }

@@ -1,11 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ReservaUPLA.Application.DTOs;
-using ReservaUPLA.Application.Interfaces;
+using ReservaUpla.Application.DTOs;
+using ReservaUpla.Application.Interfaces;
 
-namespace ReservaUPLA.API.Controllers;
+namespace ReservaUpla.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class DashboardController : ControllerBase
 {
     private readonly IDashboardService _dashboardService;
@@ -15,11 +17,11 @@ public class DashboardController : ControllerBase
         _dashboardService = dashboardService;
     }
 
-    // RF-08: Indicadores básicos de reservas en dashboard
-    [HttpGet("indicadores")]
-    public async Task<ActionResult<DashboardIndicadoresDto>> GetIndicadores()
+    // Trazabilidad: RF-08 · Indicadores de reservas en dashboard
+    [HttpGet]
+    public async Task<ActionResult<DashboardDto>> ObtenerIndicadores(CancellationToken cancellationToken)
     {
-        var indicadores = await _dashboardService.ObtenerIndicadoresAsync();
+        var indicadores = await _dashboardService.ObtenerIndicadoresAsync(cancellationToken);
         return Ok(indicadores);
     }
 }

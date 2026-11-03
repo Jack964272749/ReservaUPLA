@@ -1,17 +1,19 @@
-using ReservaUPLA.Application.DTOs;
-using ReservaUPLA.Application.Interfaces;
-using ReservaUPLA.Domain.Entities;
+using ReservaUpla.Application.DTOs;
+using ReservaUpla.Application.Interfaces;
+using ReservaUpla.Application.Mappers;
+using ReservaUpla.Domain.Constants;
+using ReservaUpla.Domain.Entities;
+using ReservaUpla.Domain.Enums;
+using ReservaUpla.Domain.Exceptions;
 
-namespace ReservaUPLA.Application.Services;
+namespace ReservaUpla.Application.Services;
 
+// Trazabilidad: RN-01 a RN-06 · RF-03 a RF-07 · ISO 9241-11 Eficacia y Eficiencia
 public class ReservaService : IReservaService
 {
     private readonly IReservaRepository _reservaRepository;
     private readonly IAmbienteRepository _ambienteRepository;
     private readonly IUsuarioRepository _usuarioRepository;
-
-    private static readonly TimeSpan LimiteInicio = new(7, 0, 0);   // 07:00
-    private static readonly TimeSpan LimiteFin = new(22, 0, 0);     // 22:00
 
     public ReservaService(
         IReservaRepository reservaRepository,
@@ -23,152 +25,159 @@ public class ReservaService : IReservaService
         _usuarioRepository = usuarioRepository;
     }
 
-    public async Task<ReservaResponseDto> CrearReservaAsync(CreateReservaDto dto)
+    public async Task<ReservaDto> CrearAsync(CrearReservaDto dto, Guid idUsuario, CancellationToken cancellationToken = default)
     {
-        // RN-02: Campos obligatorios
-        if (dto.UsuarioId == Guid.Empty)
-            throw new ArgumentException("El solicitante es obligatorio (RN-02).");
-        if (dto.AmbienteId == Guid.Empty)
-            throw new ArgumentException("El ambiente es obligatorio (RN-02).");
-        if (string.IsNullOrWhiteSpace(dto.Motivo))
-            throw new ArgumentException("El motivo de la reserva es obligatorio (RN-02).");
+        // RV-08 · E-16: Fecha obligatoria y no pasada
+        var hoy = DateOnly.FromDateTime(DateTime.UtcNow);
+        if (dto.Fecha < hoy)
+            throw new DomainException(Mensajes.FechaPasada);
 
-        // RN-03: Hora de fin debe ser mayor a hora de inicio
-        if (dto.HoraFin <= dto.HoraInicio)
-            throw new ArgumentException("La hora de fin debe ser mayor que la hora de inicio (RN-03).");
+        // RV-13: Ambiente existente y disponible
+        var ambiente = await _ambienteRepository.ObtenerPorIdAsync(dto.AmbienteId, cancellationToken)
+            ?? throw new DomainException("El ambiente especificado no existe.", 404);
 
-        // RN-04: Rango permitido de 07:00 a 22:00
-        if (dto.HoraInicio < LimiteInicio || dto.HoraFin > LimiteFin)
-            throw new ArgumentException("Las reservas solo pueden realizarse entre las 07:00 y las 22:00 horas (RN-04).");
+        if (ambiente.Est_Ambiente != EstAmbiente.Disponible)
+            throw new DomainException(Mensajes.AmbienteNoDisponible, 409);
 
-        // Validar existencia de usuario y ambiente
-        var usuario = await _usuarioRepository.GetByIdAsync(dto.UsuarioId)
-            ?? throw new KeyNotFoundException("El usuario solicitante no existe.");
-        if (!usuario.Activo)
-            throw new InvalidOperationException("El usuario solicitante no se encuentra activo.");
-
-        var ambiente = await _ambienteRepository.GetByIdAsync(dto.AmbienteId)
-            ?? throw new KeyNotFoundException("El ambiente seleccionado no existe.");
-        if (ambiente.Estado != "Disponible")
-            throw new InvalidOperationException($"El ambiente no está disponible (Estado actual: {ambiente.Estado}).");
-
-        // RN-01 & RF-04: Validar disponibilidad antes de registrar
-        var existeConflicto = await _reservaRepository.ExisteConflictoAprobadoAsync(
-            dto.AmbienteId,
-            dto.Fecha,
-            dto.HoraInicio,
-            dto.HoraFin);
-
-        if (existeConflicto)
-            throw new InvalidOperationException("El ambiente ya cuenta con una reserva aprobada en la fecha y horario solicitado (RN-01).");
-
-        var reserva = new Reserva
+        // Trazabilidad: E-17 · E-31 · Validación en transacción Serializable para prevenir condiciones de carrera
+        Reserva reservaCreada = null!;
+        await _reservaRepository.EjecutarEnTransaccionSerializableAsync(async () =>
         {
-            Fecha = dto.Fecha,
-            HoraInicio = dto.HoraInicio,
-            HoraFin = dto.HoraFin,
-            Motivo = dto.Motivo.Trim(),
-            Estado = "Pendiente",
-            UsuarioId = dto.UsuarioId,
-            AmbienteId = dto.AmbienteId,
-            FechaRegistro = DateTime.UtcNow
-        };
-
-        var creada = await _reservaRepository.AddAsync(reserva);
-        return MapToResponse(creada);
-    }
-
-    public async Task<IEnumerable<ReservaResponseDto>> ListarReservasAsync(DateOnly? fecha = null, Guid? ambienteId = null, string? estado = null)
-    {
-        var reservas = await _reservaRepository.GetAllAsync(fecha, ambienteId, estado);
-        return reservas.Select(MapToResponse);
-    }
-
-    public async Task<ReservaResponseDto?> ObtenerPorIdAsync(Guid id)
-    {
-        var reserva = await _reservaRepository.GetByIdAsync(id);
-        return reserva is null ? null : MapToResponse(reserva);
-    }
-
-    public async Task<ReservaResponseDto> CambiarEstadoAsync(Guid id, CambiarEstadoReservaDto dto)
-    {
-        var reserva = await _reservaRepository.GetByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Reserva con ID {id} no encontrada.");
-
-        // RN-06: Una reserva rechazada no podrá modificarse
-        if (reserva.Estado == "Rechazada")
-            throw new InvalidOperationException("Una reserva rechazada no puede modificarse (RN-06).");
-
-        var estadoNormalizado = dto.NuevoEstado.Trim();
-        var estadosValidos = new[] { "Aprobada", "Rechazada", "Cancelada", "Pendiente" };
-        if (!estadosValidos.Contains(estadoNormalizado, StringComparer.OrdinalIgnoreCase))
-            throw new ArgumentException($"Estado no válido: {dto.NuevoEstado}. Estados permitidos: {string.Join(", ", estadosValidos)}");
-
-        // Si se va a aprobar, validar nuevamente que no haya colisión (RN-01)
-        if (estadoNormalizado.Equals("Aprobada", StringComparison.OrdinalIgnoreCase))
-        {
-            var conflicto = await _reservaRepository.ExisteConflictoAprobadoAsync(
-                reserva.AmbienteId,
-                reserva.Fecha,
-                reserva.HoraInicio,
-                reserva.HoraFin,
-                excludeReservaId: reserva.Id);
+            var conflicto = await _reservaRepository.HayConflictoAprobadoAsync(
+                dto.AmbienteId,
+                dto.Fecha,
+                dto.HoraInicio,
+                dto.HoraFin,
+                null,
+                cancellationToken);
 
             if (conflicto)
-                throw new InvalidOperationException("No se puede aprobar la reserva porque ya existe otra reserva aprobada en este horario (RN-01).");
-        }
+                throw new DomainException(Mensajes.ConflictoDisponibilidad, 409);
 
-        reserva.Estado = estadoNormalizado;
-        if (!string.IsNullOrWhiteSpace(dto.ObservacionAdmin))
-        {
-            reserva.ObservacionAdmin = dto.ObservacionAdmin.Trim();
-        }
+            var reserva = Reserva.Crear(
+                dto.Fecha,
+                dto.HoraInicio,
+                dto.HoraFin,
+                dto.Motivo,
+                idUsuario,
+                dto.AmbienteId);
 
-        var actualizada = await _reservaRepository.UpdateAsync(reserva);
-        return MapToResponse(actualizada);
+            await _reservaRepository.AgregarAsync(reserva, cancellationToken);
+            reservaCreada = reserva;
+        }, cancellationToken);
+
+        var guardada = await _reservaRepository.ObtenerPorIdAsync(reservaCreada.Id_Reserva, cancellationToken);
+        return ReservaMapper.ToDto(guardada ?? reservaCreada);
     }
 
-    public async Task<DisponibilidadResponseDto> ValidarDisponibilidadAsync(ValidarDisponibilidadDto dto)
+    public async Task<PaginaReservasDto> ObtenerPaginadoAsync(
+        DateOnly? fecha,
+        Guid? ambienteId,
+        string? estado,
+        Guid idUsuario,
+        RolUsuario rolUsuario,
+        int pagina = 1,
+        int tamanoPagina = 10,
+        CancellationToken cancellationToken = default)
     {
-        if (dto.HoraFin <= dto.HoraInicio)
+        EstadoReserva? estadoEnum = null;
+        if (!string.IsNullOrWhiteSpace(estado) && Enum.TryParse<EstadoReserva>(estado, true, out var parsedEstado))
+            estadoEnum = parsedEstado;
+
+        Guid? filtroUsuario = null;
+        IEnumerable<Guid>? ambientesPermitidos = null;
+
+        if (rolUsuario == RolUsuario.Solicitante)
         {
-            return new DisponibilidadResponseDto(false, "La hora de fin debe ser mayor que la hora de inicio.");
+            filtroUsuario = idUsuario;
+        }
+        else if (rolUsuario == RolUsuario.Responsable)
+        {
+            // Trazabilidad: E-32 · Responsable solo ve reservas de sus ambientes
+            var misAmbientes = await _ambienteRepository.ObtenerPorResponsableAsync(idUsuario, cancellationToken);
+            ambientesPermitidos = misAmbientes.Select(a => a.Id_Ambiente).ToList();
         }
 
-        if (dto.HoraInicio < LimiteInicio || dto.HoraFin > LimiteFin)
-        {
-            return new DisponibilidadResponseDto(false, "El horario debe encontrarse dentro del rango permitido (07:00 - 22:00).");
-        }
+        var (items, total) = await _reservaRepository.ObtenerPaginadoAsync(
+            fecha,
+            ambienteId,
+            estadoEnum,
+            filtroUsuario,
+            ambientesPermitidos,
+            pagina,
+            tamanoPagina,
+            cancellationToken);
 
-        var conflicto = await _reservaRepository.ExisteConflictoAprobadoAsync(
-            dto.AmbienteId,
-            dto.Fecha,
-            dto.HoraInicio,
-            dto.HoraFin);
-
-        if (conflicto)
-        {
-            return new DisponibilidadResponseDto(false, "No disponible: Existe una reserva aprobada en ese horario.");
-        }
-
-        return new DisponibilidadResponseDto(true, "Ambiente disponible para reservar.");
+        return new PaginaReservasDto(
+            items.Select(ReservaMapper.ToDto),
+            total,
+            pagina,
+            tamanoPagina
+        );
     }
 
-    private static ReservaResponseDto MapToResponse(Reserva r) => new(
-        r.Id,
-        r.Fecha,
-        r.HoraInicio,
-        r.HoraFin,
-        r.Motivo,
-        r.Estado,
-        r.ObservacionAdmin,
-        r.FechaRegistro,
-        r.UsuarioId,
-        r.Usuario?.NombreCompleto ?? "Sin usuario",
-        r.Usuario?.Correo ?? "",
-        r.AmbienteId,
-        r.Ambiente?.Nombre ?? "Sin ambiente",
-        r.Ambiente?.Tipo ?? "",
-        r.Ambiente?.Ubicacion ?? ""
-    );
+    public async Task<ReservaDto> ObtenerPorIdAsync(
+        Guid id,
+        Guid idUsuario,
+        RolUsuario rolUsuario,
+        CancellationToken cancellationToken = default)
+    {
+        var reserva = await _reservaRepository.ObtenerPorIdAsync(id, cancellationToken)
+            ?? throw new DomainException("Reserva no encontrada.", 404);
+
+        if (rolUsuario == RolUsuario.Solicitante && reserva.Idu_Reserva != idUsuario)
+            throw new DomainException("No tiene permisos para consultar esta reserva.", 403);
+
+        if (rolUsuario == RolUsuario.Responsable)
+        {
+            var misAmbientes = await _ambienteRepository.ObtenerPorResponsableAsync(idUsuario, cancellationToken);
+            if (!misAmbientes.Any(a => a.Id_Ambiente == reserva.Ida_Reserva))
+                throw new DomainException("No tiene permisos para consultar reservas de este ambiente.", 403);
+        }
+
+        return ReservaMapper.ToDto(reserva);
+    }
+
+    public async Task<ReservaDto> CambiarEstadoAsync(
+        Guid id,
+        string nuevoEstadoStr,
+        Guid idActor,
+        RolUsuario rolActor,
+        CancellationToken cancellationToken = default)
+    {
+        if (!Enum.TryParse<EstadoReserva>(nuevoEstadoStr, true, out var nuevoEstado))
+            throw new DomainException(Mensajes.TransicionEstadoInvalida, 400);
+
+        var reserva = await _reservaRepository.ObtenerPorIdAsync(id, cancellationToken)
+            ?? throw new DomainException("Reserva no encontrada.", 404);
+
+        // Trazabilidad: E-17 · E-31 · Aprobación con transacción serializable y chequeo de colisión
+        if (nuevoEstado == EstadoReserva.Aprobada)
+        {
+            await _reservaRepository.EjecutarEnTransaccionSerializableAsync(async () =>
+            {
+                var conflicto = await _reservaRepository.HayConflictoAprobadoAsync(
+                    reserva.Ida_Reserva,
+                    reserva.Fec_Reserva,
+                    reserva.Hin_Reserva,
+                    reserva.Hfi_Reserva,
+                    reserva.Id_Reserva,
+                    cancellationToken);
+
+                if (conflicto)
+                    throw new DomainException(Mensajes.ConflictoDisponibilidad, 409);
+
+                reserva.CambiarEstado(nuevoEstado, rolActor, idActor);
+                await _reservaRepository.ActualizarAsync(reserva, cancellationToken);
+            }, cancellationToken);
+        }
+        else
+        {
+            reserva.CambiarEstado(nuevoEstado, rolActor, idActor);
+            await _reservaRepository.ActualizarAsync(reserva, cancellationToken);
+        }
+
+        var actualizada = await _reservaRepository.ObtenerPorIdAsync(id, cancellationToken);
+        return ReservaMapper.ToDto(actualizada ?? reserva);
+    }
 }

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using ReservaUPLA.Infrastructure.Data;
+using ReservaUpla.Infrastructure.Data;
 
 #nullable disable
 
@@ -17,238 +17,171 @@ namespace ReservaUPLA.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ReservaUPLA.Domain.Entities.Ambiente", b =>
+            modelBuilder.Entity("ReservaUpla.Domain.Entities.Ambiente", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("Id_Ambiente")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_ambiente");
 
-                    b.Property<int>("Capacidad")
-                        .HasColumnType("integer");
+                    b.Property<int>("Cap_Ambiente")
+                        .HasColumnType("integer")
+                        .HasColumnName("cap_ambiente");
 
-                    b.Property<string>("Estado")
+                    b.Property<string>("Est_Ambiente")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("est_ambiente");
 
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<Guid?>("Idr_Ambiente")
+                        .HasColumnType("uuid")
+                        .HasColumnName("idr_ambiente");
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("Nom_Ambiente")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nom_ambiente");
 
-                    b.Property<string>("Tipo")
+                    b.Property<string>("Tip_Ambiente")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("tip_ambiente");
 
-                    b.Property<string>("Ubicacion")
+                    b.Property<string>("Ubi_Ambiente")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ubi_ambiente");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id_Ambiente");
 
-                    b.ToTable("Ambientes");
+                    b.HasIndex("Idr_Ambiente");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Capacidad = 35,
-                            Estado = "Disponible",
-                            FechaCreacion = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Nombre = "Laboratorio de Cómputo 101",
-                            Tipo = "Laboratorio de Cómputo",
-                            Ubicacion = "Pabellón B - Segundo Piso"
-                        },
-                        new
-                        {
-                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            Capacidad = 150,
-                            Estado = "Disponible",
-                            FechaCreacion = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Nombre = "Auditorio Central Magno",
-                            Tipo = "Auditorio",
-                            Ubicacion = "Edificio Administrativo - Planta Baja"
-                        },
-                        new
-                        {
-                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            Capacidad = 18,
-                            Estado = "Disponible",
-                            FechaCreacion = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Nombre = "Sala de Reuniones del Consejo",
-                            Tipo = "Sala de Reuniones",
-                            Ubicacion = "Pabellón A - Tercer Piso"
-                        },
-                        new
-                        {
-                            Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            Capacidad = 25,
-                            Estado = "Disponible",
-                            FechaCreacion = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Nombre = "Laboratorio Especializado de Robótica",
-                            Tipo = "Laboratorio Especializado",
-                            Ubicacion = "Pabellón C - Primer Piso"
-                        });
+                    b.ToTable("ambientes", (string)null);
                 });
 
-            modelBuilder.Entity("ReservaUPLA.Domain.Entities.Reserva", b =>
+            modelBuilder.Entity("ReservaUpla.Domain.Entities.Reserva", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("Id_Reserva")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_reserva");
 
-                    b.Property<Guid>("AmbienteId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Estado")
+                    b.Property<string>("Est_Reserva")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("est_reserva");
 
-                    b.Property<DateOnly>("Fecha")
-                        .HasColumnType("date");
+                    b.Property<DateOnly>("Fec_Reserva")
+                        .HasColumnType("date")
+                        .HasColumnName("fec_reserva");
 
-                    b.Property<DateTime>("FechaRegistro")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateTime>("Fre_Reserva")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fre_reserva");
 
-                    b.Property<TimeSpan>("HoraFin")
-                        .HasColumnType("interval");
+                    b.Property<TimeSpan>("Hfi_Reserva")
+                        .HasColumnType("interval")
+                        .HasColumnName("hfi_reserva");
 
-                    b.Property<TimeSpan>("HoraInicio")
-                        .HasColumnType("interval");
+                    b.Property<TimeSpan>("Hin_Reserva")
+                        .HasColumnType("interval")
+                        .HasColumnName("hin_reserva");
 
-                    b.Property<string>("Motivo")
+                    b.Property<Guid>("Ida_Reserva")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ida_reserva");
+
+                    b.Property<Guid>("Idu_Reserva")
+                        .HasColumnType("uuid")
+                        .HasColumnName("idu_reserva");
+
+                    b.Property<string>("Mot_Reserva")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("mot_reserva");
 
-                    b.Property<string>("ObservacionAdmin")
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
+                    b.HasKey("Id_Reserva");
 
-                    b.Property<Guid>("UsuarioId")
-                        .HasColumnType("uuid");
+                    b.HasIndex("Idu_Reserva");
 
-                    b.HasKey("Id");
+                    b.HasIndex("Ida_Reserva", "Fec_Reserva", "Est_Reserva");
 
-                    b.HasIndex("AmbienteId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("Reservas");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            AmbienteId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Estado = "Aprobada",
-                            Fecha = new DateOnly(2026, 11, 10),
-                            FechaRegistro = new DateTime(2026, 11, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoraFin = new TimeSpan(0, 10, 0, 0, 0),
-                            HoraInicio = new TimeSpan(0, 8, 0, 0, 0),
-                            Motivo = "Práctica calificada de Construcción de Software",
-                            ObservacionAdmin = "Aprobado por jefatura de laboratorio",
-                            UsuarioId = new Guid("22222222-2222-2222-2222-222222222222")
-                        },
-                        new
-                        {
-                            Id = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff"),
-                            AmbienteId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            Estado = "Pendiente",
-                            Fecha = new DateOnly(2026, 11, 12),
-                            FechaRegistro = new DateTime(2026, 11, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoraFin = new TimeSpan(0, 17, 0, 0, 0),
-                            HoraInicio = new TimeSpan(0, 14, 0, 0, 0),
-                            Motivo = "Seminario de Inteligencia Artificial y Cloud",
-                            UsuarioId = new Guid("22222222-2222-2222-2222-222222222222")
-                        });
+                    b.ToTable("reservas", (string)null);
                 });
 
-            modelBuilder.Entity("ReservaUPLA.Domain.Entities.Usuario", b =>
+            modelBuilder.Entity("ReservaUpla.Domain.Entities.Usuario", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("Id_Usuario")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_usuario");
 
-                    b.Property<bool>("Activo")
-                        .HasColumnType("boolean");
+                    b.Property<bool>("Act_Usuario")
+                        .HasColumnType("boolean")
+                        .HasColumnName("act_usuario");
 
-                    b.Property<string>("Correo")
+                    b.Property<string>("Cor_Usuario")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("cor_usuario");
 
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Has_Usuario")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("has_usuario");
 
-                    b.Property<string>("NombreCompleto")
+                    b.Property<string>("Nom_Usuario")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("nom_usuario");
 
-                    b.Property<string>("Rol")
+                    b.Property<string>("Rol_Usuario")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("rol_usuario");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id_Usuario");
 
-                    b.HasIndex("Correo")
+                    b.HasIndex("Cor_Usuario")
                         .IsUnique();
 
-                    b.ToTable("Usuarios");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Activo = true,
-                            Correo = "admin@upla.edu.pe",
-                            FechaCreacion = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NombreCompleto = "Administrador General",
-                            Rol = "Administrador"
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Activo = true,
-                            Correo = "jperez@upla.edu.pe",
-                            FechaCreacion = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NombreCompleto = "Juan Pérez Docente",
-                            Rol = "Solicitante"
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            Activo = true,
-                            Correo = "mgomez@upla.edu.pe",
-                            FechaCreacion = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NombreCompleto = "María Gómez Encargada",
-                            Rol = "Responsable de ambiente"
-                        });
+                    b.ToTable("usuarios", (string)null);
                 });
 
-            modelBuilder.Entity("ReservaUPLA.Domain.Entities.Reserva", b =>
+            modelBuilder.Entity("ReservaUpla.Domain.Entities.Ambiente", b =>
                 {
-                    b.HasOne("ReservaUPLA.Domain.Entities.Ambiente", "Ambiente")
+                    b.HasOne("ReservaUpla.Domain.Entities.Usuario", "Responsable")
+                        .WithMany("AmbientesACargo")
+                        .HasForeignKey("Idr_Ambiente")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Responsable");
+                });
+
+            modelBuilder.Entity("ReservaUpla.Domain.Entities.Reserva", b =>
+                {
+                    b.HasOne("ReservaUpla.Domain.Entities.Ambiente", "Ambiente")
                         .WithMany("Reservas")
-                        .HasForeignKey("AmbienteId")
+                        .HasForeignKey("Ida_Reserva")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ReservaUPLA.Domain.Entities.Usuario", "Usuario")
+                    b.HasOne("ReservaUpla.Domain.Entities.Usuario", "Usuario")
                         .WithMany("Reservas")
-                        .HasForeignKey("UsuarioId")
+                        .HasForeignKey("Idu_Reserva")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -257,13 +190,15 @@ namespace ReservaUPLA.Infrastructure.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("ReservaUPLA.Domain.Entities.Ambiente", b =>
+            modelBuilder.Entity("ReservaUpla.Domain.Entities.Ambiente", b =>
                 {
                     b.Navigation("Reservas");
                 });
 
-            modelBuilder.Entity("ReservaUPLA.Domain.Entities.Usuario", b =>
+            modelBuilder.Entity("ReservaUpla.Domain.Entities.Usuario", b =>
                 {
+                    b.Navigation("AmbientesACargo");
+
                     b.Navigation("Reservas");
                 });
 #pragma warning restore 612, 618

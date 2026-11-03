@@ -1,11 +1,10 @@
-namespace ReservaUPLA.Application.DTOs;
+namespace ReservaUpla.Application.DTOs;
 
-public record DashboardIndicadoresDto(
+public record DashboardDto(
     int TotalReservas,
     int ReservasPendientes,
     int ReservasAprobadas,
     int ReservasRechazadas,
-    int ReservasCanceladas,
     string AmbienteMasUtilizado,
-    int TotalAmbienteMasUtilizado
+    int CantidadAmbienteMasUtilizado
 );

@@ -1,11 +1,11 @@
-using ReservaUPLA.Domain.Entities;
+using ReservaUpla.Domain.Entities;
 
-namespace ReservaUPLA.Application.Interfaces;
+namespace ReservaUpla.Application.Interfaces;
 
 public interface IUsuarioRepository
 {
-    Task<Usuario?> GetByIdAsync(Guid id);
-    Task<IEnumerable<Usuario>> GetAllAsync();
-    Task<Usuario?> GetByCorreoAsync(string correo);
-    Task<Usuario> AddAsync(Usuario usuario);
+    Task<Usuario?> ObtenerPorIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Usuario?> ObtenerPorCorreoAsync(string correo, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Usuario>> ObtenerTodosAsync(CancellationToken cancellationToken = default);
+    Task AgregarAsync(Usuario usuario, CancellationToken cancellationToken = default);
 }

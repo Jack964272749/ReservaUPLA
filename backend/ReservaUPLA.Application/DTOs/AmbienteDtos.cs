@@ -1,18 +1,20 @@
-namespace ReservaUPLA.Application.DTOs;
+namespace ReservaUpla.Application.DTOs;
 
-public record CreateAmbienteDto(
+public record CrearAmbienteDto(
     string Nombre,
     string Tipo,
     int Capacidad,
-    string Ubicacion
+    string Ubicacion,
+    Guid? ResponsableId
 );
 
-public record AmbienteResponseDto(
+public record AmbienteDto(
     Guid Id,
     string Nombre,
     string Tipo,
     int Capacidad,
     string Ubicacion,
     string Estado,
-    DateTime FechaCreacion
+    Guid? ResponsableId,
+    string? ResponsableNombre
 );

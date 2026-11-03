@@ -1,8 +1,10 @@
-using ReservaUPLA.Application.DTOs;
-using ReservaUPLA.Application.Interfaces;
+using ReservaUpla.Application.DTOs;
+using ReservaUpla.Application.Interfaces;
+using ReservaUpla.Domain.Enums;
 
-namespace ReservaUPLA.Application.Services;
+namespace ReservaUpla.Application.Services;
 
+// Trazabilidad: RF-08 · E-30 · Indicadores calculados en servidor
 public class DashboardService : IDashboardService
 {
     private readonly IReservaRepository _reservaRepository;
@@ -12,24 +14,21 @@ public class DashboardService : IDashboardService
         _reservaRepository = reservaRepository;
     }
 
-    public async Task<DashboardIndicadoresDto> ObtenerIndicadoresAsync()
+    public async Task<DashboardDto> ObtenerIndicadoresAsync(CancellationToken cancellationToken = default)
     {
-        var total = await _reservaRepository.CountByEstadoAsync(null);
-        var pendientes = await _reservaRepository.CountByEstadoAsync("Pendiente");
-        var aprobadas = await _reservaRepository.CountByEstadoAsync("Aprobada");
-        var rechazadas = await _reservaRepository.CountByEstadoAsync("Rechazada");
-        var canceladas = await _reservaRepository.CountByEstadoAsync("Cancelada");
+        var total = await _reservaRepository.ContarPorEstadoAsync(null, cancellationToken);
+        var pendientes = await _reservaRepository.ContarPorEstadoAsync(EstadoReserva.Pendiente, cancellationToken);
+        var aprobadas = await _reservaRepository.ContarPorEstadoAsync(EstadoReserva.Aprobada, cancellationToken);
+        var rechazadas = await _reservaRepository.ContarPorEstadoAsync(EstadoReserva.Rechazada, cancellationToken);
+        var masUtilizado = await _reservaRepository.ObtenerAmbienteMasUtilizadoAsync(cancellationToken);
 
-        var masUtilizado = await _reservaRepository.GetAmbienteMasUtilizadoAsync();
-
-        return new DashboardIndicadoresDto(
+        return new DashboardDto(
             TotalReservas: total,
             ReservasPendientes: pendientes,
             ReservasAprobadas: aprobadas,
             ReservasRechazadas: rechazadas,
-            ReservasCanceladas: canceladas,
-            AmbienteMasUtilizado: masUtilizado?.AmbienteNombre ?? "Ninguno",
-            TotalAmbienteMasUtilizado: masUtilizado?.Cantidad ?? 0
+            AmbienteMasUtilizado: masUtilizado?.NombreAmbiente ?? "Sin registros",
+            CantidadAmbienteMasUtilizado: masUtilizado?.Cantidad ?? 0
         );
     }
 }
