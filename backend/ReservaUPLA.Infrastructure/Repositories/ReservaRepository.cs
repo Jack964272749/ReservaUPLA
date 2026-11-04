@@ -55,20 +55,17 @@ public class ReservaRepository : IReservaRepository
 
         if (ambientesPermitidos != null)
         {
-            var permitidos = ambientesPermitidos.ToList();
-            query = query.Where(r => permitidos.Contains(r.Ida_Reserva));
+            var ids = ambientesPermitidos.ToList();
+            query = query.Where(r => ids.Contains(r.Ida_Reserva));
         }
 
         var total = await query.CountAsync(cancellationToken);
 
-        var paginaValida = pagina < 1 ? 1 : pagina;
-        var tamanoValido = tamanoPagina < 1 ? 10 : (tamanoPagina > 50 ? 50 : tamanoPagina);
-
         var items = await query
             .OrderByDescending(r => r.Fec_Reserva)
-            .ThenBy(r => r.Hin_Reserva)
-            .Skip((paginaValida - 1) * tamanoValido)
-            .Take(tamanoValido)
+            .ThenByDescending(r => r.Hin_Reserva)
+            .Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
             .ToListAsync(cancellationToken);
 
         return (items, total);
@@ -80,12 +77,14 @@ public class ReservaRepository : IReservaRepository
         CancellationToken cancellationToken = default)
     {
         return await _context.Reservas
-            .Where(r => r.Ida_Reserva == ambienteId && r.Fec_Reserva == fecha && r.Est_Reserva != EstadoReserva.Cancelada)
+            .Include(r => r.Usuario)
+            .Include(r => r.Ambiente)
             .AsNoTracking()
+            .Where(r => r.Ida_Reserva == ambienteId && r.Fec_Reserva == fecha)
+            .OrderBy(r => r.Hin_Reserva)
             .ToListAsync(cancellationToken);
     }
 
-    // Trazabilidad: RN-01 · Formula estricta de colisión con reservas Aprobadas
     public async Task<bool> HayConflictoAprobadoAsync(
         Guid ambienteId,
         DateOnly fecha,
@@ -138,6 +137,30 @@ public class ReservaRepository : IReservaRepository
             .FirstOrDefaultAsync(cancellationToken);
 
         return resultado is null ? null : (resultado.Nombre, resultado.Cantidad);
+    }
+
+    public async Task<Dictionary<string, int>> ObtenerDistribucionPorTipoAmbienteAsync(CancellationToken cancellationToken = default)
+    {
+        var grupos = await _context.Reservas
+            .Include(r => r.Ambiente)
+            .Where(r => r.Ambiente != null)
+            .GroupBy(r => r.Ambiente!.Tip_Ambiente)
+            .Select(g => new { Tipo = g.Key.ToString(), Cantidad = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        return grupos.ToDictionary(g => g.Tipo, g => g.Cantidad);
+    }
+
+    public async Task<IEnumerable<Reserva>> ObtenerReservasDeFechaAsync(DateOnly fecha, int limite = 5, CancellationToken cancellationToken = default)
+    {
+        return await _context.Reservas
+            .Include(r => r.Ambiente)
+            .Include(r => r.Usuario)
+            .AsNoTracking()
+            .Where(r => r.Fec_Reserva == fecha)
+            .OrderBy(r => r.Hin_Reserva)
+            .Take(limite)
+            .ToListAsync(cancellationToken);
     }
 
     // Trazabilidad: E-17 · E-31 · Aislamiento Serializable para concurrencia

@@ -6,7 +6,7 @@ export default function CardIndicador({
   valor,
   descripcion,
   icon: Icon,
-  color = 'sky', // sky, amber, emerald, rose, purple
+  color = 'sky', // sky, amber, emerald, rose, purple, indigo
 }) {
   const colorStyles = {
     sky: 'border-sky-500/30 bg-white/85 dark:bg-slate-900/80 text-sky-700 dark:text-sky-300',
@@ -14,6 +14,7 @@ export default function CardIndicador({
     emerald: 'border-emerald-500/30 bg-white/85 dark:bg-slate-900/80 text-emerald-700 dark:text-emerald-300',
     rose: 'border-rose-500/30 bg-white/85 dark:bg-slate-900/80 text-rose-700 dark:text-rose-300',
     purple: 'border-purple-500/30 bg-white/85 dark:bg-slate-900/80 text-purple-700 dark:text-purple-300',
+    indigo: 'border-indigo-500/30 bg-white/85 dark:bg-slate-900/80 text-indigo-700 dark:text-indigo-300',
   }[color] || 'border-slate-500/30 bg-white/85 dark:bg-slate-900/80 text-slate-700';
 
   const iconBgStyles = {
@@ -22,7 +23,10 @@ export default function CardIndicador({
     emerald: 'bg-emerald-600 text-white shadow-emerald-600/30',
     rose: 'bg-rose-600 text-white shadow-rose-600/30',
     purple: 'bg-purple-600 text-white shadow-purple-600/30',
+    indigo: 'bg-indigo-600 text-white shadow-indigo-600/30',
   }[color] || 'bg-slate-600 text-white';
+
+  const esTextoLargo = typeof valor === 'string' && valor.length > 12;
 
   return (
     <div
@@ -39,7 +43,14 @@ export default function CardIndicador({
         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
           {titulo}
         </p>
-        <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 mt-1">
+        <p
+          className={`text-slate-900 dark:text-slate-100 mt-1 truncate ${
+            esTextoLargo
+              ? 'text-base sm:text-lg font-bold'
+              : 'text-2xl sm:text-3xl font-extrabold'
+          }`}
+          title={typeof valor === 'string' ? valor : undefined}
+        >
           {valor}
         </p>
         {descripcion && (
