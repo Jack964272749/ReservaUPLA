@@ -89,6 +89,9 @@ public class Reserva
             if (rolActor == RolUsuario.Solicitante && idActor != Idu_Reserva)
                 throw new DomainException(Mensajes.SolicitanteSoloCancelaPropia, 403);
 
+            if (rolActor != RolUsuario.Administrador && rolActor != RolUsuario.Solicitante)
+                throw new DomainException(Mensajes.SoloAdminOSolicitanteDuenioCancela, 403);
+
             if (Est_Reserva != EstadoReserva.Pendiente && Est_Reserva != EstadoReserva.Aprobada)
                 throw new DomainException(Mensajes.TransicionEstadoInvalida, 409);
         }

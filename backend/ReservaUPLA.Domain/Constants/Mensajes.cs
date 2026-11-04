@@ -29,5 +29,6 @@ public static class Mensajes
     public const string ReservaRechazadaInmodificable = "Una reserva rechazada no puede ser modificada ni reactivada (RN-06, RV-15, E-20).";
     public const string SoloAdminApruebaRechaza = "Solo el Administrador tiene autorización para aprobar o rechazar reservas (RN-05, RV-16, E-18).";
     public const string SolicitanteSoloCancelaPropia = "Solo puede cancelar reservas solicitadas por usted mismo (RV-17).";
+    public const string SoloAdminOSolicitanteDuenioCancela = "Solo el Administrador o el Solicitante dueño de la reserva tienen autorización para cancelarla.";
     public const string TransicionEstadoInvalida = "La transición de estado solicitada no es válida para el ciclo de vida de la reserva (RV-15, E-21).";
 }

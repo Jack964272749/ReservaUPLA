@@ -1,4 +1,4 @@
-using Moq;
+﻿using Moq;
 using ReservaUpla.Application.DTOs;
 using ReservaUpla.Application.Interfaces;
 using ReservaUpla.Application.Services;
@@ -243,5 +243,74 @@ public class ReservaServiceTests
         var ex = await Assert.ThrowsAsync<DomainException>(() =>
             _reservaService.CrearAsync(dtoDiaAnterior, _usuarioId));
         Assert.Equal(Mensajes.FechaPasada, ex.Message);
+    }
+
+    [Fact]
+    public async Task CancelarReserva_ResponsableIntentaCancelar_Lanza403()
+    {
+        var reservaId = Guid.NewGuid();
+        var fecha = new DateOnly(2026, 11, 10);
+        var reserva = Reserva.Crear(fecha, new TimeSpan(8, 0, 0), new TimeSpan(10, 0, 0), "Motivo de prueba", _usuarioId, _ambienteId);
+
+        _mockReservaRepo.Setup(r => r.ObtenerPorIdAsync(reservaId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(reserva);
+
+        var idResponsable = Guid.NewGuid();
+        var ex = await Assert.ThrowsAsync<DomainException>(() =>
+            _reservaService.CambiarEstadoAsync(reservaId, "Cancelada", idResponsable, RolUsuario.Responsable));
+
+        Assert.Equal(Mensajes.SoloAdminOSolicitanteDuenioCancela, ex.Message);
+        Assert.Equal(403, ex.CodigoEstadoHttp);
+    }
+
+    [Fact]
+    public async Task CancelarReserva_AdministradorCancela_Exito()
+    {
+        var reservaId = Guid.NewGuid();
+        var fecha = new DateOnly(2026, 11, 10);
+        var reserva = Reserva.Crear(fecha, new TimeSpan(8, 0, 0), new TimeSpan(10, 0, 0), "Motivo de prueba", _usuarioId, _ambienteId);
+
+        _mockReservaRepo.Setup(r => r.ObtenerPorIdAsync(reservaId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(reserva);
+
+        var idAdmin = Guid.NewGuid();
+        var res = await _reservaService.CambiarEstadoAsync(reservaId, "Cancelada", idAdmin, RolUsuario.Administrador);
+
+        Assert.NotNull(res);
+        Assert.Equal("Cancelada", res.Estado);
+    }
+
+    [Fact]
+    public async Task CancelarReserva_SolicitanteDuenioCancela_Exito()
+    {
+        var reservaId = Guid.NewGuid();
+        var fecha = new DateOnly(2026, 11, 10);
+        var reserva = Reserva.Crear(fecha, new TimeSpan(8, 0, 0), new TimeSpan(10, 0, 0), "Motivo de prueba", _usuarioId, _ambienteId);
+
+        _mockReservaRepo.Setup(r => r.ObtenerPorIdAsync(reservaId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(reserva);
+
+        var res = await _reservaService.CambiarEstadoAsync(reservaId, "Cancelada", _usuarioId, RolUsuario.Solicitante);
+
+        Assert.NotNull(res);
+        Assert.Equal("Cancelada", res.Estado);
+    }
+
+    [Fact]
+    public async Task CancelarReserva_SolicitanteAjeno_Lanza403()
+    {
+        var reservaId = Guid.NewGuid();
+        var fecha = new DateOnly(2026, 11, 10);
+        var reserva = Reserva.Crear(fecha, new TimeSpan(8, 0, 0), new TimeSpan(10, 0, 0), "Motivo de prueba", _usuarioId, _ambienteId);
+
+        _mockReservaRepo.Setup(r => r.ObtenerPorIdAsync(reservaId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(reserva);
+
+        var idOtroSolicitante = Guid.NewGuid();
+        var ex = await Assert.ThrowsAsync<DomainException>(() =>
+            _reservaService.CambiarEstadoAsync(reservaId, "Cancelada", idOtroSolicitante, RolUsuario.Solicitante));
+
+        Assert.Equal(Mensajes.SolicitanteSoloCancelaPropia, ex.Message);
+        Assert.Equal(403, ex.CodigoEstadoHttp);
     }
 }
