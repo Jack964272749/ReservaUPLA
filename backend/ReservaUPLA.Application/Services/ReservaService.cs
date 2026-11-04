@@ -14,21 +14,24 @@ public class ReservaService : IReservaService
     private readonly IReservaRepository _reservaRepository;
     private readonly IAmbienteRepository _ambienteRepository;
     private readonly IUsuarioRepository _usuarioRepository;
+    private readonly IRelojService _relojService;
 
     public ReservaService(
         IReservaRepository reservaRepository,
         IAmbienteRepository ambienteRepository,
-        IUsuarioRepository usuarioRepository)
+        IUsuarioRepository usuarioRepository,
+        IRelojService relojService)
     {
         _reservaRepository = reservaRepository;
         _ambienteRepository = ambienteRepository;
         _usuarioRepository = usuarioRepository;
+        _relojService = relojService;
     }
 
     public async Task<ReservaDto> CrearAsync(CrearReservaDto dto, Guid idUsuario, CancellationToken cancellationToken = default)
     {
         // RV-08 · E-16: Fecha obligatoria y no pasada
-        var hoy = DateOnly.FromDateTime(DateTime.UtcNow);
+        var hoy = _relojService.HoyLima();
         if (dto.Fecha < hoy)
             throw new DomainException(Mensajes.FechaPasada);
 

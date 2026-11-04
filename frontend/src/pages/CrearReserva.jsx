@@ -9,9 +9,10 @@ import AlertMessage from '../components/AlertMessage';
 import ModalConfirmacion from '../components/ModalConfirmacion';
 import FondoModulo from '../components/FondoModulo';
 import { useReservaForm } from '../hooks/useReservaForm';
+import { obtenerFechaLocalISO } from '../utils/fecha';
 
 // Obtener fecha mínima permitida (hoy)
-const hoyStr = new Date().toISOString().split('T')[0];
+const hoyStr = obtenerFechaLocalISO();
 
 // Trazabilidad: RF-03, RF-04 · RN-01 a RN-04 · Nielsen H1, H4, H5, H6, H9 · Shneiderman S1..S5 · ISO 9241-11
 export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas }) {

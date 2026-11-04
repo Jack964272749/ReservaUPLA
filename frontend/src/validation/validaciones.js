@@ -1,5 +1,6 @@
 import { REGLAS } from '../constants/reglas';
 import { MENSAJES } from '../constants/mensajes';
+import { obtenerFechaLocalISO } from '../utils/fecha';
 
 // Trazabilidad: ISO 9241-11 Eficacia · Validación cliente de primer nivel
 export function validarCorreo(correo) {
@@ -26,7 +27,7 @@ export function validarClave(clave) {
 
 export function validarFormularioReserva({ fecha, horaInicio, horaFin, motivo, ambienteId }) {
   const errores = {};
-  const hoy = new Date().toISOString().split('T')[0];
+  const hoy = obtenerFechaLocalISO();
 
   if (!ambienteId) errores.ambienteId = 'Seleccione el ambiente a reservar.';
   if (!fecha) errores.fecha = MENSAJES.FECHA_REQUERIDA;

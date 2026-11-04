@@ -7,6 +7,7 @@ using ReservaUpla.Application.Services;
 using ReservaUpla.Infrastructure.Data;
 using ReservaUpla.Infrastructure.Repositories;
 using ReservaUpla.Infrastructure.Security;
+using ReservaUpla.Infrastructure.Services;
 
 namespace ReservaUpla.API.Extensions;
 
@@ -32,6 +33,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAmbienteRepository, AmbienteRepository>();
         services.AddScoped<IReservaRepository, ReservaRepository>();
         services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
+        services.AddSingleton<IRelojService, RelojService>();
         return services;
     }
 

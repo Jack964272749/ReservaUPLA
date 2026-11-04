@@ -16,6 +16,7 @@ public class ReservaServiceTests
     private readonly Mock<IAmbienteRepository> _mockAmbienteRepo;
     private readonly Mock<IUsuarioRepository> _mockUsuarioRepo;
     private readonly Mock<IPasswordHasherService> _mockPasswordHasher;
+    private readonly Mock<IRelojService> _mockReloj;
     private readonly ReservaService _reservaService;
     private readonly AuthService _authService;
 
@@ -28,11 +29,14 @@ public class ReservaServiceTests
         _mockAmbienteRepo = new Mock<IAmbienteRepository>();
         _mockUsuarioRepo = new Mock<IUsuarioRepository>();
         _mockPasswordHasher = new Mock<IPasswordHasherService>();
+        _mockReloj = new Mock<IRelojService>();
+        _mockReloj.Setup(r => r.HoyLima()).Returns(DateOnly.FromDateTime(DateTime.UtcNow));
 
         _reservaService = new ReservaService(
             _mockReservaRepo.Object,
             _mockAmbienteRepo.Object,
-            _mockUsuarioRepo.Object);
+            _mockUsuarioRepo.Object,
+            _mockReloj.Object);
 
         _authService = new AuthService(
             _mockUsuarioRepo.Object,
@@ -205,5 +209,39 @@ public class ReservaServiceTests
 
         Assert.Equal(Mensajes.ReservaRechazadaInmodificable, ex.Message);
         Assert.Equal(409, ex.CodigoEstadoHttp);
+    }
+
+    [Fact]
+    public async Task E21_ZonaHorariaLima_23Horas_ReservaMismoDiaAcepta_DiaAnteriorRechaza()
+    {
+        // Trazabilidad: Zona Horaria · A las 23:00 de Lima (donde UTC ya es el día siguiente),
+        // una reserva para el mismo día de Lima debe ser aceptada y para el día anterior rechazada.
+        var hoyLima = new DateOnly(2026, 11, 4);
+        var ayerLima = hoyLima.AddDays(-1);
+        _mockReloj.Setup(r => r.HoyLima()).Returns(hoyLima);
+
+        // 1. Reserva para el mismo día (debe aceptarse)
+        var dtoMismoDia = new CrearReservaDto(
+            hoyLima,
+            new TimeSpan(8, 0, 0),
+            new TimeSpan(10, 0, 0),
+            "Reserva para hoy desde Lima",
+            _ambienteId);
+
+        var resultado = await _reservaService.CrearAsync(dtoMismoDia, _usuarioId);
+        Assert.NotNull(resultado);
+        Assert.Equal(hoyLima, resultado.Fecha);
+
+        // 2. Reserva para el día anterior en Lima (debe rechazarse con FechaPasada)
+        var dtoDiaAnterior = new CrearReservaDto(
+            ayerLima,
+            new TimeSpan(8, 0, 0),
+            new TimeSpan(10, 0, 0),
+            "Reserva para ayer desde Lima",
+            _ambienteId);
+
+        var ex = await Assert.ThrowsAsync<DomainException>(() =>
+            _reservaService.CrearAsync(dtoDiaAnterior, _usuarioId));
+        Assert.Equal(Mensajes.FechaPasada, ex.Message);
     }
 }
