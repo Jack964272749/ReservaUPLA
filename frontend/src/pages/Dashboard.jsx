@@ -128,15 +128,15 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
             </div>
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-sky-400">
-                Ambiente de Mayor Demanda Académica
+                Ambiente más utilizado
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 text-white drop-shadow-sm">
                 {indicadores?.ambienteMasUtilizado || 'Sin registros suficientes'}
               </h2>
               <p className="text-xs sm:text-sm text-sky-200/90 mt-1.5 font-medium">
                 {indicadores?.cantidadAmbienteMasUtilizado
-                  ? `${indicadores.cantidadAmbienteMasUtilizado} reservas aprobadas acumuladas.`
-                  : 'Aún no se registran reservas aprobadas para determinar el ambiente líder.'}
+                  ? `${indicadores.cantidadAmbienteMasUtilizado} reservas registradas en total.`
+                  : 'Aún no se registran reservas para determinar el ambiente más utilizado.'}
               </p>
             </div>
           </div>
