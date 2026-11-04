@@ -4,6 +4,7 @@ import TextInput from '../components/TextInput';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import Logo from '../components/Logo';
+import FondoModulo from '../components/FondoModulo';
 import { useRegistroUsuario } from '../hooks/useRegistroUsuario';
 
 // Trazabilidad: RF-01 · Nielsen H2, H3, H5, H9 · Shneiderman S1..S5 · ISO 9241-11
@@ -28,8 +29,11 @@ export default function RegistroSolicitante({ alVolverALogin }) {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#EDF3F9] dark:bg-slate-950 transition-colors">
-      <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xl">
+    <FondoModulo
+      imagen="/backgrounds/bg_registro.jpg"
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6 transition-colors"
+    >
+      <div className="relative z-10 max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xl">
         <div className="mb-6 flex items-center justify-between">
           <Logo />
           <button
@@ -139,6 +143,6 @@ export default function RegistroSolicitante({ alVolverALogin }) {
           </form>
         )}
       </div>
-    </div>
+    </FondoModulo>
   );
 }

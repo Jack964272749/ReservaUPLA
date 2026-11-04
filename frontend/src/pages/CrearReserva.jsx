@@ -7,6 +7,7 @@ import TextInput from '../components/TextInput';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import ModalConfirmacion from '../components/ModalConfirmacion';
+import FondoModulo from '../components/FondoModulo';
 import { useReservaForm } from '../hooks/useReservaForm';
 
 // Obtener fecha mínima permitida (hoy)
@@ -55,7 +56,11 @@ export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas 
   }));
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <FondoModulo
+      imagen="/backgrounds/bg_nueva_reserva.jpg"
+      className="rounded-2xl"
+    >
+    <div className="relative z-10 max-w-3xl mx-auto space-y-6">
       <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
           <CalendarPlus className="w-6 h-6 text-sky-700 dark:text-sky-400" aria-hidden="true" />
@@ -238,5 +243,6 @@ export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas 
         )}
       </ModalConfirmacion>
     </div>
+    </FondoModulo>
   );
 }

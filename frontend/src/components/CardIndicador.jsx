@@ -9,12 +9,12 @@ export default function CardIndicador({
   color = 'sky', // sky, amber, emerald, rose, purple
 }) {
   const colorStyles = {
-    sky: 'border-sky-500/20 bg-sky-50/50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-300',
-    amber: 'border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300',
-    emerald: 'border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300',
-    rose: 'border-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300',
-    purple: 'border-purple-500/20 bg-purple-50/50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-300',
-  }[color] || 'border-slate-500/20 bg-slate-50/50 text-slate-700';
+    sky: 'border-sky-500/30 bg-white/85 dark:bg-slate-900/80 text-sky-700 dark:text-sky-300',
+    amber: 'border-amber-500/30 bg-white/85 dark:bg-slate-900/80 text-amber-700 dark:text-amber-300',
+    emerald: 'border-emerald-500/30 bg-white/85 dark:bg-slate-900/80 text-emerald-700 dark:text-emerald-300',
+    rose: 'border-rose-500/30 bg-white/85 dark:bg-slate-900/80 text-rose-700 dark:text-rose-300',
+    purple: 'border-purple-500/30 bg-white/85 dark:bg-slate-900/80 text-purple-700 dark:text-purple-300',
+  }[color] || 'border-slate-500/30 bg-white/85 dark:bg-slate-900/80 text-slate-700';
 
   const iconBgStyles = {
     sky: 'bg-sky-600 text-white shadow-sky-600/30',
@@ -28,10 +28,10 @@ export default function CardIndicador({
     <div
       role="status"
       aria-label={`${titulo}: ${valor}`}
-      className={`p-5 rounded-xl border transition-all duration-150 shadow-sm flex items-start gap-4 ${colorStyles}`}
+      className={`p-5 rounded-2xl border backdrop-blur-md transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-start gap-4 ${colorStyles}`}
     >
       {Icon && (
-        <div className={`p-3 rounded-lg shadow-md flex-shrink-0 ${iconBgStyles}`} aria-hidden="true">
+        <div className={`p-3 rounded-xl shadow-md flex-shrink-0 ${iconBgStyles}`} aria-hidden="true">
           <Icon className="w-5 h-5" />
         </div>
       )}
@@ -39,11 +39,11 @@ export default function CardIndicador({
         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
           {titulo}
         </p>
-        <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">
+        <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 mt-1">
           {valor}
         </p>
         {descripcion && (
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 truncate font-medium">
             {descripcion}
           </p>
         )}

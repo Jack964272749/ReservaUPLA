@@ -7,10 +7,12 @@ import {
   Building2,
   RefreshCw,
   ArrowRight,
+  Monitor,
 } from 'lucide-react';
 import CardIndicador from '../components/CardIndicador';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
+import FondoModulo from '../components/FondoModulo';
 import { useDashboard } from '../hooks/useDashboard';
 
 // Trazabilidad: RF-08 · Nielsen H1 (Visibilidad del estado del sistema), H8 · Shneiderman S1, S3
@@ -34,110 +36,123 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
-            Panel de Control Institucional
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
-            Resumen estadístico y estado general del uso de ambientes universitarios.
-          </p>
+    <FondoModulo
+      imagen="/backgrounds/bg_dashboard.jpg"
+      className="rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl p-6 sm:p-8 lg:p-10 transition-all"
+    >
+      <div className="relative z-10 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-slate-300/70 dark:border-slate-800">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100/90 dark:bg-sky-950/80 text-sky-800 dark:text-sky-300 border border-sky-300/60 dark:border-sky-800 backdrop-blur-sm shadow-xs">
+                <Monitor className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Facultad de Ingeniería · Laboratorios y Ambientes</span>
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+              Panel de Control Institucional
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium">
+              Resumen estadístico y estado general del uso de ambientes universitarios en tiempo real.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={recargar}
+              icon={RefreshCw}
+              ariaLabel="Actualizar indicadores"
+              className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-xs hover:bg-white dark:hover:bg-slate-800"
+            >
+              Actualizar
+            </Button>
+            {alIrANuevaReserva && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={alIrANuevaReserva}
+                className="shadow-md"
+              >
+                Nueva Reserva
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={recargar}
-            icon={RefreshCw}
-            ariaLabel="Actualizar indicadores"
-          >
-            Actualizar
-          </Button>
-          {alIrANuevaReserva && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={alIrANuevaReserva}
+        {error && (
+          <AlertMessage
+            type="error"
+            message={error}
+          />
+        )}
+
+        {/* Grid de Tarjetas KPI con efecto Glassmorphism */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <CardIndicador
+            titulo="Total de Reservas"
+            valor={indicadores?.totalReservas ?? 0}
+            descripcion="Histórico registrado en el sistema"
+            icon={CalendarDays}
+            color="sky"
+          />
+          <CardIndicador
+            titulo="Reservas Pendientes"
+            valor={indicadores?.reservasPendientes ?? 0}
+            descripcion="En espera de aprobación administrativa"
+            icon={Clock}
+            color="amber"
+          />
+          <CardIndicador
+            titulo="Reservas Aprobadas"
+            valor={indicadores?.reservasAprobadas ?? 0}
+            descripcion="Confirmadas sin cruces horarios"
+            icon={CheckCircle2}
+            color="emerald"
+          />
+          <CardIndicador
+            titulo="Reservas Rechazadas"
+            valor={indicadores?.reservasRechazadas ?? 0}
+            descripcion="Rechazadas por la administración"
+            icon={XCircle}
+            color="rose"
+          />
+        </div>
+
+        {/* Tarjeta de Ambiente Más Utilizado */}
+        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-sky-950/95 via-sky-900/90 to-indigo-950/95 backdrop-blur-md text-white shadow-2xl flex flex-col md:flex-row md:items-center md:justify-between gap-6 border border-sky-700/50">
+          <div className="flex items-start gap-4">
+            <div className="p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-sky-300 flex-shrink-0 shadow-inner">
+              <Building2 className="w-8 h-8" aria-hidden="true" />
+            </div>
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-sky-400">
+                Ambiente de Mayor Demanda Académica
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 text-white drop-shadow-sm">
+                {indicadores?.ambienteMasUtilizado || 'Sin registros suficientes'}
+              </h2>
+              <p className="text-xs sm:text-sm text-sky-200/90 mt-1.5 font-medium">
+                {indicadores?.cantidadAmbienteMasUtilizado
+                  ? `${indicadores.cantidadAmbienteMasUtilizado} reservas aprobadas acumuladas.`
+                  : 'Aún no se registran reservas aprobadas para determinar el ambiente líder.'}
+              </p>
+            </div>
+          </div>
+
+          {alIrAReservas && (
+            <button
+              type="button"
+              onClick={alIrAReservas}
+              className="inline-flex items-center justify-center gap-2 font-bold text-sm px-6 py-3 rounded-xl bg-white hover:bg-sky-50 text-sky-950 shadow-lg hover:shadow-xl transition-all duration-150 flex-shrink-0 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-sky-900 cursor-pointer"
             >
-              Nueva Reserva
-            </Button>
+              <span>Ver todas las reservas</span>
+              <ArrowRight className="w-4 h-4 text-sky-900" aria-hidden="true" />
+            </button>
           )}
         </div>
       </div>
-
-      {error && (
-        <AlertMessage
-          type="error"
-          message={error}
-        />
-      )}
-
-      {/* Grid de Tarjetas KPI */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <CardIndicador
-          titulo="Total de Reservas"
-          valor={indicadores?.totalReservas ?? 0}
-          descripcion="Histórico registrado en el sistema"
-          icon={CalendarDays}
-          color="sky"
-        />
-        <CardIndicador
-          titulo="Reservas Pendientes"
-          valor={indicadores?.reservasPendientes ?? 0}
-          descripcion="En espera de aprobación administrativa"
-          icon={Clock}
-          color="amber"
-        />
-        <CardIndicador
-          titulo="Reservas Aprobadas"
-          valor={indicadores?.reservasAprobadas ?? 0}
-          descripcion="Confirmadas sin cruces horarios"
-          icon={CheckCircle2}
-          color="emerald"
-        />
-        <CardIndicador
-          titulo="Reservas Rechazadas"
-          valor={indicadores?.reservasRechazadas ?? 0}
-          descripcion="Rechazadas por la administración"
-          icon={XCircle}
-          color="rose"
-        />
-      </div>
-
-      {/* Tarjeta de Ambiente Más Utilizado */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-sky-950 via-sky-900 to-indigo-950 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6 border border-sky-800/40">
-        <div className="flex items-start gap-4">
-          <div className="p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-sky-300 flex-shrink-0">
-            <Building2 className="w-8 h-8" aria-hidden="true" />
-          </div>
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-sky-400">
-              Ambiente de Mayor Demanda Académica
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 text-white">
-              {indicadores?.ambienteMasUtilizado || 'Sin registros suficientes'}
-            </h2>
-            <p className="text-xs sm:text-sm text-sky-200/90 mt-1.5 font-medium">
-              {indicadores?.cantidadAmbienteMasUtilizado
-                ? `${indicadores.cantidadAmbienteMasUtilizado} reservas aprobadas acumuladas.`
-                : 'Aún no se registran reservas aprobadas para determinar el ambiente líder.'}
-            </p>
-          </div>
-        </div>
-
-        {alIrAReservas && (
-          <button
-            type="button"
-            onClick={alIrAReservas}
-            className="inline-flex items-center justify-center gap-2 font-bold text-sm px-6 py-3 rounded-xl bg-white hover:bg-sky-50 text-sky-950 shadow-lg hover:shadow-xl transition-all duration-150 flex-shrink-0 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-sky-900 cursor-pointer"
-          >
-            <span>Ver todas las reservas</span>
-            <ArrowRight className="w-4 h-4 text-sky-900" aria-hidden="true" />
-          </button>
-        )}
-      </div>
-    </div>
+    </FondoModulo>
   );
 }

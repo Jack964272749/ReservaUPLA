@@ -6,6 +6,7 @@ import AlertMessage from '../components/AlertMessage';
 import ModalConfirmacion from '../components/ModalConfirmacion';
 import TextInput from '../components/TextInput';
 import SelectInput from '../components/SelectInput';
+import FondoModulo from '../components/FondoModulo';
 import { useAmbientes } from '../hooks/useAmbientes';
 import { useAuth } from '../hooks/useAuth';
 
@@ -96,7 +97,11 @@ export default function Ambientes({ alReservarAmbiente }) {
   ];
 
   return (
-    <div className="space-y-6">
+    <FondoModulo
+      imagen="/backgrounds/bg_ambientes.jpg"
+      className="rounded-2xl"
+    >
+    <div className="relative z-10 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -232,5 +237,6 @@ export default function Ambientes({ alReservarAmbiente }) {
         </form>
       </ModalConfirmacion>
     </div>
+    </FondoModulo>
   );
 }
