@@ -32,6 +32,9 @@ public class UsuarioService : IUsuarioService
         if (!Enum.TryParse<RolUsuario>(dto.Rol, true, out var rolEnum))
             throw new DomainException(Mensajes.RolInvalido, 400);
 
+        if (rolEnum != usuario.Rol_Usuario)
+            throw new DomainException(Mensajes.RolNoModificable, 400);
+
         if (id == adminEjecutorId && !dto.Activo)
             throw new DomainException(Mensajes.NoSePuedeDesactivarPropiaCuenta, 400);
 

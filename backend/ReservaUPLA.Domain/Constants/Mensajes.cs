@@ -14,6 +14,7 @@ public static class Mensajes
     public const string UsuarioNoExiste = "El usuario especificado no existe.";
     public const string NoSePuedeDesactivarPropiaCuenta = "No puede desactivar su propia cuenta de administrador en uso.";
     public const string RolInvalido = "El rol especificado no es válido.";
+    public const string RolNoModificable = "El rol institucional asignado a un usuario es inmutable y no puede ser modificado.";
 
     public const string NombreAmbienteRequerido = "El nombre del ambiente es obligatorio (RV-04).";
     public const string NombreAmbienteLongitud = "El nombre del ambiente debe tener entre 3 y 100 caracteres (RV-04).";

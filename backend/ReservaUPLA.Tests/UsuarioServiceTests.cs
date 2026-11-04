@@ -39,6 +39,24 @@ public class UsuarioServiceTests
     }
 
     [Fact]
+    public async Task ActualizarAsync_IntentaModificarRol_LanzaDomainException400()
+    {
+        var id = Guid.NewGuid();
+        var usuario = Usuario.Crear("Carlos Ramos", "carlos@upla.edu.pe", "hash123", RolUsuario.Solicitante);
+
+        _mockUsuarioRepo.Setup(r => r.ObtenerPorIdAsync(id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(usuario);
+
+        var dto = new ActualizarUsuarioDto("Carlos Ramos", "Responsable", true);
+
+        var ex = await Assert.ThrowsAsync<DomainException>(() =>
+            _usuarioService.ActualizarAsync(id, dto, Guid.NewGuid()));
+
+        Assert.Equal(400, ex.CodigoEstadoHttp);
+        Assert.Equal(Mensajes.RolNoModificable, ex.Message);
+    }
+
+    [Fact]
     public async Task ActualizarAsync_AdminIntentaDesactivarPropiaCuenta_LanzaDomainException400()
     {
         var adminId = Guid.NewGuid();
@@ -57,7 +75,7 @@ public class UsuarioServiceTests
     }
 
     [Fact]
-    public async Task ActualizarAsync_DatosValidos_ModificaNombreRolEstadoExitosamente()
+    public async Task ActualizarAsync_DatosValidos_ModificaNombreYEstadoExitosamente()
     {
         var id = Guid.NewGuid();
         var usuario = Usuario.Crear("Carlos Ramos", "carlos@upla.edu.pe", "hash123", RolUsuario.Solicitante);
@@ -65,13 +83,13 @@ public class UsuarioServiceTests
         _mockUsuarioRepo.Setup(r => r.ObtenerPorIdAsync(id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(usuario);
 
-        var dto = new ActualizarUsuarioDto("Carlos Ramos Actualizado", "Responsable", true);
+        var dto = new ActualizarUsuarioDto("Carlos Ramos Actualizado", "Solicitante", false);
 
         var resultado = await _usuarioService.ActualizarAsync(id, dto, Guid.NewGuid());
 
         Assert.Equal("Carlos Ramos Actualizado", resultado.NombreCompleto);
-        Assert.Equal("Responsable", resultado.Rol);
-        Assert.True(resultado.Activo);
+        Assert.Equal("Solicitante", resultado.Rol);
+        Assert.False(resultado.Activo);
         _mockUsuarioRepo.Verify(r => r.ActualizarAsync(usuario, It.IsAny<CancellationToken>()), Times.Once);
     }
 

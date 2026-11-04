@@ -146,12 +146,6 @@ export default function Usuarios() {
     );
   };
 
-  const opcionesRoles = [
-    { value: 'Administrador', label: 'Administrador (Control total)' },
-    { value: 'Responsable', label: 'Responsable (Ambientes y Labs)' },
-    { value: 'Solicitante', label: 'Solicitante (Docente / Alumno)' },
-  ];
-
   const opcionesEstado = [
     { value: 'true', label: 'Activo (Acceso permitido)' },
     { value: 'false', label: 'Inactivo (Acceso suspendido)' },
@@ -250,7 +244,7 @@ export default function Usuarios() {
             <span>Usuarios del Sistema ReservaUPLA</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Gestión institucional de cuentas, asignación de roles y control de acceso.
+            Gestión institucional de cuentas, control de estado y visualización de roles.
           </p>
         </div>
 
@@ -293,7 +287,7 @@ export default function Usuarios() {
         onClose={cerrarModalEditar}
         onConfirm={guardarEdicion}
         title="Modificar Usuario"
-        message="Actualice los datos institucionales del usuario seleccionado."
+        message="Actualice los datos permitidos del usuario seleccionado."
         confirmText={guardandoEdit ? 'Guardando…' : 'Guardar Cambios'}
         cancelText="Cancelar"
         loading={guardandoEdit}
@@ -305,7 +299,15 @@ export default function Usuarios() {
               label="Correo institucional"
               value={usuarioEditando.correo}
               disabled
-              ayuda="El correo institucional identifica la cuenta y no puede modificarse."
+              ayuda="El correo institucional identifica la cuenta y es inmutable."
+            />
+
+            <TextInput
+              id="edit-rol"
+              label="Rol institucional asignado"
+              value={editRol}
+              disabled
+              ayuda="El rol asignado (Solicitante, Responsable o Administrador) es inmutable y está bloqueado."
             />
 
             <TextInput
@@ -320,15 +322,6 @@ export default function Usuarios() {
               obligatorio
               maxLength={REGLAS.USUARIO.MAX_NOMBRE}
               placeholder="Ej. Juan Pérez Huamán"
-            />
-
-            <SelectInput
-              id="edit-rol"
-              label="Rol en el Sistema"
-              value={editRol}
-              onChange={(e) => setEditRol(e.target.value)}
-              options={opcionesRoles}
-              obligatorio
             />
 
             <SelectInput
