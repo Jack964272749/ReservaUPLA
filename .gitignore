@@ -1,3 +1,4 @@
+# Exclusiones de artefactos de compilacion, dependencias y entorno
 bin/
 obj/
 node_modules/
