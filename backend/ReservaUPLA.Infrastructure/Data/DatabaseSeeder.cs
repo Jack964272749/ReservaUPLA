@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+
 using ReservaUpla.Application.Interfaces;
 using ReservaUpla.Domain.Entities;
 using ReservaUpla.Domain.Enums;
@@ -12,12 +13,35 @@ public static class DatabaseSeeder
     public static async Task InicializarAsync(
         AppDbContext context,
         IPasswordHasherService passwordHasher,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        bool? isDevelopment = null)
     {
         await context.Database.MigrateAsync();
 
-        var claveAdmin = configuration["Seeder:AdminPassword"] ?? "Admin123*UPLA";
-        var claveUser = configuration["Seeder:UserPassword"] ?? "Usuario123*UPLA";
+        var esDesarrollo = isDevelopment.HasValue
+            ? isDevelopment.Value
+            : (string.Equals(configuration["ASPNETCORE_ENVIRONMENT"], "Development", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(configuration["DOTNET_ENVIRONMENT"], "Development", StringComparison.OrdinalIgnoreCase));
+
+        var claveAdmin = configuration["Seeder:AdminPassword"];
+        var claveUser = configuration["Seeder:UserPassword"];
+
+        if (string.IsNullOrWhiteSpace(claveAdmin))
+        {
+            if (esDesarrollo)
+                claveAdmin = "Admin123*UPLA";
+            else
+                throw new InvalidOperationException("La clave de configuración 'Seeder:AdminPassword' es requerida en entornos que no sean Development.");
+        }
+
+        if (string.IsNullOrWhiteSpace(claveUser))
+        {
+            if (esDesarrollo)
+                claveUser = "Usuario123*UPLA";
+            else
+                throw new InvalidOperationException("La clave de configuración 'Seeder:UserPassword' es requerida en entornos que no sean Development.");
+        }
+
 
         var adminHash = passwordHasher.Hash(claveAdmin);
         var userHash = passwordHasher.Hash(claveUser);
