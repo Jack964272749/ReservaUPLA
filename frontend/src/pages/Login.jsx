@@ -94,7 +94,18 @@ export default function Login({ alIrARegistro }) {
       <div className="flex-1 lg:max-w-md xl:max-w-lg w-full flex flex-col justify-between p-6 sm:p-10 lg:p-12 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xl lg:shadow-none z-10">
         <div>
           <div className="mb-8 flex items-center justify-between">
-            <Logo />
+            <div className="flex items-center gap-3">
+              <Logo className="h-10 w-auto" />
+              <div className="border-l border-slate-300 dark:border-slate-700 pl-3">
+                <div className="text-xl font-black tracking-tight leading-none">
+                  <span className="text-sky-600 dark:text-sky-400">Reserva</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-bold">UPLA</span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-none mt-1">
+                  Universidad Peruana Los Andes
+                </p>
+              </div>
+            </div>
             <button
               type="button"
               onClick={alternarTema}
