@@ -14,6 +14,7 @@ export function useAmbientes() {
   const [tipo, setTipo] = useState('LaboratorioComputo');
   const [capacidad, setCapacidad] = useState(30);
   const [ubicacion, setUbicacion] = useState('');
+  const [responsableId, setResponsableId] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [erroresForm, setErroresForm] = useState({});
 
@@ -38,6 +39,7 @@ export function useAmbientes() {
     setTipo('LaboratorioComputo');
     setCapacidad(30);
     setUbicacion('');
+    setResponsableId('');
     setErroresForm({});
     setModalAbierto(true);
   };
@@ -79,6 +81,7 @@ export function useAmbientes() {
       tipo,
       capacidad: capNum,
       ubicacion: ubicacionLimpia,
+      responsableId: responsableId || null,
     });
 
     if (res.exito) {
@@ -106,6 +109,8 @@ export function useAmbientes() {
     setCapacidad,
     ubicacion,
     setUbicacion,
+    responsableId,
+    setResponsableId,
     erroresForm,
     guardando,
     guardarAmbiente,

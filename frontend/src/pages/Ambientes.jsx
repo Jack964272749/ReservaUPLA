@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DoorOpen, Plus, Users, MapPin, CalendarPlus, RefreshCw } from 'lucide-react';
 import TableList from '../components/TableList';
 import Button from '../components/Button';
@@ -9,6 +9,7 @@ import SelectInput from '../components/SelectInput';
 import FondoModulo from '../components/FondoModulo';
 import { useAmbientes } from '../hooks/useAmbientes';
 import { useAuth } from '../hooks/useAuth';
+import { usuarioService } from '../services/usuarioService';
 
 // Trazabilidad: RF-02 · Nielsen H1, H4, H5, H7, H8 · Shneiderman S1..S5 · ISO 9241-11
 export default function Ambientes({ alReservarAmbiente }) {
@@ -31,10 +32,35 @@ export default function Ambientes({ alReservarAmbiente }) {
     setCapacidad,
     ubicacion,
     setUbicacion,
+    responsableId,
+    setResponsableId,
     erroresForm,
     guardando,
     guardarAmbiente,
   } = useAmbientes();
+
+  const [responsables, setResponsables] = useState([]);
+
+  useEffect(() => {
+    if (rol === 'Administrador') {
+      usuarioService.listar().then((res) => {
+        if (res.exito && Array.isArray(res.datos)) {
+          const soloResp = res.datos.filter(
+            (u) => (u.rol === 'Responsable' || u.rol === 2) && (u.activo ?? true)
+          );
+          setResponsables(soloResp);
+        }
+      });
+    }
+  }, [rol]);
+
+  const opcionesResponsables = [
+    { value: '', label: 'Sin asignar (opcional)' },
+    ...responsables.map((r) => ({
+      value: r.id,
+      label: `${r.nombre} (${r.correo})`,
+    })),
+  ];
 
   const opcionesTipos = [
     { value: 'LaboratorioComputo', label: 'Laboratorio de Cómputo' },
@@ -68,6 +94,14 @@ export default function Ambientes({ alReservarAmbiente }) {
         <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300">
           <MapPin className="w-3.5 h-3.5 text-slate-400" />
           {amb.ubicacion}
+        </span>
+      ),
+    },
+    {
+      header: 'Responsable',
+      render: (amb) => (
+        <span className="text-xs text-slate-700 dark:text-slate-300">
+          {amb.responsableNombre || 'Sin asignar'}
         </span>
       ),
     },
@@ -233,6 +267,14 @@ export default function Ambientes({ alReservarAmbiente }) {
             onChange={(e) => setUbicacion(e.target.value)}
             error={erroresForm.ubicacion}
             obligatorio
+          />
+          <SelectInput
+            id="ambiente-responsable"
+            label="Responsable del ambiente"
+            value={responsableId}
+            onChange={(e) => setResponsableId(e.target.value)}
+            options={opcionesResponsables}
+            ayuda="Usuario con rol Responsable que autorizará las solicitudes de este ambiente."
           />
         </form>
       </ModalConfirmacion>
