@@ -11,6 +11,9 @@ public static class Mensajes
     public const string ClaveRequerida = "La contraseña es obligatoria (RV-03).";
     public const string ClaveLongitud = "La contraseña debe tener entre 8 y 64 caracteres (RV-03).";
     public const string CredencialesInvalidas = "Credenciales incorrectas. Verifique correo y contraseña (E-08).";
+    public const string UsuarioNoExiste = "El usuario especificado no existe.";
+    public const string NoSePuedeDesactivarPropiaCuenta = "No puede desactivar su propia cuenta de administrador en uso.";
+    public const string RolInvalido = "El rol especificado no es válido.";
 
     public const string NombreAmbienteRequerido = "El nombre del ambiente es obligatorio (RV-04).";
     public const string NombreAmbienteLongitud = "El nombre del ambiente debe tener entre 3 y 100 caracteres (RV-04).";

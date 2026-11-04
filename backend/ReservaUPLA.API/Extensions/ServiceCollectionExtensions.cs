@@ -17,6 +17,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUsuarioService, UsuarioService>();
         services.AddScoped<IAmbienteService, AmbienteService>();
         services.AddScoped<IReservaService, ReservaService>();
         services.AddScoped<IDashboardService, DashboardService>();
