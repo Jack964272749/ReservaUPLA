@@ -13,9 +13,10 @@ public static class Mensajes
     public const string CredencialesInvalidas = "Credenciales incorrectas. Verifique correo y contraseña (E-08).";
 
     public const string NombreAmbienteRequerido = "El nombre del ambiente es obligatorio (RV-04).";
-    public const string NombreAmbienteLongitud = "El nombre del ambiente no puede exceder 100 caracteres (RV-04).";
+    public const string NombreAmbienteLongitud = "El nombre del ambiente debe tener entre 3 y 100 caracteres (RV-04).";
     public const string CapacidadInvalida = "La capacidad debe ser un número entero entre 1 y 1000 personas (RV-06, E-11).";
     public const string UbicacionRequerida = "La ubicación del ambiente es obligatoria (RV-07).";
+    public const string UbicacionLongitud = "La ubicación del ambiente no puede exceder 100 caracteres (RV-07).";
     public const string ResponsableNoExiste = "El responsable asignado no existe.";
     public const string UsuarioNoEsResponsable = "El usuario asignado debe tener el rol Responsable y encontrarse activo.";
     public const string AmbienteNoDisponible = "El ambiente seleccionado no se encuentra en estado Disponible (RV-13).";

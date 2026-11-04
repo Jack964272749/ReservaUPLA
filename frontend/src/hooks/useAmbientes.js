@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { ambienteService } from '../services/ambienteService';
 import { normalizarTexto } from '../utils/normalizar';
+import { validarAmbiente } from '../validation/validaciones';
 
 // Trazabilidad: RF-02 · Nielsen H1, H5, H9 · ISO 9241-11
 export function useAmbientes() {
@@ -53,25 +54,21 @@ export function useAmbientes() {
     if (e) e.preventDefault();
     if (guardando) return;
 
-    const errs = {};
+    const validacion = validarAmbiente({
+      nombre,
+      tipo,
+      capacidad,
+      ubicacion,
+    });
+
+    if (!validacion.esValido) {
+      setErroresForm(validacion.errores);
+      return;
+    }
     const nombreLimpio = normalizarTexto(nombre);
     const ubicacionLimpia = normalizarTexto(ubicacion);
 
-    if (!nombreLimpio) {
-      errs.nombre = 'El nombre del ambiente es obligatorio.';
-    }
     const capNum = Number(capacidad);
-    if (isNaN(capNum) || capNum < 1 || capNum > 1000) {
-      errs.capacidad = 'La capacidad debe estar entre 1 y 1000 personas.';
-    }
-    if (!ubicacionLimpia) {
-      errs.ubicacion = 'La ubicación o pabellón es obligatoria.';
-    }
-
-    if (Object.keys(errs).length > 0) {
-      setErroresForm(errs);
-      return;
-    }
 
     setGuardando(true);
     setErroresForm({});

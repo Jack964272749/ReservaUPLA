@@ -234,6 +234,7 @@ export default function Ambientes({ alReservarAmbiente }) {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             error={erroresForm.nombre}
+            maxLength={100}
             obligatorio
             autoFocus
           />
@@ -266,6 +267,7 @@ export default function Ambientes({ alReservarAmbiente }) {
             value={ubicacion}
             onChange={(e) => setUbicacion(e.target.value)}
             error={erroresForm.ubicacion}
+            maxLength={100}
             obligatorio
           />
           <SelectInput

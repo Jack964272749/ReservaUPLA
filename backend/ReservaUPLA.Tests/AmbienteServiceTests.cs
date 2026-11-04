@@ -97,4 +97,37 @@ public class AmbienteServiceTests
         Assert.Equal(idResponsable, resultado.ResponsableId);
         _mockAmbienteRepo.Verify(r => r.AgregarAsync(It.IsAny<Ambiente>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task CrearAsync_UbicacionCon101Caracteres_LanzaDomainException()
+    {
+        var ubicacion101 = new string('A', 101);
+        var dto = new CrearAmbienteDto(
+            "Laboratorio 204",
+            "LaboratorioComputo",
+            25,
+            ubicacion101,
+            null);
+
+        var ex = await Assert.ThrowsAsync<DomainException>(() =>
+            _ambienteService.CrearAsync(dto));
+
+        Assert.Equal(Mensajes.UbicacionLongitud, ex.Message);
+    }
+
+    [Fact]
+    public async Task CrearAsync_NombreMenorA3Caracteres_LanzaDomainException()
+    {
+        var dto = new CrearAmbienteDto(
+            "AB",
+            "LaboratorioComputo",
+            25,
+            "Pabellón A",
+            null);
+
+        var ex = await Assert.ThrowsAsync<DomainException>(() =>
+            _ambienteService.CrearAsync(dto));
+
+        Assert.Equal(Mensajes.NombreAmbienteLongitud, ex.Message);
+    }
 }

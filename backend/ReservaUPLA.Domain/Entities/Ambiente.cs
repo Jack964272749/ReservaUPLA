@@ -33,7 +33,7 @@ public class Ambiente
 
         if (string.IsNullOrWhiteSpace(nom))
             throw new DomainException(Mensajes.NombreAmbienteRequerido);
-        if (nom.Length > ReglasAmbiente.MaxLongitudNombre)
+        if (nom.Length < ReglasAmbiente.MinLongitudNombre || nom.Length > ReglasAmbiente.MaxLongitudNombre)
             throw new DomainException(Mensajes.NombreAmbienteLongitud);
 
         if (capacidad < ReglasAmbiente.MinCapacidad || capacidad > ReglasAmbiente.MaxCapacidad)
@@ -41,6 +41,8 @@ public class Ambiente
 
         if (string.IsNullOrWhiteSpace(ubi))
             throw new DomainException(Mensajes.UbicacionRequerida);
+        if (ubi.Length > ReglasAmbiente.MaxLongitudUbicacion)
+            throw new DomainException(Mensajes.UbicacionLongitud);
 
         return new Ambiente
         {

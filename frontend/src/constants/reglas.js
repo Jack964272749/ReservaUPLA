@@ -10,6 +10,7 @@ export const REGLAS = {
     REGEX_CORREO: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
   },
   AMBIENTE: {
+    MIN_NOMBRE: 3,
     MAX_NOMBRE: 100,
     MAX_UBICACION: 100,
     MIN_CAPACIDAD: 1,
