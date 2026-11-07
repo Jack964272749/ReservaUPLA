@@ -6,6 +6,13 @@ Desarrollado bajo **Clean Architecture** en **.NET 8 Web API** y **React + Vite 
 
 ---
 
+## Demo en Línea (Frontend)
+
+El frontend de la aplicación se encuentra publicado en GitHub Pages:  
+🌐 **[https://jack964272749.github.io/ReservaUPLA/](https://jack964272749.github.io/ReservaUPLA/)**
+
+---
+
 ## Requisitos del Sistema
 
 - **.NET SDK**: Versión 8.0 o superior (`dotnet --version`)
