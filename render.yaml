@@ -2,11 +2,15 @@ services:
   - type: web
     name: reservaupla-api
     runtime: docker
-    dockerfilePath: backend/Dockerfile
+    dockerfilePath: Dockerfile
     dockerContext: backend
     plan: free
     region: oregon
     envVars:
+      - key: PORT
+        value: 8080
+      - key: ASPNETCORE_HTTP_PORTS
+        value: 8080
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
       - key: DATABASE_URL
