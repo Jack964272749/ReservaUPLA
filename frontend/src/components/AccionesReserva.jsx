@@ -16,13 +16,13 @@ export default function AccionesReserva({ reserva, rol, onVer, onAccion }) {
   // Color de identidad visual diferenciado por rol para el botón "Ver"
   const estiloVer = ESTILOS_VER_POR_ROL[rol] || ESTILOS_VER_POR_ROL.Solicitante;
 
-  // Cuadrícula fija para garantizar que todos los botones "Ver" queden en la misma línea vertical sin zig-zag
+  // Trazabilidad: Responsivo (< sm: flex-wrap a la izquierda sin ancho fijo; sm+: cuadrícula fija alineada)
   const contenedorClases =
     rol === 'Administrador'
-      ? 'flex items-center justify-start gap-2 w-[292px] mx-auto'
+      ? 'flex flex-wrap items-center justify-start gap-1.5 sm:gap-2 w-full sm:w-[292px] sm:mx-auto'
       : rol === 'Solicitante'
-      ? 'flex items-center justify-start gap-2 w-[196px] mx-auto'
-      : 'flex items-center justify-center gap-2 w-auto mx-auto';
+      ? 'flex flex-wrap items-center justify-start gap-1.5 sm:gap-2 w-full sm:w-[196px] sm:mx-auto'
+      : 'flex flex-wrap items-center justify-start sm:justify-center gap-1.5 sm:gap-2 w-full sm:w-auto sm:mx-auto';
 
   return (
     <div className={contenedorClases}>
