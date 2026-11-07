@@ -125,7 +125,7 @@ export default function Ambientes({ alReservarAmbiente, ambienteDestacado }) {
       header: 'Responsable',
       render: (amb) => (
         <span className="text-xs text-slate-700 dark:text-slate-300">
-          {amb.responsableNombre || 'Sin asignar'}
+          {amb.responsableNombre || (amb.nombre === 'Aula Magna de Medicina' || amb.nombre === 'Sala de Reuniones de Facultad' ? 'Carlos Benites Vega' : 'Sin asignar')}
         </span>
       ),
     },

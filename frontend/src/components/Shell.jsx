@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import Navigation from './Navigation';
+import LienzoIgloo from './LienzoIgloo';
 import { useAuth } from '../hooks/useAuth';
 import { obtenerRuta } from '../utils/rutas';
 
@@ -79,6 +80,7 @@ export default function Shell({ activeTab, setActiveTab, children }) {
           style={{ backgroundImage: `url("${FONDOS[activeTab] || FONDOS.reservas}")` }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#f4f6fa]/75 via-[#f4f6fa]/55 to-sky-100/50 dark:from-slate-950/90 dark:via-slate-950/80 dark:to-slate-950/90 transition-colors" />
+        <LienzoIgloo className="absolute inset-0 z-10 pointer-events-none" />
       </div>
 
       <div className="lg:pl-64 xl:pl-72 flex flex-col min-h-screen">

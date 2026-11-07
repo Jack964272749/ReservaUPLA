@@ -68,6 +68,14 @@ public class Usuario
         Act_Usuario = activo;
     }
 
+    // Trazabilidad: Seguridad · Actualización segura de credencial hasheada
+    public void ActualizarClave(string nuevoHash)
+    {
+        if (string.IsNullOrWhiteSpace(nuevoHash))
+            throw new DomainException(Mensajes.ClaveRequerida);
+        Has_Usuario = nuevoHash;
+    }
+
     // Trazabilidad: RF-01 · Activación y desactivación de cuenta
     public void CambiarEstado(bool activo)
     {

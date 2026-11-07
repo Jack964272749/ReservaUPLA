@@ -55,4 +55,9 @@ public class Ambiente
             Idr_Ambiente = idResponsable
         };
     }
+
+    public void AsignarResponsable(Guid? idResponsable)
+    {
+        Idr_Ambiente = idResponsable;
+    }
 }

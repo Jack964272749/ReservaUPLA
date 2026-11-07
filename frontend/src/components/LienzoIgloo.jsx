@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 // Trazabilidad: Nielsen H8 (Estética y diseño) · ISO 9241-110 · Experiencia interactiva inspirada en igloo.inc
-// Simulación de partículas cristalinas y filamentos luminosos en Canvas 2D a 60 FPS con física reactiva al cursor.
+// Simulación de partículas cristalinas, destellos en diamante y filamentos luminosos en Canvas 2D a 60 FPS con alta visibilidad y densidad.
 export default function LienzoIgloo({ className = '' }) {
   const canvasRef = useRef(null);
 
@@ -12,33 +12,38 @@ export default function LienzoIgloo({ className = '' }) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Detectar si el usuario prefiere movimiento reducido (accesibilidad)
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mediaQuery.matches) return;
-
     let animId;
     let ancho = 0;
     let alto = 0;
     let dpr = 1;
 
-    // Posición del mouse en coordenadas locales
+    // Posición del cursor en coordenadas locales del canvas
     const mouse = {
       x: -1000,
       y: -1000,
-      radio: 140,
+      radio: 180,
       activo: false,
     };
 
-    // Colección de partículas
     let particulas = [];
-    const MAX_PARTICULAS = 75;
-    const DISTANCIA_CONEXION = 110;
+    const MAX_PARTICULAS = 145; // Mayor cantidad de nodos (~60% más densidad)
+    const DISTANCIA_CONEXION = 145; // Mayor alcance de filamentos
 
-    const paleta = [
-      { r: 56, g: 189, b: 248 },  // Sky 400 (celeste hielo)
-      { r: 14, g: 165, b: 233 },  // Sky 500 (azul institucional UPLA)
-      { r: 255, g: 255, b: 255 }, // Blanco escarcha
-      { r: 99, g: 102, b: 241 },  // Indigo cristalino
+    // Paletas adaptativas según modo claro / oscuro
+    const paletaOscura = [
+      { r: 56, g: 189, b: 248 },   // Cyan / Sky 400
+      { r: 14, g: 165, b: 233 },   // Sky 500
+      { r: 255, g: 255, b: 255 },  // Blanco diamante
+      { r: 129, g: 140, b: 248 },  // Indigo cristalino
+      { r: 165, g: 243, b: 252 },  // Cyan glacial claro
+    ];
+
+    const paletaClara = [
+      { r: 2, g: 132, b: 199 },   // Sky 600
+      { r: 14, g: 165, b: 233 },  // Sky 500
+      { r: 3, g: 105, b: 161 },   // Sky 700
+      { r: 79, g: 70, b: 229 },   // Indigo 600
+      { r: 14, g: 116, b: 144 },  // Cyan 700
     ];
 
     class Particula {
@@ -49,42 +54,49 @@ export default function LienzoIgloo({ className = '' }) {
       reset(w, h, aleatorio = false) {
         this.x = aleatorio ? Math.random() * w : (Math.random() > 0.5 ? 0 : w);
         this.y = aleatorio ? Math.random() * h : Math.random() * h;
-        this.vx = (Math.random() - 0.5) * 0.45;
-        this.vy = (Math.random() - 0.5) * 0.45;
-        this.radioBase = Math.random() * 2 + 1;
+        this.vx = (Math.random() - 0.5) * 0.65;
+        this.vy = (Math.random() - 0.5) * 0.65;
+        // Tamaño significativamente mayor (de 3.0px a 6.2px)
+        this.radioBase = Math.random() * 3.2 + 3.0;
         this.radio = this.radioBase;
-        this.color = paleta[Math.floor(Math.random() * paleta.length)];
-        this.alfaBase = Math.random() * 0.5 + 0.35;
+        this.esEstrella = Math.random() > 0.58; // ~42% son cristales con destello de 4 puntas
+        this.colorIndex = Math.floor(Math.random() * paletaOscura.length);
+        this.alfaBase = Math.random() * 0.40 + 0.55;
         this.alfa = this.alfaBase;
         this.pulso = Math.random() * Math.PI * 2;
-        this.velocidadPulso = Math.random() * 0.02 + 0.01;
+        this.velocidadPulso = Math.random() * 0.03 + 0.015;
+        this.rotacion = Math.random() * Math.PI;
+        this.velocidadRotacion = (Math.random() - 0.5) * 0.025;
       }
 
       actualizar(w, h) {
-        // Movimiento ambiental
         this.x += this.vx;
         this.y += this.vy;
 
-        // Rebote en bordes suaves
-        if (this.x < 0 || this.x > w) this.vx *= -1;
-        if (this.y < 0 || this.y > h) this.vy *= -1;
+        // Rebote en bordes con margen suave
+        if (this.x < 0) { this.x = 0; this.vx *= -1; }
+        if (this.x > w) { this.x = w; this.vx *= -1; }
+        if (this.y < 0) { this.y = 0; this.vy *= -1; }
+        if (this.y > h) { this.y = h; this.vy *= -1; }
 
-        // Pulso suave de brillo
         this.pulso += this.velocidadPulso;
-        this.alfa = this.alfaBase + Math.sin(this.pulso) * 0.15;
+        this.alfa = this.alfaBase + Math.sin(this.pulso) * 0.22;
+        this.rotacion += this.velocidadRotacion;
 
-        // Física interactiva tipo igloo.inc al acercar el cursor
+        // Física reactiva con el cursor (estilo Igloo Inc.)
         if (mouse.activo) {
           const dx = this.x - mouse.x;
           const dy = this.y - mouse.y;
           const dist = Math.hypot(dx, dy);
 
           if (dist < mouse.radio && dist > 0) {
-            const fuerza = (1 - dist / mouse.radio) * 2.2;
+            const factor = (1 - dist / mouse.radio);
+            const fuerza = factor * 3.2;
             const angulo = Math.atan2(dy, dx);
             this.x += Math.cos(angulo) * fuerza;
             this.y += Math.sin(angulo) * fuerza;
-            this.radio = this.radioBase * (1 + fuerza * 0.5);
+            this.radio = this.radioBase * (1 + factor * 0.9);
+            this.alfa = Math.min(1, this.alfa + factor * 0.45);
           } else {
             this.radio = this.radioBase;
           }
@@ -93,41 +105,88 @@ export default function LienzoIgloo({ className = '' }) {
         }
       }
 
-      dibujar(context) {
-        const { r, g, b } = this.color;
-        context.beginPath();
-        context.arc(this.x, this.y, this.radio, 0, Math.PI * 2);
-        context.fillStyle = `rgba(${r}, ${g}, ${b}, ${Math.max(0.1, this.alfa)})`;
-        context.shadowColor = `rgba(${r}, ${g}, ${b}, 0.8)`;
-        context.shadowBlur = this.radio * 3;
-        context.fill();
-        context.shadowBlur = 0;
+      dibujar(context, esOscuro) {
+        const paleta = esOscuro ? paletaOscura : paletaClara;
+        const { r, g, b } = paleta[this.colorIndex];
+        const opacidad = Math.min(1, Math.max(0.28, this.alfa * (esOscuro ? 1 : 0.98)));
+
+        context.save();
+        context.translate(this.x, this.y);
+
+        if (this.esEstrella) {
+          // Destello cristalino en 4 puntas de mayor tamaño y resplandor
+          context.rotate(this.rotacion);
+          context.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacidad})`;
+          context.shadowColor = `rgba(${r}, ${g}, ${b}, ${esOscuro ? 0.95 : 0.75})`;
+          context.shadowBlur = this.radio * (esOscuro ? 5 : 3.5);
+
+          const tam = this.radio * 2.8;
+          context.beginPath();
+          context.moveTo(0, -tam);
+          context.lineTo(tam * 0.28, -tam * 0.28);
+          context.lineTo(tam, 0);
+          context.lineTo(tam * 0.28, tam * 0.28);
+          context.lineTo(0, tam);
+          context.lineTo(-tam * 0.28, tam * 0.28);
+          context.lineTo(-tam, 0);
+          context.lineTo(-tam * 0.28, -tam * 0.28);
+          context.closePath();
+          context.fill();
+
+          // Núcleo blanco brillante en el centro del cristal
+          context.beginPath();
+          context.arc(0, 0, this.radio * 0.5, 0, Math.PI * 2);
+          context.fillStyle = esOscuro ? 'rgba(255, 255, 255, 0.95)' : 'rgba(240, 249, 255, 0.95)';
+          context.fill();
+        } else {
+          // Esfera cristalina luminosa con resplandor y núcleo brillante
+          context.beginPath();
+          context.arc(0, 0, this.radio, 0, Math.PI * 2);
+          context.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacidad})`;
+          context.shadowColor = `rgba(${r}, ${g}, ${b}, ${esOscuro ? 0.9 : 0.7})`;
+          context.shadowBlur = this.radio * (esOscuro ? 4 : 2.5);
+          context.fill();
+
+          // Núcleo brillante central para definición cristalina
+          context.beginPath();
+          context.arc(0, 0, this.radio * 0.45, 0, Math.PI * 2);
+          context.fillStyle = esOscuro ? 'rgba(255, 255, 255, 0.9)' : `rgba(224, 242, 254, 0.95)`;
+          context.fill();
+        }
+
+        context.restore();
       }
     }
 
-    const inicializar = () => {
-      const rect = canvas.getBoundingClientRect();
+    const inicializar = (w, h) => {
+      if (!w || !h) return;
       dpr = window.devicePixelRatio || 1;
-      ancho = rect.width;
-      alto = rect.height;
+      ancho = w;
+      alto = h;
 
       canvas.width = Math.floor(ancho * dpr);
       canvas.height = Math.floor(alto * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       particulas = [];
-      const cantidad = Math.min(MAX_PARTICULAS, Math.floor((ancho * alto) / 9000));
+      const cantidad = Math.min(MAX_PARTICULAS, Math.max(50, Math.floor((ancho * alto) / 5000)));
       for (let i = 0; i < cantidad; i++) {
         particulas.push(new Particula(ancho, alto));
       }
     };
 
     const animar = () => {
+      if (ancho <= 0 || alto <= 0) {
+        animId = requestAnimationFrame(animar);
+        return;
+      }
+
+      const esOscuro = document.documentElement.classList.contains('dark');
       ctx.clearRect(0, 0, ancho, alto);
 
-      // Efecto de aura de luz difusa donde está el cursor (estilo igloo iceberg glow)
+      // 1. Aura resplandeciente interactiva donde está el cursor (estilo Iceberg Glow)
       if (mouse.activo) {
-        const resplandor = ctx.createRadialGradient(
+        const gradiente = ctx.createRadialGradient(
           mouse.x,
           mouse.y,
           0,
@@ -135,17 +194,25 @@ export default function LienzoIgloo({ className = '' }) {
           mouse.y,
           mouse.radio * 1.3
         );
-        resplandor.addColorStop(0, 'rgba(56, 189, 248, 0.12)');
-        resplandor.addColorStop(0.5, 'rgba(14, 165, 233, 0.05)');
-        resplandor.addColorStop(1, 'rgba(6, 20, 38, 0)');
+        if (esOscuro) {
+          gradiente.addColorStop(0, 'rgba(56, 189, 248, 0.32)');
+          gradiente.addColorStop(0.35, 'rgba(14, 165, 233, 0.15)');
+          gradiente.addColorStop(0.7, 'rgba(2, 132, 199, 0.05)');
+          gradiente.addColorStop(1, 'rgba(6, 20, 38, 0)');
+        } else {
+          gradiente.addColorStop(0, 'rgba(14, 165, 233, 0.28)');
+          gradiente.addColorStop(0.35, 'rgba(2, 132, 199, 0.13)');
+          gradiente.addColorStop(0.7, 'rgba(3, 105, 161, 0.04)');
+          gradiente.addColorStop(1, 'rgba(240, 249, 255, 0)');
+        }
 
-        ctx.fillStyle = resplandor;
+        ctx.fillStyle = gradiente;
         ctx.beginPath();
         ctx.arc(mouse.x, mouse.y, mouse.radio * 1.3, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Dibujar filamentos cristalinos entre partículas cercanas
+      // 2. Dibujar filamentos cristalinos entre partículas cercanas
       for (let i = 0; i < particulas.length; i++) {
         const p1 = particulas[i];
         for (let j = i + 1; j < particulas.length; j++) {
@@ -155,38 +222,68 @@ export default function LienzoIgloo({ className = '' }) {
           const dist = Math.hypot(dx, dy);
 
           if (dist < DISTANCIA_CONEXION) {
-            const opacidad = (1 - dist / DISTANCIA_CONEXION) * 0.28;
+            const factor = 1 - dist / DISTANCIA_CONEXION;
+            const opacidad = factor * (esOscuro ? 0.44 : 0.38);
+
+            // Si ambos están cerca del cursor, la línea brilla más
+            const cercaCursor = mouse.activo &&
+              (Math.hypot(p1.x - mouse.x, p1.y - mouse.y) < mouse.radio ||
+               Math.hypot(p2.x - mouse.x, p2.y - mouse.y) < mouse.radio);
+
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(56, 189, 248, ${opacidad})`;
-            ctx.lineWidth = 0.8;
+            if (esOscuro) {
+              ctx.strokeStyle = cercaCursor
+                ? `rgba(165, 243, 252, ${Math.min(0.85, opacidad * 2.0)})`
+                : `rgba(56, 189, 248, ${opacidad})`;
+            } else {
+              ctx.strokeStyle = cercaCursor
+                ? `rgba(3, 105, 161, ${Math.min(0.80, opacidad * 2.0)})`
+                : `rgba(14, 165, 233, ${opacidad})`;
+            }
+            ctx.lineWidth = cercaCursor ? 1.6 : 1.1;
             ctx.stroke();
           }
         }
       }
 
-      // Actualizar y dibujar cada cristal
+      // 3. Actualizar y dibujar cada cristal
       for (let i = 0; i < particulas.length; i++) {
         particulas[i].actualizar(ancho, alto);
-        particulas[i].dibujar(ctx);
+        particulas[i].dibujar(ctx, esOscuro);
       }
 
       animId = requestAnimationFrame(animar);
     };
 
-    inicializar();
+    // Usar ResizeObserver para medir el tamaño exacto del contenedor en cuanto se renderice
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const cr = entry.contentRect;
+        if (cr.width > 0 && cr.height > 0) {
+          inicializar(cr.width, cr.height);
+        }
+      }
+    });
+
+    const rectInicial = canvas.getBoundingClientRect();
+    if (rectInicial.width > 0 && rectInicial.height > 0) {
+      inicializar(rectInicial.width, rectInicial.height);
+    }
+    resizeObserver.observe(canvas);
+
     animId = requestAnimationFrame(animar);
 
-    // Eventos de mouse interactivo (escuchados sobre el contenedor o ventana)
+    // Detección del mouse sobre la pantalla
     const manejarMouseMove = (e) => {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
-        mouse.x = x;
-        mouse.y = y;
+      if (x >= -50 && x <= rect.width + 50 && y >= -50 && y <= rect.height + 50) {
+        mouse.x = Math.max(0, Math.min(rect.width, x));
+        mouse.y = Math.max(0, Math.min(rect.height, y));
         mouse.activo = true;
       } else {
         mouse.activo = false;
@@ -197,19 +294,14 @@ export default function LienzoIgloo({ className = '' }) {
       mouse.activo = false;
     };
 
-    const manejarResize = () => {
-      inicializar();
-    };
-
     window.addEventListener('mousemove', manejarMouseMove);
-    window.addEventListener('resize', manejarResize);
-    canvas.addEventListener('mouseleave', manejarMouseLeave);
+    window.addEventListener('blur', manejarMouseLeave);
 
     return () => {
       cancelAnimationFrame(animId);
+      resizeObserver.disconnect();
       window.removeEventListener('mousemove', manejarMouseMove);
-      window.removeEventListener('resize', manejarResize);
-      canvas.removeEventListener('mouseleave', manejarMouseLeave);
+      window.removeEventListener('blur', manejarMouseLeave);
     };
   }, []);
 
@@ -217,7 +309,14 @@ export default function LienzoIgloo({ className = '' }) {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className={`w-full h-full pointer-events-none ${className}`}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+      }}
+      className={className}
     />
   );
 }

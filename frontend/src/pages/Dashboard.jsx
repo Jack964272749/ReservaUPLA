@@ -17,6 +17,7 @@ import CardIndicador from '../components/CardIndicador';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import FondoModulo from '../components/FondoModulo';
+import LienzoIgloo from '../components/LienzoIgloo';
 import { useDashboard } from '../hooks/useDashboard';
 
 // Trazabilidad: RF-08 · Nielsen H1 (Visibilidad del estado del sistema), H8 · Shneiderman S1, S3
@@ -79,7 +80,8 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva, alIrAAmbie
       imagen="/backgrounds/bg_dashboard.jpg"
       className="rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl p-6 sm:p-8 lg:p-10 transition-all"
     >
-      <div className="relative z-10 space-y-6">
+      <LienzoIgloo className="absolute inset-0 z-10 pointer-events-none" />
+      <div className="relative z-20 space-y-6">
         {/* Cabecera del Dashboard */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-slate-300/70 dark:border-slate-800">
           <div>
@@ -317,8 +319,9 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva, alIrAAmbie
                         className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 transition-colors shadow-2xs space-y-1.5"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-extrabold text-sky-700 dark:text-sky-300 font-mono">
-                            {r.horaInicio} - {r.horaFin}
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-800 dark:text-indigo-300 text-xs font-mono font-bold shadow-2xs">
+                            <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+                            <span>{r.horaInicio} – {r.horaFin}</span>
                           </span>
                           {badgeEstado(r.estado)}
                         </div>

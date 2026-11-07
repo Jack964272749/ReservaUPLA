@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
   CalendarDays,
+  Calendar,
+  Building2,
+  User,
   Filter,
   CheckCircle2,
   XCircle,
@@ -119,13 +122,14 @@ export default function Reservas({ alIrANuevaReserva, estadoInicial }) {
     {
       header: 'Fecha y Horario',
       render: (r) => (
-        <div className="flex flex-col items-start gap-1">
-          <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
-            {r.fecha}
+        <div className="flex flex-col items-start gap-1.5">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-800 dark:text-sky-300 font-semibold text-xs border border-sky-200/90 dark:border-sky-800 shadow-2xs">
+            <Calendar className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" aria-hidden="true" />
+            <span>{r.fecha}</span>
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-sky-100/70 dark:bg-sky-950/50 text-sky-900 dark:text-sky-300 font-mono text-xs font-semibold border border-sky-200 dark:border-sky-800">
-            <Clock className="w-3.5 h-3.5 text-sky-700 dark:text-sky-400" aria-hidden="true" />
-            {r.horaInicio} – {r.horaFin}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-800 dark:text-indigo-300 font-mono font-semibold text-xs border border-indigo-200/90 dark:border-indigo-800 shadow-2xs">
+            <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+            <span>{r.horaInicio} – {r.horaFin}</span>
           </span>
         </div>
       ),
@@ -145,7 +149,7 @@ export default function Reservas({ alIrANuevaReserva, estadoInicial }) {
     },
     {
       header: 'Acciones',
-      className: 'text-right',
+      className: 'text-center',
       render: (r) => (
         <AccionesReserva
           reserva={r}
@@ -357,9 +361,15 @@ export default function Reservas({ alIrANuevaReserva, estadoInicial }) {
               </span>
               {badgeEstado(r.estado)}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-xs text-slate-800 dark:text-slate-200">📅 {r.fecha}</span>
-              <span className="text-xs text-sky-800 dark:text-sky-300 font-mono font-medium">⏰ {r.horaInicio} – {r.horaFin}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 font-semibold text-xs border border-sky-200 dark:border-sky-800">
+                <Calendar className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" aria-hidden="true" />
+                <span>{r.fecha}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 font-mono font-semibold text-xs border border-indigo-200 dark:border-indigo-800">
+                <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+                <span>{r.horaInicio} – {r.horaFin}</span>
+              </span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400">
               👤 Solicitado por: <strong>{r.solicitanteNombre}</strong>
@@ -415,20 +425,73 @@ export default function Reservas({ alIrANuevaReserva, estadoInicial }) {
           cancelText="Volver"
           variant="primary"
         >
-          <div className="space-y-2.5 text-xs text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600 font-medium">
-            <p><strong>ID:</strong> <span className="font-mono">{reservaDetalle.id}</span></p>
-            <p><strong>Ambiente:</strong> {reservaDetalle.ambienteNombre}</p>
-            <p><strong>Fecha programada:</strong> {reservaDetalle.fecha}</p>
-            <p><strong>Horario:</strong> <span className="font-mono font-semibold">{reservaDetalle.horaInicio} – {reservaDetalle.horaFin}</span></p>
-            <p><strong>Estado:</strong> {badgeEstado(reservaDetalle.estado)}</p>
-            <p><strong>Solicitante:</strong> {reservaDetalle.solicitanteNombre} ({reservaDetalle.solicitanteCorreo})</p>
-            <p><strong>Motivo:</strong> {reservaDetalle.motivo}</p>
-            {reservaDetalle.motivoRechazo && (
-              <p className="text-rose-700 dark:text-rose-400 font-semibold">
-                <strong>Motivo de rechazo:</strong> {reservaDetalle.motivoRechazo}
-              </p>
-            )}
-            <p className="text-slate-500 dark:text-slate-400"><strong>Fecha de registro:</strong> {new Date(reservaDetalle.fechaRegistro).toLocaleString()}</p>
+          <div className="space-y-3.5 text-xs bg-white dark:bg-slate-800/90 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-sm font-medium">
+            {/* Header del detalle: Ambiente y Estado */}
+            <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                  <Building2 className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Ambiente institucional</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{reservaDetalle.ambienteNombre}</p>
+                </div>
+              </div>
+              <div>{badgeEstado(reservaDetalle.estado)}</div>
+            </div>
+
+            {/* Fecha y Horario destacados en colores diferenciados */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-sky-50 dark:bg-sky-950/50 border border-sky-200/90 dark:border-sky-800 shadow-2xs">
+                <div className="p-2 rounded-lg bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300">
+                  <Calendar className="w-4 h-4" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400">Fecha programada</p>
+                  <p className="text-xs font-bold text-sky-950 dark:text-sky-100">{reservaDetalle.fecha}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/90 dark:border-indigo-800 shadow-2xs">
+                <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300">
+                  <Clock className="w-4 h-4" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">Horario reservado</p>
+                  <p className="text-xs font-bold font-mono text-indigo-950 dark:text-indigo-100">{reservaDetalle.horaInicio} – {reservaDetalle.horaFin}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Solicitante y Motivo */}
+            <div className="space-y-2 pt-1 text-slate-700 dark:text-slate-300">
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200/80 dark:border-slate-700">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Solicitado por</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 mt-0.5">
+                  <User className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
+                  <span>{reservaDetalle.solicitanteNombre}</span>
+                  <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">({reservaDetalle.solicitanteCorreo})</span>
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200/80 dark:border-slate-700">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Motivo de la solicitud</p>
+                <p className="text-xs text-slate-800 dark:text-slate-200 mt-0.5">{reservaDetalle.motivo}</p>
+              </div>
+
+              {reservaDetalle.motivoRechazo && (
+                <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Motivo de rechazo administrativo</p>
+                  <p className="text-xs font-semibold mt-0.5">{reservaDetalle.motivoRechazo}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Metadata técnica en pie */}
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400 dark:text-slate-500 font-mono">
+              <span>ID: {reservaDetalle.id.substring(0, 18)}…</span>
+              <span>Registro: {new Date(reservaDetalle.fechaRegistro).toLocaleString()}</span>
+            </div>
           </div>
         </ModalConfirmacion>
       )}

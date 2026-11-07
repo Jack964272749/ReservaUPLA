@@ -5,6 +5,7 @@ import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import Logo from '../components/Logo';
 import FondoModulo from '../components/FondoModulo';
+import LienzoIgloo from '../components/LienzoIgloo';
 import { useRegistroUsuario } from '../hooks/useRegistroUsuario';
 
 // Trazabilidad: RF-01 · Nielsen H2, H3, H5, H9 · Shneiderman S1..S5 · ISO 9241-11
@@ -33,7 +34,8 @@ export default function RegistroSolicitante({ alVolverALogin }) {
       imagen="/backgrounds/bg_registro.jpg"
       className="min-h-screen flex items-center justify-center p-4 sm:p-6 transition-colors"
     >
-      <div className="relative z-10 max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xl">
+      <LienzoIgloo className="absolute inset-0 z-10 pointer-events-none" />
+      <div className="relative z-20 max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xl">
         <div className="mb-6 flex items-center justify-between">
           <Logo />
           <button

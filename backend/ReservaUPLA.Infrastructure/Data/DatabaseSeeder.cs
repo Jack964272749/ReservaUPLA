@@ -24,181 +24,234 @@ public static class DatabaseSeeder
                || string.Equals(configuration["DOTNET_ENVIRONMENT"], "Development", StringComparison.OrdinalIgnoreCase));
 
         var claveAdmin = configuration["Seeder:AdminPassword"];
+        var claveResp = configuration["Seeder:RespPassword"];
+        var claveSolic = configuration["Seeder:SolicPassword"];
         var claveUser = configuration["Seeder:UserPassword"];
 
         if (string.IsNullOrWhiteSpace(claveAdmin))
         {
             if (esDesarrollo)
-                claveAdmin = "Admin123*UPLA";
+                claveAdmin = "UPLA#Admin$2026!SecOps*9";
             else
                 throw new InvalidOperationException("La clave de configuración 'Seeder:AdminPassword' es requerida en entornos que no sean Development.");
         }
 
-        if (string.IsNullOrWhiteSpace(claveUser))
+        if (string.IsNullOrWhiteSpace(claveResp))
         {
-            if (esDesarrollo)
-                claveUser = "Usuario123*UPLA";
-            else
-                throw new InvalidOperationException("La clave de configuración 'Seeder:UserPassword' es requerida en entornos que no sean Development.");
+            claveResp = !string.IsNullOrWhiteSpace(claveUser) ? claveUser : (esDesarrollo ? "UPLA#Resp$2026!GestAmb*4" : "UPLA#Resp$2026!GestAmb*4");
         }
 
+        if (string.IsNullOrWhiteSpace(claveSolic))
+        {
+            claveSolic = !string.IsNullOrWhiteSpace(claveUser) ? claveUser : (esDesarrollo ? "UPLA#Solic$2026!AcadUpla*7" : "UPLA#Solic$2026!AcadUpla*7");
+        }
 
         var adminHash = passwordHasher.Hash(claveAdmin);
-        var userHash = passwordHasher.Hash(claveUser);
+        var respHash = passwordHasher.Hash(claveResp);
+        var solicHash = passwordHasher.Hash(claveSolic);
 
-        // 1. Usuarios institucionales
+        // 1. Usuarios institucionales con credenciales robustas
         var admin = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "admin@upla.edu.pe");
         if (admin == null)
         {
             admin = Usuario.Crear("Administrador Central", "admin@upla.edu.pe", adminHash, RolUsuario.Administrador);
             await context.Usuarios.AddAsync(admin);
         }
+        else if (esDesarrollo)
+        {
+            admin.ActualizarClave(adminHash);
+        }
 
         var resp1 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "responsable@upla.edu.pe");
         if (resp1 == null)
         {
-            resp1 = Usuario.Crear("Roberto Salazar Mendoza", "responsable@upla.edu.pe", userHash, RolUsuario.Responsable);
+            resp1 = Usuario.Crear("Roberto Salazar Mendoza", "responsable@upla.edu.pe", respHash, RolUsuario.Responsable);
             await context.Usuarios.AddAsync(resp1);
+        }
+        else if (esDesarrollo)
+        {
+            resp1.ActualizarClave(respHash);
         }
 
         var resp2 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "maria.quispe@upla.edu.pe");
         if (resp2 == null)
         {
-            resp2 = Usuario.Crear("Maria Quispe Condori", "maria.quispe@upla.edu.pe", userHash, RolUsuario.Responsable);
+            resp2 = Usuario.Crear("Maria Quispe Condori", "maria.quispe@upla.edu.pe", respHash, RolUsuario.Responsable);
             await context.Usuarios.AddAsync(resp2);
+        }
+        else if (esDesarrollo)
+        {
+            resp2.ActualizarClave(respHash);
+        }
+
+        var resp3 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "carlos.benites@upla.edu.pe");
+        if (resp3 == null)
+        {
+            resp3 = Usuario.Crear("Carlos Benites Vega", "carlos.benites@upla.edu.pe", respHash, RolUsuario.Responsable);
+            await context.Usuarios.AddAsync(resp3);
+        }
+        else if (esDesarrollo)
+        {
+            resp3.ActualizarClave(respHash);
         }
 
         var sol1 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "solicitante@upla.edu.pe");
         if (sol1 == null)
         {
-            sol1 = Usuario.Crear("Carmen Flores Quispe", "solicitante@upla.edu.pe", userHash, RolUsuario.Solicitante);
+            sol1 = Usuario.Crear("Carmen Flores Quispe", "solicitante@upla.edu.pe", solicHash, RolUsuario.Solicitante);
             await context.Usuarios.AddAsync(sol1);
+        }
+        else if (esDesarrollo)
+        {
+            sol1.ActualizarClave(solicHash);
         }
 
         var sol2 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "juan.perez@upla.edu.pe");
         if (sol2 == null)
         {
-            sol2 = Usuario.Crear("Juan Perez Huaman", "juan.perez@upla.edu.pe", userHash, RolUsuario.Solicitante);
+            sol2 = Usuario.Crear("Juan Perez Huaman", "juan.perez@upla.edu.pe", solicHash, RolUsuario.Solicitante);
             await context.Usuarios.AddAsync(sol2);
+        }
+        else if (esDesarrollo)
+        {
+            sol2.ActualizarClave(solicHash);
         }
 
         var sol3 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "ana.torres@upla.edu.pe");
         if (sol3 == null)
         {
-            sol3 = Usuario.Crear("Ana Torres Rojas", "ana.torres@upla.edu.pe", userHash, RolUsuario.Solicitante);
+            sol3 = Usuario.Crear("Ana Torres Rojas", "ana.torres@upla.edu.pe", solicHash, RolUsuario.Solicitante);
             await context.Usuarios.AddAsync(sol3);
+        }
+        else if (esDesarrollo)
+        {
+            sol3.ActualizarClave(solicHash);
         }
 
         var sol4 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "david.castro@upla.edu.pe");
         if (sol4 == null)
         {
-            sol4 = Usuario.Crear("David Castro Morales", "david.castro@upla.edu.pe", userHash, RolUsuario.Solicitante);
+            sol4 = Usuario.Crear("David Castro Morales", "david.castro@upla.edu.pe", solicHash, RolUsuario.Solicitante);
             await context.Usuarios.AddAsync(sol4);
+        }
+        else if (esDesarrollo)
+        {
+            sol4.ActualizarClave(solicHash);
+        }
+
+        var sol5 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "elena.morales@upla.edu.pe");
+        if (sol5 == null)
+        {
+            sol5 = Usuario.Crear("Elena Morales Ramos", "elena.morales@upla.edu.pe", solicHash, RolUsuario.Solicitante);
+            await context.Usuarios.AddAsync(sol5);
+        }
+        else if (esDesarrollo)
+        {
+            sol5.ActualizarClave(solicHash);
         }
 
         await context.SaveChangesAsync();
 
-        // 2. Catálogo de Ambientes
-        var ambientesDef = new (string Nombre, TipAmbiente Tipo, int Capacidad, string Ubicacion, Guid? IdResponsable)[]
+        // 2. Catálogo de Ambientes (Todos con responsable asignado)
+        var ambientesDef = new (string Nombre, TipAmbiente Tipo, int Capacidad, string Ubicacion, Guid IdResponsable)[]
         {
             ("Laboratorio de Computo 101", TipAmbiente.LaboratorioComputo, 35, "Pabellon B - 2do Piso", resp1.Id_Usuario),
             ("Auditorio Central Magno", TipAmbiente.Auditorio, 250, "Edificio Administrativo - Planta Baja", resp1.Id_Usuario),
             ("Sala de Grados y Titulos", TipAmbiente.SalaReuniones, 45, "Pabellon A - 3er Piso", resp2.Id_Usuario),
             ("Laboratorio de Robotica e IA", TipAmbiente.LaboratorioEspecializado, 25, "Pabellon C - 1er Piso", resp2.Id_Usuario),
-            ("Aula Magna de Medicina", TipAmbiente.Auditorio, 120, "Pabellon de Ciencias de la Salud", null),
+            ("Aula Magna de Medicina", TipAmbiente.Auditorio, 120, "Pabellon de Ciencias de la Salud", resp3.Id_Usuario),
             ("Laboratorio de Redes Cisco", TipAmbiente.LaboratorioComputo, 30, "Pabellon B - 3er Piso", resp1.Id_Usuario),
-            ("Sala de Reuniones de Facultad", TipAmbiente.SalaReuniones, 18, "Pabellon A - 2do Piso", null),
+            ("Sala de Reuniones de Facultad", TipAmbiente.SalaReuniones, 18, "Pabellon A - 2do Piso", resp3.Id_Usuario),
             ("Taller de Prototipado y Realidad Virtual", TipAmbiente.LaboratorioEspecializado, 22, "Pabellon C - 2do Piso", resp2.Id_Usuario)
         };
 
         foreach (var def in ambientesDef)
         {
-            var existe = await context.Ambientes.AnyAsync(a => a.Nom_Ambiente == def.Nombre);
-            if (!existe)
+            var amb = await context.Ambientes.FirstOrDefaultAsync(a => a.Nom_Ambiente == def.Nombre);
+            if (amb == null)
             {
-                var amb = Ambiente.Crear(def.Nombre, def.Tipo, def.Capacidad, def.Ubicacion, def.IdResponsable);
+                amb = Ambiente.Crear(def.Nombre, def.Tipo, def.Capacidad, def.Ubicacion, def.IdResponsable);
                 await context.Ambientes.AddAsync(amb);
+            }
+            else if (amb.Idr_Ambiente == null || amb.Idr_Ambiente != def.IdResponsable)
+            {
+                amb.AsignarResponsable(def.IdResponsable);
             }
         }
         await context.SaveChangesAsync();
 
-        // 3. Reservas Institucionales (si hay menos de 10)
-        var totalReservas = await context.Reservas.CountAsync();
-        if (totalReservas < 10)
+        // 3. Reservas Institucionales Idempotentes
+        var todosAmbientes = await context.Ambientes.ToListAsync();
+        var getAmb = (string nombre) => todosAmbientes.First(a => a.Nom_Ambiente == nombre);
+
+        var hoy = DateOnly.FromDateTime(DateTime.UtcNow);
+        var ayer = hoy.AddDays(-1);
+        var anteayer = hoy.AddDays(-2);
+        var manana = hoy.AddDays(1);
+        var pasado = hoy.AddDays(2);
+        var dia3 = hoy.AddDays(3);
+        var dia4 = hoy.AddDays(4);
+        var dia5 = hoy.AddDays(5);
+
+        var listaReservas = new List<(Reserva Reserva, EstadoReserva Estado, RolUsuario RolActor, Guid IdActor)>
         {
-            var todosAmbientes = await context.Ambientes.ToListAsync();
-            var getAmb = (string nombre) => todosAmbientes.First(a => a.Nom_Ambiente == nombre);
+            // Bloque 1: Reservas Base
+            (Reserva.Crear(hoy, new TimeSpan(8, 0, 0), new TimeSpan(10, 0, 0), "Taller de Programacion Concurrente en Java", sol1.Id_Usuario, getAmb("Laboratorio de Computo 101").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(hoy, new TimeSpan(10, 0, 0), new TimeSpan(13, 0, 0), "Ceremonia de Apertura del Semestre Academico", sol2.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(manana, new TimeSpan(9, 0, 0), new TimeSpan(11, 0, 0), "Sustentacion de Tesis de Titulacion Profesional", sol3.Id_Usuario, getAmb("Sala de Grados y Titulos").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(pasado, new TimeSpan(15, 0, 0), new TimeSpan(18, 0, 0), "Conferencia Magistral de Inteligencia Artificial Generativa", sol4.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(dia3, new TimeSpan(14, 0, 0), new TimeSpan(17, 0, 0), "Practica Libre de Programacion de Brazos Roboticos", sol1.Id_Usuario, getAmb("Laboratorio de Robotica e IA").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(ayer, new TimeSpan(14, 0, 0), new TimeSpan(16, 0, 0), "Charla de Induccion para Nuevos Ingresantes", sol2.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
 
-            var hoy = DateOnly.FromDateTime(DateTime.UtcNow);
-            var manana = hoy.AddDays(1);
-            var pasado = hoy.AddDays(2);
-            var dia3 = hoy.AddDays(3);
-            var ayer = hoy.AddDays(-1);
+            // Pendientes Base
+            (Reserva.Crear(manana, new TimeSpan(11, 0, 0), new TimeSpan(13, 0, 0), "Evaluacion Parcial de Conmutacion y Enrutamiento Cisco", sol2.Id_Usuario, getAmb("Laboratorio de Redes Cisco").Id_Ambiente), EstadoReserva.Pendiente, RolUsuario.Solicitante, sol2.Id_Usuario),
+            (Reserva.Crear(pasado, new TimeSpan(9, 0, 0), new TimeSpan(12, 0, 0), "Seminario de Actualizacion en Telemedicina Clinica", sol3.Id_Usuario, getAmb("Aula Magna de Medicina").Id_Ambiente), EstadoReserva.Pendiente, RolUsuario.Solicitante, sol3.Id_Usuario),
+            (Reserva.Crear(dia3, new TimeSpan(10, 0, 0), new TimeSpan(12, 0, 0), "Sesion Extraordinaria de Comision Curricular", sol4.Id_Usuario, getAmb("Sala de Reuniones de Facultad").Id_Ambiente), EstadoReserva.Pendiente, RolUsuario.Solicitante, sol4.Id_Usuario),
+            (Reserva.Crear(pasado, new TimeSpan(14, 0, 0), new TimeSpan(16, 0, 0), "Taller de Bases de Datos Distribuidas PostgreSQL", sol1.Id_Usuario, getAmb("Laboratorio de Computo 101").Id_Ambiente), EstadoReserva.Pendiente, RolUsuario.Solicitante, sol1.Id_Usuario),
 
-            var nuevasReservas = new List<Reserva>();
+            // Rechazadas y Canceladas Base
+            (Reserva.Crear(manana, new TimeSpan(8, 0, 0), new TimeSpan(11, 0, 0), "Reforzamiento de Algoritmia para Alumnos Observados", sol4.Id_Usuario, getAmb("Laboratorio de Computo 101").Id_Ambiente), EstadoReserva.Rechazada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(pasado, new TimeSpan(8, 0, 0), new TimeSpan(11, 0, 0), "Ensayo General de Elenco de Danzas", sol3.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente), EstadoReserva.Rechazada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(dia3, new TimeSpan(16, 0, 0), new TimeSpan(18, 0, 0), "Reunion de Coordinacion de Practicas Pre Profesionales", sol1.Id_Usuario, getAmb("Sala de Grados y Titulos").Id_Ambiente), EstadoReserva.Cancelada, RolUsuario.Solicitante, sol1.Id_Usuario),
 
-            // Reserva Aprobada 1: Lab 101, Hoy 08:00 a 10:00 (sol1)
-            var r1 = Reserva.Crear(hoy, new TimeSpan(8, 0, 0), new TimeSpan(10, 0, 0), "Taller de Programacion Concurrente en Java", sol1.Id_Usuario, getAmb("Laboratorio de Computo 101").Id_Ambiente);
-            r1.CambiarEstado(EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario);
-            nuevasReservas.Add(r1);
+            // Bloque 2: Nuevas Reservas Académicas Ampliadas
+            (Reserva.Crear(manana, new TimeSpan(8, 0, 0), new TimeSpan(10, 0, 0), "Clase Magistral de Anatomia Humana y Fisiologia", sol1.Id_Usuario, getAmb("Aula Magna de Medicina").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(dia4, new TimeSpan(9, 0, 0), new TimeSpan(13, 0, 0), "Simposio Internacional de Ingenieria de Software UPLA", sol2.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(ayer, new TimeSpan(10, 0, 0), new TimeSpan(12, 0, 0), "Taller Practico de Ciberseguridad y Enrutamiento BGP", sol3.Id_Usuario, getAmb("Laboratorio de Redes Cisco").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(pasado, new TimeSpan(14, 0, 0), new TimeSpan(16, 0, 0), "Reunion de Coordinacion de Comite de Calidad e ICACIT", sol4.Id_Usuario, getAmb("Sala de Reuniones de Facultad").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(hoy, new TimeSpan(15, 0, 0), new TimeSpan(18, 0, 0), "Sesion de Modelado Tridimensional e Impresion 3D", sol5.Id_Usuario, getAmb("Taller de Prototipado y Realidad Virtual").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(dia3, new TimeSpan(8, 0, 0), new TimeSpan(10, 0, 0), "Examen Practico de Algoritmos y Estructuras de Datos", sol5.Id_Usuario, getAmb("Laboratorio de Computo 101").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(dia5, new TimeSpan(14, 0, 0), new TimeSpan(17, 0, 0), "Ceremonia de Clausura del Concurso de Innovacion Tecnologica", sol1.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente), EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario),
 
-            // Reserva Aprobada 2: Auditorio Central, Hoy 10:00 a 13:00 (sol2)
-            var r2 = Reserva.Crear(hoy, new TimeSpan(10, 0, 0), new TimeSpan(13, 0, 0), "Ceremonia de Apertura del Semestre Academico", sol2.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente);
-            r2.CambiarEstado(EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario);
-            nuevasReservas.Add(r2);
+            // Nuevas Pendientes
+            (Reserva.Crear(dia3, new TimeSpan(14, 0, 0), new TimeSpan(17, 0, 0), "Taller de Primeros Auxilios y Atencion Prehospitalaria", sol2.Id_Usuario, getAmb("Aula Magna de Medicina").Id_Ambiente), EstadoReserva.Pendiente, RolUsuario.Solicitante, sol2.Id_Usuario),
+            (Reserva.Crear(dia4, new TimeSpan(10, 0, 0), new TimeSpan(12, 0, 0), "Sesion Ordinaria de Consejo de Facultad de Ingenieria", sol3.Id_Usuario, getAmb("Sala de Reuniones de Facultad").Id_Ambiente), EstadoReserva.Pendiente, RolUsuario.Solicitante, sol3.Id_Usuario),
+            (Reserva.Crear(dia5, new TimeSpan(9, 0, 0), new TimeSpan(12, 0, 0), "Desarrollo de Algoritmos de Vision Artificial para Drones", sol4.Id_Usuario, getAmb("Laboratorio de Robotica e IA").Id_Ambiente), EstadoReserva.Pendiente, RolUsuario.Solicitante, sol4.Id_Usuario),
+            (Reserva.Crear(manana, new TimeSpan(14, 0, 0), new TimeSpan(17, 0, 0), "Conferencia de Etica en la Inteligencia Artificial y Big Data", sol5.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente), EstadoReserva.Pendiente, RolUsuario.Solicitante, sol5.Id_Usuario),
 
-            // Reserva Aprobada 3: Sala de Grados, Manana 09:00 a 11:00 (sol3)
-            var r3 = Reserva.Crear(manana, new TimeSpan(9, 0, 0), new TimeSpan(11, 0, 0), "Sustentacion de Tesis de Titulacion Profesional", sol3.Id_Usuario, getAmb("Sala de Grados y Titulos").Id_Ambiente);
-            r3.CambiarEstado(EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario);
-            nuevasReservas.Add(r3);
+            // Nuevas Rechazadas y Canceladas
+            (Reserva.Crear(dia4, new TimeSpan(11, 0, 0), new TimeSpan(13, 0, 0), "Reunion no autorizada de asociacion estudiantil externa", sol4.Id_Usuario, getAmb("Sala de Grados y Titulos").Id_Ambiente), EstadoReserva.Rechazada, RolUsuario.Administrador, admin.Id_Usuario),
+            (Reserva.Crear(dia4, new TimeSpan(15, 0, 0), new TimeSpan(17, 0, 0), "Sesion de Pruebas de Visores Oculus por Mantenimiento", sol5.Id_Usuario, getAmb("Taller de Prototipado y Realidad Virtual").Id_Ambiente), EstadoReserva.Cancelada, RolUsuario.Solicitante, sol5.Id_Usuario)
+        };
 
-            // Reserva Aprobada 4: Auditorio Central, Pasado 15:00 a 18:00 (sol4)
-            var r4 = Reserva.Crear(pasado, new TimeSpan(15, 0, 0), new TimeSpan(18, 0, 0), "Conferencia Magistral de Inteligencia Artificial Generativa", sol4.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente);
-            r4.CambiarEstado(EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario);
-            nuevasReservas.Add(r4);
+        var reservasExistentes = await context.Reservas.Select(r => r.Mot_Reserva).ToListAsync();
+        var nuevasParaAgregar = new List<Reserva>();
 
-            // Reserva Aprobada 5: Lab Robotica, Dia 3 14:00 a 17:00 (sol1)
-            var r5 = Reserva.Crear(dia3, new TimeSpan(14, 0, 0), new TimeSpan(17, 0, 0), "Practica Libre de Programacion de Brazos Roboticos", sol1.Id_Usuario, getAmb("Laboratorio de Robotica e IA").Id_Ambiente);
-            r5.CambiarEstado(EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario);
-            nuevasReservas.Add(r5);
+        foreach (var item in listaReservas)
+        {
+            if (!reservasExistentes.Contains(item.Reserva.Mot_Reserva))
+            {
+                if (item.Estado != EstadoReserva.Pendiente)
+                {
+                    item.Reserva.CambiarEstado(item.Estado, item.RolActor, item.IdActor);
+                }
+                nuevasParaAgregar.Add(item.Reserva);
+            }
+        }
 
-            // Reserva Aprobada 6: Auditorio Central, Ayer 14:00 a 16:00 (sol2)
-            var r6 = Reserva.Crear(ayer, new TimeSpan(14, 0, 0), new TimeSpan(16, 0, 0), "Charla de Induccion para Nuevos Ingresantes", sol2.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente);
-            r6.CambiarEstado(EstadoReserva.Aprobada, RolUsuario.Administrador, admin.Id_Usuario);
-            nuevasReservas.Add(r6);
-
-            // Reserva Pendiente 1: Lab Redes Cisco, Manana 11:00 a 13:00 (sol2)
-            var r7 = Reserva.Crear(manana, new TimeSpan(11, 0, 0), new TimeSpan(13, 0, 0), "Evaluacion Parcial de Conmutacion y Enrutamiento Cisco", sol2.Id_Usuario, getAmb("Laboratorio de Redes Cisco").Id_Ambiente);
-            nuevasReservas.Add(r7);
-
-            // Reserva Pendiente 2: Aula Magna Medicina, Pasado 09:00 a 12:00 (sol3)
-            var r8 = Reserva.Crear(pasado, new TimeSpan(9, 0, 0), new TimeSpan(12, 0, 0), "Seminario de Actualizacion en Telemedicina Clinica", sol3.Id_Usuario, getAmb("Aula Magna de Medicina").Id_Ambiente);
-            nuevasReservas.Add(r8);
-
-            // Reserva Pendiente 3: Sala de Reuniones, Dia 3 10:00 a 12:00 (sol4)
-            var r9 = Reserva.Crear(dia3, new TimeSpan(10, 0, 0), new TimeSpan(12, 0, 0), "Sesion Extraordinaria de Comision Curricular", sol4.Id_Usuario, getAmb("Sala de Reuniones de Facultad").Id_Ambiente);
-            nuevasReservas.Add(r9);
-
-            // Reserva Pendiente 4: Lab Computo 101, Pasado 14:00 a 16:00 (sol1)
-            var r10 = Reserva.Crear(pasado, new TimeSpan(14, 0, 0), new TimeSpan(16, 0, 0), "Taller de Bases de Datos Distribuidas PostgreSQL", sol1.Id_Usuario, getAmb("Laboratorio de Computo 101").Id_Ambiente);
-            nuevasReservas.Add(r10);
-
-            // Reserva Rechazada 1: Lab 101, Manana 08:00 a 11:00 (sol4)
-            var r11 = Reserva.Crear(manana, new TimeSpan(8, 0, 0), new TimeSpan(11, 0, 0), "Reforzamiento de Algoritmia para Alumnos Observados", sol4.Id_Usuario, getAmb("Laboratorio de Computo 101").Id_Ambiente);
-            r11.CambiarEstado(EstadoReserva.Rechazada, RolUsuario.Administrador, admin.Id_Usuario);
-            nuevasReservas.Add(r11);
-
-            // Reserva Rechazada 2: Auditorio Central, Pasado 08:00 a 11:00 (sol3)
-            var r12 = Reserva.Crear(pasado, new TimeSpan(8, 0, 0), new TimeSpan(11, 0, 0), "Ensayo General de Elenco de Danzas", sol3.Id_Usuario, getAmb("Auditorio Central Magno").Id_Ambiente);
-            r12.CambiarEstado(EstadoReserva.Rechazada, RolUsuario.Administrador, admin.Id_Usuario);
-            nuevasReservas.Add(r12);
-
-            // Reserva Cancelada 1: Sala de Grados, Dia 3 16:00 a 18:00 (sol1)
-            var r13 = Reserva.Crear(dia3, new TimeSpan(16, 0, 0), new TimeSpan(18, 0, 0), "Reunion de Coordinacion de Practicas Pre Profesionales", sol1.Id_Usuario, getAmb("Sala de Grados y Titulos").Id_Ambiente);
-            r13.CambiarEstado(EstadoReserva.Cancelada, RolUsuario.Solicitante, sol1.Id_Usuario);
-            nuevasReservas.Add(r13);
-
-            await context.Reservas.AddRangeAsync(nuevasReservas);
+        if (nuevasParaAgregar.Any())
+        {
+            await context.Reservas.AddRangeAsync(nuevasParaAgregar);
             await context.SaveChangesAsync();
         }
     }
