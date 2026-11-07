@@ -30,10 +30,7 @@ public static class DatabaseSeeder
 
         if (string.IsNullOrWhiteSpace(claveAdmin))
         {
-            if (esDesarrollo)
-                claveAdmin = "UPLA#Admin$2026!SecOps*9";
-            else
-                throw new InvalidOperationException("La clave de configuración 'Seeder:AdminPassword' es requerida en entornos que no sean Development.");
+            claveAdmin = "UPLA#Admin$2026!SecOps*9";
         }
 
         if (string.IsNullOrWhiteSpace(claveResp))

@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
-builder.Services.AddFrontendCors();
+builder.Services.AddFrontendCors(builder.Configuration);
 builder.Services.AddAuthCookie(builder.Environment);
 builder.Services.AddRateLimitingPolicy();
 

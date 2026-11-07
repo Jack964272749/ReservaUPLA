@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: reservaupla-api
+    runtime: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free
+    region: oregon
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: reservaupla-db
+          property: connectionString
+      - key: Cors__FrontendUrl
+        value: https://jack964272749.github.io
+      - key: Seeder__AdminPassword
+        value: UPLA#Admin$2026!SecOps*9
+      - key: Seeder__RespPassword
+        value: UPLA#Resp$2026!GestAmb*4
+      - key: Seeder__SolicPassword
+        value: UPLA#Solic$2026!AcadUpla*7
+
+databases:
+  - name: reservaupla-db
+    databaseName: reservaupladb
+    user: postgres
+    plan: free
+    region: oregon
