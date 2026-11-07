@@ -26,9 +26,10 @@ export default function TextInput({
   className = '',
   inputRef,
   mostrarAlternarClave = false,
+  bloquearMostrarClave = false,
 }) {
   const [mostrarClave, setMostrarClave] = useState(false);
-  const tipoEfectivo = type === 'password' && mostrarClave ? 'text' : type;
+  const tipoEfectivo = type === 'password' && mostrarClave && !bloquearMostrarClave ? 'text' : type;
   const descripcionId = error ? `${id}-error` : (ayuda ? `${id}-ayuda` : undefined);
 
   return (
@@ -61,7 +62,7 @@ export default function TextInput({
           aria-invalid={Boolean(error)}
           aria-describedby={descripcionId}
           aria-required={obligatorio}
-          className={`w-full min-h-[44px] px-3.5 py-2 text-sm rounded-xl border transition-all duration-150 shadow-sm focus:outline-none focus:ring-2 ${
+          className={`w-full h-11 min-h-[44px] px-3.5 py-2 text-sm rounded-xl border transition-colors shadow-sm focus:outline-none focus:ring-2 ${
             mostrarAlternarClave && type === 'password' ? 'pr-12' : ''
           } ${
             error
@@ -72,12 +73,38 @@ export default function TextInput({
         {type === 'password' && mostrarAlternarClave && (
           <button
             type="button"
-            onClick={() => setMostrarClave((prev) => !prev)}
-            aria-label={mostrarClave ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            onClick={() => {
+              if (bloquearMostrarClave) return;
+              setMostrarClave((prev) => !prev);
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+            disabled={bloquearMostrarClave || disabled}
+            aria-label={
+              bloquearMostrarClave
+                ? 'Contraseña protegida para acceso de demostración'
+                : mostrarClave
+                ? 'Ocultar contraseña'
+                : 'Mostrar contraseña'
+            }
+            title={
+              bloquearMostrarClave
+                ? 'Por seguridad, las credenciales de demostración no pueden visualizarse en texto plano'
+                : mostrarClave
+                ? 'Ocultar contraseña'
+                : 'Mostrar contraseña'
+            }
             aria-pressed={mostrarClave}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 rounded-md"
+            className={`absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg transition-colors select-none ${
+              bloquearMostrarClave
+                ? 'opacity-40 cursor-not-allowed text-slate-400 dark:text-slate-500'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 focus:outline-none focus:ring-2 focus:ring-sky-500'
+            }`}
           >
-            {mostrarClave ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {mostrarClave && !bloquearMostrarClave ? (
+              <EyeOff className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+            ) : (
+              <Eye className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+            )}
           </button>
         )}
       </div>

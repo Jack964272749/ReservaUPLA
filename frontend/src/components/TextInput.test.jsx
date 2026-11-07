@@ -50,4 +50,27 @@ describe('Componente Accesible TextInput (Nielsen H4, H5, H9)', () => {
     fireEvent.click(boton);
     expect(screen.getByRole('button', { name: /Ocultar contraseña/i })).toBeInTheDocument();
   });
+
+  it('bloquea la visualización de contraseña cuando bloquearMostrarClave es true', () => {
+    render(
+      <TextInput
+        id="clave-demo-test"
+        label="Contraseña"
+        type="password"
+        value="DemoSecret123"
+        onChange={() => {}}
+        mostrarAlternarClave
+        bloquearMostrarClave
+      />
+    );
+    const boton = screen.getByRole('button', { name: /Contraseña protegida para acceso de demostración/i });
+    expect(boton).toBeInTheDocument();
+    expect(boton).toBeDisabled();
+
+    const input = screen.getByLabelText(/^Contraseña$/i);
+    expect(input).toHaveAttribute('type', 'password');
+
+    fireEvent.click(boton);
+    expect(input).toHaveAttribute('type', 'password');
+  });
 });
