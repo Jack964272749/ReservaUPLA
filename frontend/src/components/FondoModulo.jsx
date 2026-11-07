@@ -1,27 +1,38 @@
 import React from 'react';
 
 // Trazabilidad: Nielsen H8 (Estética y diseño minimalista) · WCAG 2.1 AA (Contraste de color >= 4.5:1)
+function resolverRuta(ruta) {
+  if (!ruta) return ruta;
+  if (ruta.startsWith('/') && !ruta.startsWith('//')) {
+    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+    return base ? `${base}${ruta}` : ruta;
+  }
+  return ruta;
+}
+
 export default function FondoModulo({
   imagen,
   children,
   className = '',
   overlayClassName = '',
 }) {
+  const urlImagen = resolverRuta(imagen);
+
   return (
     <div
       className={`relative overflow-hidden bg-[#f4f6fa] dark:bg-slate-950 transition-colors ${className}`}
     >
       {/* Capa de imagen con difuminado suave (blur) y scale para evitar bordes duros */}
-      {imagen && (
+      {urlImagen && (
         <div
           aria-hidden="true"
           className="absolute inset-0 z-0 pointer-events-none bg-cover bg-center scale-105 blur-[3px]"
-          style={{ backgroundImage: `url("${imagen}")` }}
+          style={{ backgroundImage: `url("${urlImagen}")` }}
         />
       )}
 
       {/* Capa de contraste difuminada: degradado oscuro en modo oscuro y claro en modo claro */}
-      {imagen && (
+      {urlImagen && (
         <div
           aria-hidden="true"
           className={`absolute inset-0 z-0 pointer-events-none transition-colors ${

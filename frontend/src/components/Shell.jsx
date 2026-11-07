@@ -5,6 +5,15 @@ import LienzoIgloo from './LienzoIgloo';
 import { useAuth } from '../hooks/useAuth';
 import { obtenerRuta } from '../utils/rutas';
 
+function resolverRuta(ruta) {
+  if (!ruta) return ruta;
+  if (ruta.startsWith('/') && !ruta.startsWith('//')) {
+    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+    return base ? `${base}${ruta}` : ruta;
+  }
+  return ruta;
+}
+
 const anioActual = new Date().getFullYear();
 
 // Imagen de fondo difuminada según el módulo (las mismas que usan las páginas en /public/backgrounds)
@@ -77,7 +86,7 @@ export default function Shell({ activeTab, setActiveTab, children }) {
         <div
           key={activeTab}
           className="absolute inset-0 animate-ayuda-fondo bg-cover bg-center scale-105 blur-[6px]"
-          style={{ backgroundImage: `url("${FONDOS[activeTab] || FONDOS.reservas}")` }}
+          style={{ backgroundImage: `url("${resolverRuta(FONDOS[activeTab] || FONDOS.reservas)}")` }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#f4f6fa]/75 via-[#f4f6fa]/55 to-sky-100/50 dark:from-slate-950/90 dark:via-slate-950/80 dark:to-slate-950/90 transition-colors" />
         <LienzoIgloo className="absolute inset-0 z-10 pointer-events-none" />
