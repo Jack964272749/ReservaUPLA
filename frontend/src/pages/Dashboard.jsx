@@ -17,7 +17,6 @@ import CardIndicador from '../components/CardIndicador';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import FondoModulo from '../components/FondoModulo';
-import LienzoIgloo from '../components/LienzoIgloo';
 import { useDashboard } from '../hooks/useDashboard';
 
 // Trazabilidad: RF-08 · Nielsen H1 (Visibilidad del estado del sistema), H8 · Shneiderman S1, S3
@@ -80,8 +79,7 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva, alIrAAmbie
       imagen="/backgrounds/bg_dashboard.jpg"
       className="rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl p-6 sm:p-8 lg:p-10 transition-all"
     >
-      <LienzoIgloo className="absolute inset-0 z-10 pointer-events-none" />
-      <div className="relative z-20 space-y-6">
+            <div className="relative z-20 space-y-6">
         {/* Cabecera del Dashboard */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-slate-300/70 dark:border-slate-800">
           <div>

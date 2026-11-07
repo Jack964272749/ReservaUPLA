@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from 'react';
+import { useAnimacionFondo } from '../hooks/useAnimacionFondo';
 
-// Trazabilidad: Nielsen H8 (Estética y diseño) · ISO 9241-110 · Experiencia interactiva inspirada en igloo.inc
-// Simulación de partículas cristalinas, destellos en diamante y filamentos luminosos en Canvas 2D a 60 FPS con alta visibilidad y densidad.
+// Trazabilidad: Nielsen H8 (Estética y diseño) · ISO 9241-110 · WCAG 2.2.2 (Control de movimiento)
+// Simulación de partículas cristalinas con control de accesibilidad, pausa en background y escala eficiente.
 export default function LienzoIgloo({ className = '' }) {
   const canvasRef = useRef(null);
+  const { animacionActiva } = useAnimacionFondo();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -12,10 +14,16 @@ export default function LienzoIgloo({ className = '' }) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId;
+    let animId = null;
     let ancho = 0;
     let alto = 0;
     let dpr = 1;
+
+    // WCAG 2.2.2: Verificar preferencia de movimiento reducido del sistema operativo
+    const mediaQueryMotion = typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)')
+      : { matches: false };
+    const prefiereReduccion = mediaQueryMotion.matches;
 
     // Posición del cursor en coordenadas locales del canvas
     const mouse = {
@@ -26,8 +34,8 @@ export default function LienzoIgloo({ className = '' }) {
     };
 
     let particulas = [];
-    const MAX_PARTICULAS = 145; // Mayor cantidad de nodos (~60% más densidad)
-    const DISTANCIA_CONEXION = 145; // Mayor alcance de filamentos
+    const MAX_PARTICULAS = 145;
+    const DISTANCIA_CONEXION = 145;
 
     // Paletas adaptativas según modo claro / oscuro
     const paletaOscura = [
@@ -56,10 +64,9 @@ export default function LienzoIgloo({ className = '' }) {
         this.y = aleatorio ? Math.random() * h : Math.random() * h;
         this.vx = (Math.random() - 0.5) * 0.65;
         this.vy = (Math.random() - 0.5) * 0.65;
-        // Tamaño significativamente mayor (de 3.0px a 6.2px)
         this.radioBase = Math.random() * 3.2 + 3.0;
         this.radio = this.radioBase;
-        this.esEstrella = Math.random() > 0.58; // ~42% son cristales con destello de 4 puntas
+        this.esEstrella = Math.random() > 0.58;
         this.colorIndex = Math.floor(Math.random() * paletaOscura.length);
         this.alfaBase = Math.random() * 0.40 + 0.55;
         this.alfa = this.alfaBase;
@@ -73,7 +80,6 @@ export default function LienzoIgloo({ className = '' }) {
         this.x += this.vx;
         this.y += this.vy;
 
-        // Rebote en bordes con margen suave
         if (this.x < 0) { this.x = 0; this.vx *= -1; }
         if (this.x > w) { this.x = w; this.vx *= -1; }
         if (this.y < 0) { this.y = 0; this.vy *= -1; }
@@ -83,7 +89,6 @@ export default function LienzoIgloo({ className = '' }) {
         this.alfa = this.alfaBase + Math.sin(this.pulso) * 0.22;
         this.rotacion += this.velocidadRotacion;
 
-        // Física reactiva con el cursor (estilo Igloo Inc.)
         if (mouse.activo) {
           const dx = this.x - mouse.x;
           const dy = this.y - mouse.y;
@@ -114,7 +119,6 @@ export default function LienzoIgloo({ className = '' }) {
         context.translate(this.x, this.y);
 
         if (this.esEstrella) {
-          // Destello cristalino en 4 puntas de mayor tamaño y resplandor
           context.rotate(this.rotacion);
           context.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacidad})`;
           context.shadowColor = `rgba(${r}, ${g}, ${b}, ${esOscuro ? 0.95 : 0.75})`;
@@ -133,13 +137,11 @@ export default function LienzoIgloo({ className = '' }) {
           context.closePath();
           context.fill();
 
-          // Núcleo blanco brillante en el centro del cristal
           context.beginPath();
           context.arc(0, 0, this.radio * 0.5, 0, Math.PI * 2);
           context.fillStyle = esOscuro ? 'rgba(255, 255, 255, 0.95)' : 'rgba(240, 249, 255, 0.95)';
           context.fill();
         } else {
-          // Esfera cristalina luminosa con resplandor y núcleo brillante
           context.beginPath();
           context.arc(0, 0, this.radio, 0, Math.PI * 2);
           context.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacidad})`;
@@ -147,10 +149,9 @@ export default function LienzoIgloo({ className = '' }) {
           context.shadowBlur = this.radio * (esOscuro ? 4 : 2.5);
           context.fill();
 
-          // Núcleo brillante central para definición cristalina
           context.beginPath();
           context.arc(0, 0, this.radio * 0.45, 0, Math.PI * 2);
-          context.fillStyle = esOscuro ? 'rgba(255, 255, 255, 0.9)' : `rgba(224, 242, 254, 0.95)`;
+          context.fillStyle = esOscuro ? 'rgba(255, 255, 255, 0.9)' : 'rgba(224, 242, 254, 0.95)';
           context.fill();
         }
 
@@ -160,7 +161,8 @@ export default function LienzoIgloo({ className = '' }) {
 
     const inicializar = (w, h) => {
       if (!w || !h) return;
-      dpr = window.devicePixelRatio || 1;
+      // Limitar devicePixelRatio a máximo 2 para optimizar rendimiento GPU/batería
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
       ancho = w;
       alto = h;
 
@@ -169,23 +171,24 @@ export default function LienzoIgloo({ className = '' }) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       particulas = [];
-      const cantidad = Math.min(MAX_PARTICULAS, Math.max(50, Math.floor((ancho * alto) / 5000)));
+      // Reducir la cantidad de partículas cuando el ancho sea menor a 768px (móviles/tablets)
+      const esPantallaPequena = ancho < 768;
+      const limite = esPantallaPequena ? 40 : MAX_PARTICULAS;
+      const divisor = esPantallaPequena ? 12000 : 5000;
+      const cantidad = Math.min(limite, Math.max(esPantallaPequena ? 18 : 45, Math.floor((ancho * alto) / divisor)));
+
       for (let i = 0; i < cantidad; i++) {
         particulas.push(new Particula(ancho, alto));
       }
     };
 
-    const animar = () => {
-      if (ancho <= 0 || alto <= 0) {
-        animId = requestAnimationFrame(animar);
-        return;
-      }
-
+    const renderizarCuadro = () => {
+      if (ancho <= 0 || alto <= 0) return;
       const esOscuro = document.documentElement.classList.contains('dark');
       ctx.clearRect(0, 0, ancho, alto);
 
-      // 1. Aura resplandeciente interactiva donde está el cursor (estilo Iceberg Glow)
-      if (mouse.activo) {
+      // Aura interactiva con el cursor
+      if (mouse.activo && !prefiereReduccion && animacionActiva) {
         const gradiente = ctx.createRadialGradient(
           mouse.x,
           mouse.y,
@@ -212,7 +215,7 @@ export default function LienzoIgloo({ className = '' }) {
         ctx.fill();
       }
 
-      // 2. Dibujar filamentos cristalinos entre partículas cercanas
+      // Filamentos cristalinos
       for (let i = 0; i < particulas.length; i++) {
         const p1 = particulas[i];
         for (let j = i + 1; j < particulas.length; j++) {
@@ -225,7 +228,6 @@ export default function LienzoIgloo({ className = '' }) {
             const factor = 1 - dist / DISTANCIA_CONEXION;
             const opacidad = factor * (esOscuro ? 0.44 : 0.38);
 
-            // Si ambos están cerca del cursor, la línea brilla más
             const cercaCursor = mouse.activo &&
               (Math.hypot(p1.x - mouse.x, p1.y - mouse.y) < mouse.radio ||
                Math.hypot(p2.x - mouse.x, p2.y - mouse.y) < mouse.radio);
@@ -248,21 +250,46 @@ export default function LienzoIgloo({ className = '' }) {
         }
       }
 
-      // 3. Actualizar y dibujar cada cristal
+      // Dibujar cada cristal
       for (let i = 0; i < particulas.length; i++) {
-        particulas[i].actualizar(ancho, alto);
+        if (animacionActiva && !prefiereReduccion) {
+          particulas[i].actualizar(ancho, alto);
+        }
         particulas[i].dibujar(ctx, esOscuro);
       }
-
-      animId = requestAnimationFrame(animar);
     };
 
-    // Usar ResizeObserver para medir el tamaño exacto del contenedor en cuanto se renderice
+    const animar = () => {
+      renderizarCuadro();
+      if (animacionActiva && !prefiereReduccion && !document.hidden) {
+        animId = requestAnimationFrame(animar);
+      }
+    };
+
+    const iniciarOParar = () => {
+      if (animId) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+
+      if (!animacionActiva || prefiereReduccion) {
+        // Dibuja un único cuadro estático si la animación está desactivada o prefers-reduced-motion
+        renderizarCuadro();
+        return;
+      }
+
+      if (!document.hidden) {
+        animId = requestAnimationFrame(animar);
+      }
+    };
+
+    // Usar ResizeObserver para medir tamaño y redibujar
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const cr = entry.contentRect;
         if (cr.width > 0 && cr.height > 0) {
           inicializar(cr.width, cr.height);
+          iniciarOParar();
         }
       }
     });
@@ -270,13 +297,25 @@ export default function LienzoIgloo({ className = '' }) {
     const rectInicial = canvas.getBoundingClientRect();
     if (rectInicial.width > 0 && rectInicial.height > 0) {
       inicializar(rectInicial.width, rectInicial.height);
+      iniciarOParar();
     }
     resizeObserver.observe(canvas);
 
-    animId = requestAnimationFrame(animar);
+    // Pausar animación cuando la pestaña o documento esté oculto (visibilitychange)
+    const manejarVisibilidad = () => {
+      if (document.hidden) {
+        if (animId) {
+          cancelAnimationFrame(animId);
+          animId = null;
+        }
+      } else {
+        iniciarOParar();
+      }
+    };
 
-    // Detección del mouse sobre la pantalla
+    // Detección del cursor
     const manejarMouseMove = (e) => {
+      if (!animacionActiva || prefiereReduccion) return;
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -296,14 +335,16 @@ export default function LienzoIgloo({ className = '' }) {
 
     window.addEventListener('mousemove', manejarMouseMove);
     window.addEventListener('blur', manejarMouseLeave);
+    document.addEventListener('visibilitychange', manejarVisibilidad);
 
     return () => {
-      cancelAnimationFrame(animId);
+      if (animId) cancelAnimationFrame(animId);
       resizeObserver.disconnect();
       window.removeEventListener('mousemove', manejarMouseMove);
       window.removeEventListener('blur', manejarMouseLeave);
+      document.removeEventListener('visibilitychange', manejarVisibilidad);
     };
-  }, []);
+  }, [animacionActiva]);
 
   return (
     <canvas

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Sun, Moon, HelpCircle, Menu, ChevronRight } from 'lucide-react';
+import { Sun, Moon, HelpCircle, Menu, ChevronRight, Sparkles } from 'lucide-react';
+import { useAnimacionFondo } from '../hooks/useAnimacionFondo';
 import { useTema } from '../hooks/useTema';
 import PanelAyuda from './PanelAyuda';
 import MenuUsuario from './MenuUsuario';
@@ -8,6 +9,7 @@ import MenuUsuario from './MenuUsuario';
 // Barra superior: botón de menú (móvil), título de la sección, ayuda y modo claro/oscuro.
 export default function Header({ ruta = [], onIrA, onAbrirMenu, menuAbierto }) {
   const { tema, alternarTema } = useTema();
+  const { animacionActiva, alternarAnimacion } = useAnimacionFondo();
   const [ayudaAbierta, setAyudaAbierta] = useState(false);
 
   const botonIcono =
@@ -73,6 +75,18 @@ export default function Header({ ruta = [], onIrA, onAbrirMenu, menuAbierto }) {
             className={botonIcono}
           >
             <HelpCircle className="w-5 h-5" />
+          </button>
+
+          {/* Control accesible de animación de fondo (WCAG 2.2.2) */}
+          <button
+            type="button"
+            onClick={alternarAnimacion}
+            aria-label={animacionActiva ? 'Desactivar animación de fondo' : 'Activar animación de fondo'}
+            className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 min-h-[44px] text-xs font-semibold transition-all duration-200"
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${animacionActiva ? 'text-amber-500' : 'text-slate-400'}`} aria-hidden="true" />
+            <span className="hidden sm:inline">Animación: {animacionActiva ? 'sí' : 'no'}</span>
+            <span className="sm:hidden">{animacionActiva ? 'Anim: sí' : 'Anim: no'}</span>
           </button>
 
           {/* Alternar modo oscuro / claro */}
