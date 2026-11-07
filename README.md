@@ -175,6 +175,45 @@ ReservaUPLA/
 
 ---
 
+---
+
+## Despliegue en Producción
+
+### Arquitectura de Despliegue
+El sistema se encuentra desplegado en la nube bajo una arquitectura distribuida:
+- **Frontend**: Hospedado en **GitHub Pages** como Single Page Application (SPA) construida con Vite, automatizada mediante el flujo de CI/CD en `.github/workflows/deploy-pages.yml`.
+- **Backend**: Hospedado en **Render Web Service** ejecutando un contenedor Docker multi-etapa con **.NET 8 Web API** expuesto en el puerto `8080`.
+- **Base de Datos**: Instancia de **PostgreSQL gestionada en Render**, aprovisionada mediante Blueprint (`render.yaml`).
+
+### Variables de Entorno Requeridas
+
+#### 1. Configuración en Render (Web Service)
+Configuradas a través del panel de Render o mediante `render.yaml` (`sync: false` para credenciales sensibles):
+- `DATABASE_URL`: Cadena de conexión inyectada automáticamente desde la base de datos PostgreSQL gestionada de Render.
+- `Cors__FrontendUrl`: URL de origen del frontend autorizada para peticiones con credenciales (`https://jack964272749.github.io`).
+- `Seeder__AdminPassword`: Contraseña inicial para el usuario Administrador del sistema.
+- `Seeder__RespPassword`: Contraseña inicial para los usuarios con rol Responsable.
+- `Seeder__SolicPassword`: Contraseña inicial para los usuarios con rol Solicitante.
+
+#### 2. Configuración en GitHub (Repositorio)
+En **Settings → Secrets and variables → Actions → Variables** (como variable de entorno en texto plano):
+- `VITE_API_URL`: URL base de la API backend en Render con terminación `/api` (ejemplo: `https://reservaupla-api.onrender.com/api`).
+
+#### 3. Configuración de GitHub Pages
+En **Settings → Pages**:
+- **Build and deployment → Source**: Debe seleccionarse **GitHub Actions** (NO "Deploy from a branch"), permitiendo que el workflow compile y publique automáticamente el artefacto con Vite.
+
+### Advertencias Técnicas Importantes
+
+1. **Latencia de inicio en frío (Cold Start) en Render**:  
+   En el plan gratuito de Render, el contenedor web entra en modo de suspensión tras 15 minutos continuos de inactividad. La primera petición HTTP entrante puede tardar entre **50 y 90 segundos** mientras se descarga la imagen e inicializa el runtime de .NET. Las peticiones subsecuentes responderán de forma inmediata.
+
+2. **Expiración de la base de datos de Render**:  
+   Las bases de datos PostgreSQL en el nivel gratuito de Render cuentan con un ciclo de vida limitado (caducidad típica a los 30 o 90 días según políticas del proveedor). Para evaluaciones académicas o demostraciones es fundamental comprobar que la instancia permanezca activa desde el panel de Render antes de iniciar la sustentación.
+
+3. **Cookies cross-domain y políticas de privacidad en navegadores**:  
+   La autenticación emplea cookies seguras con atributos `HttpOnly`, `SameSite=None` y `Secure` debido a que el frontend (`*.github.io`) y el backend (`*.onrender.com`) residen en dominios distintos. Navegadores o modos con bloqueo estricto de rastreo de terceros (Safari ITP, Brave Shields o ciertas ventanas en incógnito) pueden rechazar el almacenamiento de cookies cross-site, impidiendo la persistencia de la sesión. Se recomienda realizar las pruebas de demostración en un navegador estándar (Chrome/Edge/Firefox) o verificar los permisos de cookies en el navegador donde se realice la sustentación.
+
 ## Cómo empaquetar el proyecto
 
 Para generar el entregable en archivo comprimido `.zip` excluyendo carpetas transitorias de compilación (`bin/`, `obj/`, `node_modules/`, `dist/`, `.vs/`) pero preservando el código fuente y `database.sql`:
