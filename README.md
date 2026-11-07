@@ -1,4 +1,4 @@
-# PortalUpla — Sistema de Reserva de Ambientes Universitarios
+# ReservaUPLA — Sistema de Reserva de Ambientes Universitarios
 
 Sistema institucional de reserva, auditoría y control de concurrencia de ambientes académicos para la **Universidad Peruana Los Andes (UPLA)**.
 
