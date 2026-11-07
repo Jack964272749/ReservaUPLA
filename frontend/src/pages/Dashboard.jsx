@@ -20,7 +20,7 @@ import FondoModulo from '../components/FondoModulo';
 import { useDashboard } from '../hooks/useDashboard';
 
 // Trazabilidad: RF-08 · Nielsen H1 (Visibilidad del estado del sistema), H8 · Shneiderman S1, S3
-export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
+export default function Dashboard({ alIrAReservas, alIrANuevaReserva, alIrAAmbientes }) {
   const { indicadores, cargando, error, recargar } = useDashboard();
 
   if (cargando) {
@@ -129,13 +129,14 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
         )}
 
         {/* 10. Indicadores mínimos del dashboard (Caso Práctico UPLA) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5">
           <CardIndicador
             titulo="Total de reservas"
             valor={indicadores?.totalReservas ?? 0}
             descripcion="Cantidad total de reservas registradas."
             icon={CalendarDays}
             color="sky"
+            className="lg:col-span-2"
           />
           <CardIndicador
             titulo="Reservas pendientes"
@@ -143,6 +144,7 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
             descripcion="Cantidad de reservas en espera de aprobación."
             icon={Clock}
             color="amber"
+            className="lg:col-span-2"
           />
           <CardIndicador
             titulo="Reservas aprobadas"
@@ -150,6 +152,7 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
             descripcion="Cantidad de reservas aprobadas."
             icon={CheckCircle2}
             color="emerald"
+            className="sm:col-span-2 lg:col-span-2"
           />
           <CardIndicador
             titulo="Reservas rechazadas"
@@ -157,6 +160,7 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
             descripcion="Cantidad de reservas rechazadas."
             icon={XCircle}
             color="rose"
+            className="lg:col-span-3"
           />
           <CardIndicador
             titulo="Ambiente más utilizado"
@@ -164,6 +168,13 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva }) {
             descripcion="Ambiente con mayor número de reservas."
             icon={Building2}
             color="indigo"
+            className="sm:col-span-2 lg:col-span-3"
+            onClick={
+              alIrAAmbientes && indicadores?.ambienteMasUtilizado
+                ? () => alIrAAmbientes(indicadores.ambienteMasUtilizado)
+                : undefined
+            }
+            pista="Ver en Ambientes"
           />
         </div>
 

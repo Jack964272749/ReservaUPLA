@@ -61,11 +61,14 @@ public class ReservaRepository : IReservaRepository
 
         var total = await query.CountAsync(cancellationToken);
 
+        var paginaValida = pagina < 1 ? 1 : pagina;
+        var tamanoValido = tamanoPagina < 1 ? 10 : (tamanoPagina > 50 ? 50 : tamanoPagina);
+
         var items = await query
-            .OrderByDescending(r => r.Fec_Reserva)
-            .ThenByDescending(r => r.Hin_Reserva)
-            .Skip((pagina - 1) * tamanoPagina)
-            .Take(tamanoPagina)
+            .OrderByDescending(r => r.Fre_Reserva)
+            .ThenByDescending(r => r.Id_Reserva)
+            .Skip((paginaValida - 1) * tamanoValido)
+            .Take(tamanoValido)
             .ToListAsync(cancellationToken);
 
         return (items, total);

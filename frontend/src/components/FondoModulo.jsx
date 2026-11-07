@@ -9,7 +9,7 @@ export default function FondoModulo({
 }) {
   return (
     <div
-      className={`relative overflow-hidden bg-[#EDF3F9] dark:bg-slate-950 transition-colors ${className}`}
+      className={`relative overflow-hidden bg-[#f4f6fa] dark:bg-slate-950 transition-colors ${className}`}
     >
       {/* Capa de imagen con difuminado suave (blur) y scale para evitar bordes duros */}
       {imagen && (

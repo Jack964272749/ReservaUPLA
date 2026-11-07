@@ -17,6 +17,7 @@ import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import Logo from '../components/Logo';
 import FondoModulo from '../components/FondoModulo';
+import LienzoIgloo from '../components/LienzoIgloo';
 import { useLogin } from '../hooks/useLogin';
 import { useTema } from '../hooks/useTema';
 
@@ -281,9 +282,10 @@ export default function Login({ alIrARegistro }) {
       <FondoModulo
         imagen="/backgrounds/bg_login.jpg"
         className="hidden lg:flex flex-1 flex-col justify-between p-12 xl:p-16 text-white rounded-none border-0"
-        overlayClassName="bg-gradient-to-br from-slate-950/70 via-sky-950/60 to-slate-900/65"
+        overlayClassName="bg-gradient-to-br from-slate-950/75 via-sky-950/70 to-slate-900/75"
       >
-        <div className="relative z-10 flex flex-col justify-between h-full">
+        <LienzoIgloo className="absolute inset-0 z-0" />
+        <div className="relative z-10 flex flex-col justify-between h-full pointer-events-none *:pointer-events-auto">
 
         {/* Decoración de fondo */}
         <div

@@ -10,6 +10,7 @@ import { useAuth } from '../hooks/useAuth';
 import { usuarioService } from '../services/usuarioService';
 import { REGLAS } from '../constants/reglas';
 import { MENSAJES } from '../constants/mensajes';
+import { BASE, ESTILOS, DESHABILITADO } from '../utils/estilosAccion';
 
 // Trazabilidad: RF-01 · Nielsen H1, H3, H4, H5, H8 · Shneiderman S1, S2 · ISO 9241-11
 export default function Usuarios() {
@@ -193,41 +194,41 @@ export default function Usuarios() {
         const esMismoAdmin = usuarioActual && (usuarioActual.id === u.id || usuarioActual.correo === u.correo);
 
         return (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
               onClick={() => abrirModalEditar(u)}
-              icon={Pencil}
-              ariaLabel={`Modificar cuenta de ${u.nombreCompleto}`}
+              aria-label={`Modificar cuenta de ${u.nombreCompleto}`}
+              title="Editar cuenta"
+              className={`${BASE} ${ESTILOS.ver}`}
             >
-              Editar
-            </Button>
+              <Pencil className="w-4 h-4" aria-hidden="true" />
+              <span>Editar</span>
+            </button>
 
             {u.activo ? (
-              <Button
-                variant="outline"
-                size="sm"
+              <button
+                type="button"
                 onClick={() => pedirConfirmacionEstado(u, false)}
                 disabled={esMismoAdmin}
-                icon={UserX}
-                className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900/50"
-                ariaLabel={`Desactivar cuenta de ${u.nombreCompleto}`}
+                aria-label={`Desactivar cuenta de ${u.nombreCompleto}`}
                 title={esMismoAdmin ? 'No puede desactivar su propia cuenta en uso' : 'Desactivar cuenta'}
+                className={`${BASE} ${ESTILOS.rechazar} ${DESHABILITADO}`}
               >
-                Desactivar
-              </Button>
+                <UserX className="w-4 h-4" aria-hidden="true" />
+                <span>Desactivar</span>
+              </button>
             ) : (
-              <Button
-                variant="outline"
-                size="sm"
+              <button
+                type="button"
                 onClick={() => pedirConfirmacionEstado(u, true)}
-                icon={UserCheck}
-                className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/50"
-                ariaLabel={`Activar cuenta de ${u.nombreCompleto}`}
+                aria-label={`Activar cuenta de ${u.nombreCompleto}`}
+                title="Activar cuenta"
+                className={`${BASE} ${ESTILOS.aprobar}`}
               >
-                Activar
-              </Button>
+                <UserCheck className="w-4 h-4" aria-hidden="true" />
+                <span>Activar</span>
+              </button>
             )}
           </div>
         );
@@ -243,7 +244,7 @@ export default function Usuarios() {
             <Users className="w-6 h-6 text-sky-700 dark:text-sky-400" aria-hidden="true" />
             <span>Usuarios del Sistema ReservaUPLA</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">
             Gestión institucional de cuentas, control de estado y visualización de roles.
           </p>
         </div>

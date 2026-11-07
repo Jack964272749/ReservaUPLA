@@ -1,14 +1,14 @@
-/* REEMPLAZAR por HEX oficial del Manual de Marca UPLA pág. 17 */
+/* Colores tomados de la intranet UPLA (azul #2d80b9, marino #061426, fondo #f4f6fa) */
 :root {
-  --color-primario: #0A3D91;
-  --color-primario-oscuro: #072B66;
-  --color-primario-claro: #E8EEF9;
+  --color-primario: #2d80b9;
+  --color-primario-oscuro: #25689a;
+  --color-primario-claro: #eaf4fb;
   --color-superficie: #FFFFFF;
-  --color-texto: #1A1F2B;
-  --color-texto-secundario: #475569;
-  --color-borde: #CBD5E1;
+  --color-texto: #23303f;
+  --color-texto-secundario: #6b7685;
+  --color-borde: #e1e6ec;
   /* Fondo azul suave descansable para la vista (ISO 9241-11 Ergonomía visual) */
-  --color-fondo: #EDF3F9;
+  --color-fondo: #f4f6fa;
 
   /* Estados semánticos (Texto + Ícono obligatorio · Nielsen H2) */
   --color-pendiente-bg: #FEF3C7;
@@ -20,18 +20,18 @@
   --color-cancelada-bg: #F1F5F9;
   --color-cancelada-txt: #475569;
 
-  --focus-ring: 0 0 0 3px rgba(10, 61, 145, 0.45);
+  --focus-ring: 0 0 0 3px rgba(52, 152, 219, 0.45);
 }
 
 [data-theme="dark"] {
-  --color-primario: #38BDF8;
-  --color-primario-oscuro: #0284C7;
-  --color-primario-claro: #0C4A6E;
-  --color-superficie: #0F172A;
-  --color-texto: #F8FAFC;
-  --color-texto-secundario: #94A3B8;
-  --color-borde: #334155;
-  --color-fondo: #020617;
+  --color-primario: #55a9de;
+  --color-primario-oscuro: #2d80b9;
+  --color-primario-claro: #0f2b40;
+  --color-superficie: #0b1c33;
+  --color-texto: #f4f6fa;
+  --color-texto-secundario: #a7b0bd;
+  --color-borde: #1a2b42;
+  --color-fondo: #050f1d;
 
   --color-pendiente-bg: #78350F;
   --color-pendiente-txt: #FDE68A;
@@ -42,7 +42,7 @@
   --color-cancelada-bg: #1E293B;
   --color-cancelada-txt: #94A3B8;
 
-  --focus-ring: 0 0 0 3px rgba(56, 189, 248, 0.6);
+  --focus-ring: 0 0 0 3px rgba(85, 169, 222, 0.6);
 }
 
 /* Trazabilidad: Shneiderman 2 · Estilos de foco visible contrastados */

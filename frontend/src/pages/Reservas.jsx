@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   CalendarDays,
   Filter,
@@ -7,18 +7,21 @@ import {
   Clock,
   Eye,
   RefreshCw,
+  Ban,
 } from 'lucide-react';
 import TableList from '../components/TableList';
+import AccionesReserva from '../components/AccionesReserva';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import ModalConfirmacion from '../components/ModalConfirmacion';
 import TextInput from '../components/TextInput';
-import FondoModulo from '../components/FondoModulo';
 import { useReservas } from '../hooks/useReservas';
 import { useAuth } from '../hooks/useAuth';
+import { useResumenAmbientes } from '../hooks/useResumenAmbientes';
+import { useNumeroRegistro } from '../hooks/useNumeroRegistro';
 
 // Trazabilidad: RF-05, RF-06, RF-07 · RN-05, RN-06 · Nielsen H1, H3, H5, H6, H7, H9 · Shneiderman S1..S5 · ISO 9241-11
-export default function Reservas({ alIrANuevaReserva }) {
+export default function Reservas({ alIrANuevaReserva, estadoInicial }) {
   const { usuario } = useAuth();
   const rol = usuario?.rol || 'Solicitante';
 
@@ -32,6 +35,8 @@ export default function Reservas({ alIrANuevaReserva }) {
     error,
     filtroFecha,
     setFiltroFecha,
+    filtroAmbiente,
+    setFiltroAmbiente,
     filtroEstado,
     setFiltroEstado,
     recargar,
@@ -48,6 +53,25 @@ export default function Reservas({ alIrANuevaReserva }) {
   // Modal para Detalle de Reserva (RF-06)
   const [reservaDetalle, setReservaDetalle] = useState(null);
 
+  // Estado preseleccionado (p. ej. al llegar desde la alerta de pendientes del Administrador)
+  useEffect(() => {
+    if (estadoInicial) {
+      setFiltroEstado(estadoInicial);
+      setPaginaActual(1);
+    }
+  }, [estadoInicial]);
+
+  // Numeración por orden de registro (solo Administrador)
+  const esAdmin = rol === 'Administrador';
+  const numerosRegistro = useNumeroRegistro(esAdmin, totalRegistros);
+
+  // Mejora para el Responsable: resumen de uso de los ambientes que tiene asignados
+  const esResponsable = rol === 'Responsable';
+  const { ambientes: misAmbientes, resumen, cargando: cargandoResumen } = useResumenAmbientes(
+    esResponsable,
+    usuario?.id
+  );
+
   const badgeEstado = (estado) => {
     const config = {
       Pendiente: 'bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800',
@@ -56,14 +80,33 @@ export default function Reservas({ alIrANuevaReserva }) {
       Cancelada: 'bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700',
     }[estado] || 'bg-slate-100 text-slate-800 border-slate-300';
 
+    const IconoEstado = { Pendiente: Clock, Aprobada: CheckCircle2, Rechazada: XCircle, Cancelada: Ban }[estado];
+
     return (
-      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${config}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${config}`}>
+        {IconoEstado && <IconoEstado className="w-3.5 h-3.5" aria-hidden="true" />}
         {estado}
       </span>
     );
   };
 
   const columnas = [
+    ...(esAdmin
+      ? [
+          {
+            header: 'N°',
+            className: 'w-14',
+            render: (r) => (
+              <span
+                className="font-bold text-slate-500 dark:text-slate-400"
+                title="Orden de registro de la reserva"
+              >
+                {numerosRegistro[r.id] ?? '—'}
+              </span>
+            ),
+          },
+        ]
+      : []),
     {
       header: 'Ambiente',
       render: (r) => (
@@ -104,66 +147,18 @@ export default function Reservas({ alIrANuevaReserva }) {
       header: 'Acciones',
       className: 'text-right',
       render: (r) => (
-        <div className="flex items-center justify-end gap-1.5">
-          {/* Botón Ver Detalle (RF-06) */}
-          <button
-            type="button"
-            onClick={() => setReservaDetalle(r)}
-            aria-label={`Ver detalles de la reserva de ${r.solicitanteNombre}`}
-            title="Ver detalles"
-            className="p-2 text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-
-          {/* Acciones de Administrador (RN-05): Aprobar / Rechazar */}
-          {rol === 'Administrador' && r.estado === 'Pendiente' && (
-            <>
-              <button
-                type="button"
-                onClick={(e) => abrirModalAccion(r, 'Aprobada', e.currentTarget)}
-                aria-label={`Aprobar reserva de ${r.solicitanteNombre}`}
-                title="Aprobar reserva"
-                className="p-2 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/40 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => abrirModalAccion(r, 'Rechazada', e.currentTarget)}
-                aria-label={`Rechazar reserva de ${r.solicitanteNombre}`}
-                title="Rechazar reserva"
-                className="p-2 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/40 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
-              >
-                <XCircle className="w-4 h-4" />
-              </button>
-            </>
-          )}
-
-          {/* Cancelación (Solicitante o Admin sobre reservas no rechazadas) */}
-          {(rol === 'Administrador' || rol === 'Solicitante') &&
-            r.estado !== 'Rechazada' &&
-            r.estado !== 'Cancelada' && (
-              <button
-                type="button"
-                onClick={(e) => abrirModalAccion(r, 'Cancelada', e.currentTarget)}
-                aria-label="Cancelar esta reserva"
-                title="Cancelar reserva"
-                className="text-xs font-semibold text-rose-700 hover:text-rose-900 dark:text-rose-400 dark:hover:text-rose-300 px-2.5 py-1.5 rounded-lg hover:bg-rose-100/70 dark:hover:bg-rose-950/40 min-h-[44px] flex items-center"
-              >
-                Cancelar
-              </button>
-            )}
-        </div>
+        <AccionesReserva
+          reserva={r}
+          rol={rol}
+          onVer={setReservaDetalle}
+          onAccion={abrirModalAccion}
+        />
       ),
     },
   ];
 
   return (
-    <FondoModulo
-      imagen="/backgrounds/bg_listado.jpg"
-      className="rounded-2xl"
-    >
+    <>
     <div className="relative z-10 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div>
@@ -177,7 +172,7 @@ export default function Reservas({ alIrANuevaReserva }) {
                 : 'Gestión General de Reservas'}
             </span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">
             {totalRegistros} reserva(s) registrada(s) en total.
           </p>
         </div>
@@ -209,6 +204,57 @@ export default function Reservas({ alIrANuevaReserva }) {
           type="error"
           message={error}
         />
+      )}
+
+      {esResponsable && misAmbientes.length > 0 && (
+        <section aria-label="Resumen de uso de mis ambientes" className="space-y-3">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            Resumen de uso de mis ambientes
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {misAmbientes.map((amb, i) => (
+              <div
+                key={amb.id}
+                className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm"
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className="flex-shrink-0 w-7 h-7 rounded-full bg-sky-600 text-white text-xs font-bold flex items-center justify-center"
+                    aria-hidden="true"
+                  >
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{amb.nombre}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {amb.ubicacion} · {amb.capacidad} personas
+                    </p>
+                  </div>
+                </div>
+                <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 py-2">
+                <dt className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Total</dt>
+                <dd className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                  {cargandoResumen ? '…' : (resumen[amb.id]?.total ?? 0)}
+                </dd>
+              </div>
+              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 py-2">
+                <dt className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Aprobadas</dt>
+                <dd className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
+                  {cargandoResumen ? '…' : (resumen[amb.id]?.aprobadas ?? 0)}
+                </dd>
+              </div>
+              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 py-2">
+                <dt className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Pendientes</dt>
+                <dd className="text-xl font-bold text-amber-700 dark:text-amber-400">
+                  {cargandoResumen ? '…' : (resumen[amb.id]?.pendientes ?? 0)}
+                </dd>
+              </div>
+                </dl>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* Barra de Filtros Accesible (RF-05 · Nielsen H7) */}
@@ -255,11 +301,36 @@ export default function Reservas({ alIrANuevaReserva }) {
           </select>
         </div>
 
-        {(filtroFecha || filtroEstado) && (
+        {esResponsable && misAmbientes.length > 1 && (
+          <div className="w-full sm:w-56">
+            <label htmlFor="filtro-ambiente" className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Ambiente:
+            </label>
+            <select
+              id="filtro-ambiente"
+              value={filtroAmbiente}
+              onChange={(e) => {
+                setFiltroAmbiente(e.target.value);
+                setPaginaActual(1);
+              }}
+              className="w-full min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            >
+              <option value="">Todos mis ambientes</option>
+              {misAmbientes.map((a, i) => (
+                <option key={a.id} value={a.id}>
+                  {i + 1}. {a.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {(filtroFecha || filtroEstado || filtroAmbiente) && (
           <button
             type="button"
             onClick={() => {
               setFiltroFecha('');
+              setFiltroAmbiente('');
               setFiltroEstado('');
               setPaginaActual(1);
             }}
@@ -280,7 +351,10 @@ export default function Reservas({ alIrANuevaReserva }) {
         renderMobileCard={(r) => (
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-sm text-slate-900 dark:text-slate-100">{r.ambienteNombre}</span>
+              <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                {esAdmin && numerosRegistro[r.id] ? `N° ${numerosRegistro[r.id]} · ` : ''}
+                {r.ambienteNombre}
+              </span>
               {badgeEstado(r.estado)}
             </div>
             <div className="flex items-center gap-2">
@@ -290,14 +364,13 @@ export default function Reservas({ alIrANuevaReserva }) {
             <p className="text-xs text-slate-600 dark:text-slate-400">
               👤 Solicitado por: <strong>{r.solicitanteNombre}</strong>
             </p>
-            <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-700">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setReservaDetalle(r)}
-              >
-                Ver detalle
-              </Button>
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
+              <AccionesReserva
+                reserva={r}
+                rol={rol}
+                onVer={setReservaDetalle}
+                onAccion={abrirModalAccion}
+              />
             </div>
           </div>
         )}
@@ -394,6 +467,6 @@ export default function Reservas({ alIrANuevaReserva }) {
         )}
       </ModalConfirmacion>
     </div>
-    </FondoModulo>
+    </>
   );
 }

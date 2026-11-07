@@ -1,12 +1,17 @@
 import React from 'react';
+import { ArrowRight } from 'lucide-react';
 
-// Trazabilidad: Nielsen H1 (Visibilidad del estado del sistema) · Shneiderman S3 (Retroalimentación informativa)
+// Trazabilidad: Nielsen H1 (Visibilidad del estado del sistema), H7 (Flexibilidad) · Shneiderman S3 (Retroalimentación informativa)
+// Si recibe onClick se comporta como un botón (accesible por teclado) y muestra una pista de la acción.
 export default function CardIndicador({
   titulo,
   valor,
   descripcion,
   icon: Icon,
   color = 'sky', // sky, amber, emerald, rose, purple, indigo
+  onClick,
+  pista,
+  className = '',
 }) {
   const colorStyles = {
     sky: 'border-sky-500/30 bg-white/85 dark:bg-slate-900/80 text-sky-700 dark:text-sky-300',
@@ -27,12 +32,19 @@ export default function CardIndicador({
   }[color] || 'bg-slate-600 text-white';
 
   const esTextoLargo = typeof valor === 'string' && valor.length > 12;
+  const Raiz = onClick ? 'button' : 'div';
+  const propsRaiz = onClick
+    ? { type: 'button', onClick, 'aria-label': `${titulo}: ${valor}. ${pista || 'Abrir'}` }
+    : { role: 'status', 'aria-label': `${titulo}: ${valor}` };
 
   return (
-    <div
-      role="status"
-      aria-label={`${titulo}: ${valor}`}
-      className={`p-5 rounded-2xl border backdrop-blur-md transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-start gap-4 ${colorStyles}`}
+    <Raiz
+      {...propsRaiz}
+      className={`p-5 rounded-2xl border backdrop-blur-md transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-start gap-4 w-full text-left ${
+        onClick
+          ? 'cursor-pointer hover:border-indigo-500/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500'
+          : ''
+      } ${colorStyles} ${className}`}
     >
       {Icon && (
         <div className={`p-3 rounded-xl shadow-md flex-shrink-0 ${iconBgStyles}`} aria-hidden="true">
@@ -40,13 +52,13 @@ export default function CardIndicador({
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 break-words">
           {titulo}
         </p>
         <p
-          className={`text-slate-900 dark:text-slate-100 mt-1 truncate ${
+          className={`text-slate-900 dark:text-slate-100 mt-1 break-words ${
             esTextoLargo
-              ? 'text-base sm:text-lg font-bold'
+              ? 'text-lg sm:text-xl font-bold leading-snug'
               : 'text-2xl sm:text-3xl font-extrabold'
           }`}
           title={typeof valor === 'string' ? valor : undefined}
@@ -54,11 +66,17 @@ export default function CardIndicador({
           {valor}
         </p>
         {descripcion && (
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 truncate font-medium">
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-medium break-words">
             {descripcion}
           </p>
         )}
+        {pista && (
+          <p className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-indigo-700 dark:text-indigo-300">
+            {pista}
+            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+          </p>
+        )}
       </div>
-    </div>
+    </Raiz>
   );
 }

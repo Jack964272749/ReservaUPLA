@@ -61,12 +61,12 @@ export default function TextInput({
           aria-invalid={Boolean(error)}
           aria-describedby={descripcionId}
           aria-required={obligatorio}
-          className={`w-full min-h-[44px] px-3.5 py-2 text-sm rounded-lg border transition-all duration-150 shadow-sm focus:outline-none focus:ring-2 ${
+          className={`w-full min-h-[44px] px-3.5 py-2 text-sm rounded-xl border transition-all duration-150 shadow-sm focus:outline-none focus:ring-2 ${
             mostrarAlternarClave && type === 'password' ? 'pr-12' : ''
           } ${
             error
               ? 'border-rose-500 focus:border-rose-600 focus:ring-rose-200 dark:focus:ring-rose-900/50 bg-rose-50/40 dark:bg-rose-950/20 text-slate-900 dark:text-slate-100'
-              : 'border-slate-300 dark:border-slate-600 focus:border-sky-600 focus:ring-sky-200 dark:focus:ring-sky-900/40 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'
+              : 'border-slate-200 dark:border-slate-600 focus:border-sky-500 focus:ring-sky-200 dark:focus:ring-sky-900/40 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100'
           } ${disabled ? 'opacity-60 cursor-not-allowed bg-slate-100 dark:bg-slate-900' : ''}`}
         />
         {type === 'password' && mostrarAlternarClave && (

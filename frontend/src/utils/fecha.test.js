@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { obtenerFechaLocalISO } from './fecha';
+import { obtenerFechaLocalISO, normalizarHora } from './fecha';
 
 describe('obtenerFechaLocalISO', () => {
   it('formatea correctamente una fecha dada en formato YYYY-MM-DD local', () => {
@@ -18,5 +18,16 @@ describe('obtenerFechaLocalISO', () => {
     const hoy = new Date();
     const esperado = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
     expect(obtenerFechaLocalISO()).toBe(esperado);
+  });
+});
+
+describe('normalizarHora', () => {
+  it('agrega los segundos a una hora HH:mm', () => {
+    expect(normalizarHora('09:30')).toBe('09:30:00');
+  });
+
+  it('no modifica una hora que ya tiene segundos ni valores vacíos', () => {
+    expect(normalizarHora('09:30:00')).toBe('09:30:00');
+    expect(normalizarHora('')).toBe('');
   });
 });

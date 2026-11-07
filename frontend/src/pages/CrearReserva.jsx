@@ -7,9 +7,9 @@ import TextInput from '../components/TextInput';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import ModalConfirmacion from '../components/ModalConfirmacion';
-import FondoModulo from '../components/FondoModulo';
 import { useReservaForm } from '../hooks/useReservaForm';
 import { obtenerFechaLocalISO } from '../utils/fecha';
+import { recortarHora } from '../utils/reservaMapper';
 
 // Obtener fecha mínima permitida (hoy)
 const hoyStr = obtenerFechaLocalISO();
@@ -57,17 +57,14 @@ export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas 
   }));
 
   return (
-    <FondoModulo
-      imagen="/backgrounds/bg_nueva_reserva.jpg"
-      className="rounded-2xl"
-    >
+    <>
     <div className="relative z-10 max-w-3xl mx-auto space-y-6">
       <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
           <CalendarPlus className="w-6 h-6 text-sky-700 dark:text-sky-400" aria-hidden="true" />
           <span>Solicitar Reserva de Ambiente</span>
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">
           Complete el formulario institucional. La disponibilidad se valida en tiempo real.
         </p>
       </div>
@@ -147,7 +144,7 @@ export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas 
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-mono text-[11px]"
                     >
                       <AlertCircle className="w-3 h-3 text-rose-500" />
-                      {r.horaInicio} – {r.horaFin} ({r.estado})
+                      {recortarHora(r.horaInicio)} – {recortarHora(r.horaFin)} ({r.estado})
                     </span>
                   ))}
                 </div>
@@ -244,6 +241,6 @@ export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas 
         )}
       </ModalConfirmacion>
     </div>
-    </FondoModulo>
+    </>
   );
 }
