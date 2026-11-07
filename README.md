@@ -35,9 +35,10 @@ cd backend/ReservaUPLA.API
 dotnet user-secrets init
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=ReservaUPLADB;Username=postgres;Password=TU_PASSWORD_LOCAL;"
 
-# Opcional: configurar credenciales del Seeder (toma valores por defecto en Development)
-dotnet user-secrets set "Seeder:AdminPassword" "Admin123*UPLA"
-dotnet user-secrets set "Seeder:UserPassword" "Usuario123*UPLA"
+# Configurar credenciales seguras del Seeder
+dotnet user-secrets set "Seeder:AdminPassword" "<TU_PASSWORD_ADMIN_SEGURO>"
+dotnet user-secrets set "Seeder:RespPassword" "<TU_PASSWORD_RESPONSABLE_SEGURO>"
+dotnet user-secrets set "Seeder:SolicPassword" "<TU_PASSWORD_SOLICITANTE_SEGURO>"
 ```
 
 ### Opción B: Usando `appsettings.Development.json`
@@ -56,8 +57,9 @@ Editar `backend/ReservaUPLA.API/appsettings.Development.json`:
     "DefaultConnection": "Host=localhost;Port=5432;Database=ReservaUPLADB;Username=postgres;Password=TU_PASSWORD_AQUI;"
   },
   "Seeder": {
-    "AdminPassword": "Admin123*UPLA",
-    "UserPassword": "Usuario123*UPLA"
+    "AdminPassword": "<TU_PASSWORD_ADMIN_SEGURO>",
+    "RespPassword": "<TU_PASSWORD_RESPONSABLE_SEGURO>",
+    "SolicPassword": "<TU_PASSWORD_SOLICITANTE_SEGURO>"
   }
 }
 ```
@@ -129,17 +131,21 @@ npm test --prefix frontend -- --run
 
 ---
 
-## Cuentas de Prueba del Seeder
+## Cuentas Sembradas del Sistema
 
-| Rol | Nombre | Correo Institucional | Contraseña | Ambientes Asignados |
-| :--- | :--- | :--- | :--- | :--- |
-| **Administrador** | Administrador Central | `admin@upla.edu.pe` | `Admin123*UPLA` | Control total del sistema |
-| **Responsable** | Roberto Salazar Mendoza | `responsable@upla.edu.pe` | `Usuario123*UPLA` | Laboratorio 101, Auditorio Magno, Redes Cisco |
-| **Responsable** | Maria Quispe Condori | `maria.quispe@upla.edu.pe` | `Usuario123*UPLA` | Sala de Grados, Robótica e IA, Realidad Virtual |
-| **Solicitante** | Carmen Flores Quispe | `solicitante@upla.edu.pe` | `Usuario123*UPLA` | Usuario solicitante docente |
-| **Solicitante** | Juan Perez Huaman | `juan.perez@upla.edu.pe` | `Usuario123*UPLA` | Usuario solicitante docente |
-| **Solicitante** | Ana Torres Rojas | `ana.torres@upla.edu.pe` | `Usuario123*UPLA` | Usuario solicitante docente |
-| **Solicitante** | David Castro Morales | `david.castro@upla.edu.pe` | `Usuario123*UPLA` | Usuario solicitante docente |
+Las cuentas institucionales se crean únicamente cuando la tabla de usuarios se encuentra vacía, utilizando las contraseñas definidas en la configuración (`Seeder:*`: user-secrets en local, variables de entorno en Render). En entorno **Development**, si no se configuran, el sembrador genera contraseñas aleatorias seguras (16+ caracteres) y las imprime por consola una sola vez.
+
+| Rol | Nombre | Correo Institucional | Ambientes Asignados |
+| :--- | :--- | :--- | :--- |
+| **Administrador** | Administrador Central | `admin@upla.edu.pe` | Control total del sistema |
+| **Responsable** | Roberto Salazar Mendoza | `responsable@upla.edu.pe` | Laboratorio 101, Auditorio Magno, Redes Cisco |
+| **Responsable** | Maria Quispe Condori | `maria.quispe@upla.edu.pe` | Sala de Grados, Robótica e IA, Realidad Virtual |
+| **Responsable** | Carlos Benites Vega | `carlos.benites@upla.edu.pe` | Aula Magna de Medicina, Sala de Reuniones |
+| **Solicitante** | Carmen Flores Quispe | `solicitante@upla.edu.pe` | Usuario solicitante docente |
+| **Solicitante** | Juan Perez Huaman | `juan.perez@upla.edu.pe` | Usuario solicitante docente |
+| **Solicitante** | Ana Torres Rojas | `ana.torres@upla.edu.pe` | Usuario solicitante docente |
+| **Solicitante** | David Castro Morales | `david.castro@upla.edu.pe` | Usuario solicitante docente |
+| **Solicitante** | Elena Morales Ramos | `elena.morales@upla.edu.pe` | Usuario solicitante docente |
 
 ---
 

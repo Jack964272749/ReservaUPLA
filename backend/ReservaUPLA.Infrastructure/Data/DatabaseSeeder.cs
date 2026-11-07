@@ -1,5 +1,7 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 using ReservaUpla.Application.Interfaces;
 using ReservaUpla.Domain.Entities;
@@ -14,7 +16,8 @@ public static class DatabaseSeeder
         AppDbContext context,
         IPasswordHasherService passwordHasher,
         IConfiguration configuration,
-        bool? isDevelopment = null)
+        bool? isDevelopment = null,
+        ILogger? logger = null)
     {
         await context.Database.MigrateAsync();
 
@@ -23,131 +26,75 @@ public static class DatabaseSeeder
             : (string.Equals(configuration["ASPNETCORE_ENVIRONMENT"], "Development", StringComparison.OrdinalIgnoreCase)
                || string.Equals(configuration["DOTNET_ENVIRONMENT"], "Development", StringComparison.OrdinalIgnoreCase));
 
-        var claveAdmin = configuration["Seeder:AdminPassword"];
-        var claveResp = configuration["Seeder:RespPassword"];
-        var claveSolic = configuration["Seeder:SolicPassword"];
-        var claveUser = configuration["Seeder:UserPassword"];
+        // El sembrador solo crea usuarios cuando la tabla está vacía; nunca modifica contraseñas de usuarios existentes.
+        var hayUsuarios = await context.Usuarios.AnyAsync();
+        if (!hayUsuarios)
+        {
+            var claveAdmin = configuration["Seeder:AdminPassword"];
+            var claveResp = configuration["Seeder:RespPassword"] ?? configuration["Seeder:UserPassword"];
+            var claveSolic = configuration["Seeder:SolicPassword"] ?? configuration["Seeder:UserPassword"];
 
-        if (string.IsNullOrWhiteSpace(claveAdmin))
-        {
-            claveAdmin = "UPLA#Admin$2026!SecOps*9";
-        }
+            if (!esDesarrollo)
+            {
+                if (string.IsNullOrWhiteSpace(claveAdmin))
+                    throw new InvalidOperationException("La clave de configuración 'Seeder:AdminPassword' es requerida en entornos que no sean Development.");
+                if (string.IsNullOrWhiteSpace(claveResp))
+                    throw new InvalidOperationException("La clave de configuración 'Seeder:RespPassword' (o 'Seeder:UserPassword') es requerida en entornos que no sean Development.");
+                if (string.IsNullOrWhiteSpace(claveSolic))
+                    throw new InvalidOperationException("La clave de configuración 'Seeder:SolicPassword' (o 'Seeder:UserPassword') es requerida en entornos que no sean Development.");
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(claveAdmin))
+                {
+                    claveAdmin = GenerarClaveSegura(20);
+                    logger?.LogWarning("Sembrador [Development]: 'Seeder:AdminPassword' no configurado. Se generó contraseña segura para admin@upla.edu.pe: {Clave} (válida solo para esta base de datos recién sembrada).", claveAdmin);
+                }
 
-        if (string.IsNullOrWhiteSpace(claveResp))
-        {
-            claveResp = !string.IsNullOrWhiteSpace(claveUser) ? claveUser : (esDesarrollo ? "UPLA#Resp$2026!GestAmb*4" : "UPLA#Resp$2026!GestAmb*4");
-        }
+                if (string.IsNullOrWhiteSpace(claveResp))
+                {
+                    claveResp = GenerarClaveSegura(20);
+                    logger?.LogWarning("Sembrador [Development]: 'Seeder:RespPassword' no configurado. Se generó contraseña segura para responsables: {Clave} (válida solo para esta base de datos recién sembrada).", claveResp);
+                }
 
-        if (string.IsNullOrWhiteSpace(claveSolic))
-        {
-            claveSolic = !string.IsNullOrWhiteSpace(claveUser) ? claveUser : (esDesarrollo ? "UPLA#Solic$2026!AcadUpla*7" : "UPLA#Solic$2026!AcadUpla*7");
-        }
+                if (string.IsNullOrWhiteSpace(claveSolic))
+                {
+                    claveSolic = GenerarClaveSegura(20);
+                    logger?.LogWarning("Sembrador [Development]: 'Seeder:SolicPassword' no configurado. Se generó contraseña segura para solicitantes: {Clave} (válida solo para esta base de datos recién sembrada).", claveSolic);
+                }
+            }
 
-        var adminHash = passwordHasher.Hash(claveAdmin);
-        var respHash = passwordHasher.Hash(claveResp);
-        var solicHash = passwordHasher.Hash(claveSolic);
+            var adminHash = passwordHasher.Hash(claveAdmin);
+            var respHash = passwordHasher.Hash(claveResp);
+            var solicHash = passwordHasher.Hash(claveSolic);
 
-        // 1. Usuarios institucionales con credenciales robustas
-        var admin = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "admin@upla.edu.pe");
-        if (admin == null)
-        {
-            admin = Usuario.Crear("Administrador Central", "admin@upla.edu.pe", adminHash, RolUsuario.Administrador);
-            await context.Usuarios.AddAsync(admin);
-        }
-        else
-        {
-            admin.ActualizarClave(adminHash);
-        }
+            var usuariosIniciales = new[]
+            {
+                Usuario.Crear("Administrador Central", "admin@upla.edu.pe", adminHash, RolUsuario.Administrador),
+                Usuario.Crear("Roberto Salazar Mendoza", "responsable@upla.edu.pe", respHash, RolUsuario.Responsable),
+                Usuario.Crear("Maria Quispe Condori", "maria.quispe@upla.edu.pe", respHash, RolUsuario.Responsable),
+                Usuario.Crear("Carlos Benites Vega", "carlos.benites@upla.edu.pe", respHash, RolUsuario.Responsable),
+                Usuario.Crear("Carmen Flores Quispe", "solicitante@upla.edu.pe", solicHash, RolUsuario.Solicitante),
+                Usuario.Crear("Juan Perez Huaman", "juan.perez@upla.edu.pe", solicHash, RolUsuario.Solicitante),
+                Usuario.Crear("Ana Torres Rojas", "ana.torres@upla.edu.pe", solicHash, RolUsuario.Solicitante),
+                Usuario.Crear("David Castro Morales", "david.castro@upla.edu.pe", solicHash, RolUsuario.Solicitante),
+                Usuario.Crear("Elena Morales Ramos", "elena.morales@upla.edu.pe", solicHash, RolUsuario.Solicitante)
+            };
 
-        var resp1 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "responsable@upla.edu.pe");
-        if (resp1 == null)
-        {
-            resp1 = Usuario.Crear("Roberto Salazar Mendoza", "responsable@upla.edu.pe", respHash, RolUsuario.Responsable);
-            await context.Usuarios.AddAsync(resp1);
-        }
-        else
-        {
-            resp1.ActualizarClave(respHash);
-        }
-
-        var resp2 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "maria.quispe@upla.edu.pe");
-        if (resp2 == null)
-        {
-            resp2 = Usuario.Crear("Maria Quispe Condori", "maria.quispe@upla.edu.pe", respHash, RolUsuario.Responsable);
-            await context.Usuarios.AddAsync(resp2);
-        }
-        else
-        {
-            resp2.ActualizarClave(respHash);
-        }
-
-        var resp3 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "carlos.benites@upla.edu.pe");
-        if (resp3 == null)
-        {
-            resp3 = Usuario.Crear("Carlos Benites Vega", "carlos.benites@upla.edu.pe", respHash, RolUsuario.Responsable);
-            await context.Usuarios.AddAsync(resp3);
-        }
-        else
-        {
-            resp3.ActualizarClave(respHash);
+            await context.Usuarios.AddRangeAsync(usuariosIniciales);
+            await context.SaveChangesAsync();
         }
 
-        var sol1 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "solicitante@upla.edu.pe");
-        if (sol1 == null)
-        {
-            sol1 = Usuario.Crear("Carmen Flores Quispe", "solicitante@upla.edu.pe", solicHash, RolUsuario.Solicitante);
-            await context.Usuarios.AddAsync(sol1);
-        }
-        else
-        {
-            sol1.ActualizarClave(solicHash);
-        }
-
-        var sol2 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "juan.perez@upla.edu.pe");
-        if (sol2 == null)
-        {
-            sol2 = Usuario.Crear("Juan Perez Huaman", "juan.perez@upla.edu.pe", solicHash, RolUsuario.Solicitante);
-            await context.Usuarios.AddAsync(sol2);
-        }
-        else
-        {
-            sol2.ActualizarClave(solicHash);
-        }
-
-        var sol3 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "ana.torres@upla.edu.pe");
-        if (sol3 == null)
-        {
-            sol3 = Usuario.Crear("Ana Torres Rojas", "ana.torres@upla.edu.pe", solicHash, RolUsuario.Solicitante);
-            await context.Usuarios.AddAsync(sol3);
-        }
-        else
-        {
-            sol3.ActualizarClave(solicHash);
-        }
-
-        var sol4 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "david.castro@upla.edu.pe");
-        if (sol4 == null)
-        {
-            sol4 = Usuario.Crear("David Castro Morales", "david.castro@upla.edu.pe", solicHash, RolUsuario.Solicitante);
-            await context.Usuarios.AddAsync(sol4);
-        }
-        else
-        {
-            sol4.ActualizarClave(solicHash);
-        }
-
-        var sol5 = await context.Usuarios.FirstOrDefaultAsync(u => u.Cor_Usuario == "elena.morales@upla.edu.pe");
-        if (sol5 == null)
-        {
-            sol5 = Usuario.Crear("Elena Morales Ramos", "elena.morales@upla.edu.pe", solicHash, RolUsuario.Solicitante);
-            await context.Usuarios.AddAsync(sol5);
-        }
-        else
-        {
-            sol5.ActualizarClave(solicHash);
-        }
-
-        await context.SaveChangesAsync();
+        // Obtener usuarios para asociar ambientes y reservas
+        var admin = await context.Usuarios.FirstAsync(u => u.Cor_Usuario == "admin@upla.edu.pe");
+        var resp1 = await context.Usuarios.FirstAsync(u => u.Cor_Usuario == "responsable@upla.edu.pe");
+        var resp2 = await context.Usuarios.FirstAsync(u => u.Cor_Usuario == "maria.quispe@upla.edu.pe");
+        var resp3 = await context.Usuarios.FirstAsync(u => u.Cor_Usuario == "carlos.benites@upla.edu.pe");
+        var sol1 = await context.Usuarios.FirstAsync(u => u.Cor_Usuario == "solicitante@upla.edu.pe");
+        var sol2 = await context.Usuarios.FirstAsync(u => u.Cor_Usuario == "juan.perez@upla.edu.pe");
+        var sol3 = await context.Usuarios.FirstAsync(u => u.Cor_Usuario == "ana.torres@upla.edu.pe");
+        var sol4 = await context.Usuarios.FirstAsync(u => u.Cor_Usuario == "david.castro@upla.edu.pe");
+        var sol5 = await context.Usuarios.FirstAsync(u => u.Cor_Usuario == "elena.morales@upla.edu.pe");
 
         // 2. Catálogo de Ambientes (Todos con responsable asignado)
         var ambientesDef = new (string Nombre, TipAmbiente Tipo, int Capacidad, string Ubicacion, Guid IdResponsable)[]
@@ -251,5 +198,19 @@ public static class DatabaseSeeder
             await context.Reservas.AddRangeAsync(nuevasParaAgregar);
             await context.SaveChangesAsync();
         }
+    }
+
+    private static string GenerarClaveSegura(int longitud = 20)
+    {
+        const string caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
+        var bytes = new byte[longitud];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(bytes);
+        var chars = new char[longitud];
+        for (int i = 0; i < longitud; i++)
+        {
+            chars[i] = caracteres[bytes[i] % caracteres.Length];
+        }
+        return new string(chars);
     }
 }

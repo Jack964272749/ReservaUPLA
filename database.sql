@@ -173,17 +173,9 @@ INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000013', '202
 
 --
 -- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
+-- NOTA: Las cuentas institucionales se crean dinamicamente mediante el sembrador EF Core (DatabaseSeeder)
+-- utilizando credenciales configuradas en variables de entorno (Seeder:*).
 --
-
-INSERT INTO public.usuarios VALUES ('74f70257-a1c8-4500-805e-1cc372862ba7', 'Maria Quispe Condori', 'maria.quispe@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Responsable', true);
-INSERT INTO public.usuarios VALUES ('7b2532ca-88bb-4f6c-b449-a37d9dc7a302', 'Carmen Flores Quispe', 'solicitante@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Solicitante', true);
-INSERT INTO public.usuarios VALUES ('9967ec0c-27ee-4df6-ba3f-e04b3d2fb02f', 'Roberto Salazar Mendoza', 'responsable@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Responsable', true);
-INSERT INTO public.usuarios VALUES ('a697a0f0-cefc-42a4-a746-7cbacba10dac', 'Administrador Central', 'admin@upla.edu.pe', 'AQAAAAIAAYagAAAAEC3g9hlbHGlR/6m/oMQ1cXcV62nfSEfNgF15AvuK4evrENzh2KYbAhoVoJ+vpK0qag==', 'Administrador', true);
-INSERT INTO public.usuarios VALUES ('ad4b36f0-485d-4d2e-b862-0951bcb73006', 'Ana Torres Rojas', 'ana.torres@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Solicitante', true);
-INSERT INTO public.usuarios VALUES ('bc19aca7-03a3-4cfa-b075-e1efb7767e25', 'David Castro Morales', 'david.castro@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Solicitante', true);
-INSERT INTO public.usuarios VALUES ('c26cec3f-5ac6-460e-8a1a-90c4c039109c', 'Juan Perez Huaman', 'juan.perez@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Solicitante', true);
-INSERT INTO public.usuarios VALUES ('e4b2d189-9a7c-4822-b514-648dc829a01f', 'Carlos Benites Vega', 'carlos.benites@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Responsable', true);
-INSERT INTO public.usuarios VALUES ('d5c1a8e2-8924-42b7-a389-72f883b10c9a', 'Elena Morales Ramos', 'elena.morales@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Solicitante', true);
 
 
 --

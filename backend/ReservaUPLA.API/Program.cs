@@ -27,7 +27,7 @@ using (var scope = app.Services.CreateScope())
     var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasherService>();
     try
     {
-        await DatabaseSeeder.InicializarAsync(context, hasher, builder.Configuration, builder.Environment.IsDevelopment());
+        await DatabaseSeeder.InicializarAsync(context, hasher, builder.Configuration, builder.Environment.IsDevelopment(), app.Logger);
     }
     catch (Exception ex)
     {

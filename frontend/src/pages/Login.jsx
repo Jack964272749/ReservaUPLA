@@ -29,7 +29,6 @@ const CUENTAS_DEMO = [
     titulo: 'Administrador',
     subtitulo: 'Control total',
     correo: 'admin@upla.edu.pe',
-    clave: 'UPLA#Admin$2026!SecOps*9',
     icono: Shield,
     colorBorde: 'border-rose-200 hover:border-rose-400 dark:border-rose-900/60 dark:hover:border-rose-700',
     colorBg: 'bg-rose-50/60 hover:bg-rose-100/70 dark:bg-rose-950/20 dark:hover:bg-rose-950/40',
@@ -41,7 +40,6 @@ const CUENTAS_DEMO = [
     titulo: 'Responsable',
     subtitulo: 'Ambientes y Labs',
     correo: 'responsable@upla.edu.pe',
-    clave: 'UPLA#Resp$2026!GestAmb*4',
     icono: UserCheck,
     colorBorde: 'border-amber-200 hover:border-amber-400 dark:border-amber-900/60 dark:hover:border-amber-700',
     colorBg: 'bg-amber-50/60 hover:bg-amber-100/70 dark:bg-amber-950/20 dark:hover:bg-amber-950/40',
@@ -53,7 +51,6 @@ const CUENTAS_DEMO = [
     titulo: 'Solicitante',
     subtitulo: 'Docente / Alumno',
     correo: 'solicitante@upla.edu.pe',
-    clave: 'UPLA#Solic$2026!AcadUpla*7',
     icono: User,
     colorBorde: 'border-sky-200 hover:border-sky-400 dark:border-sky-900/60 dark:hover:border-sky-700',
     colorBg: 'bg-sky-50/60 hover:bg-sky-100/70 dark:bg-sky-950/20 dark:hover:bg-sky-950/40',
@@ -86,7 +83,7 @@ export default function Login({ alIrARegistro }) {
 
   const autocompletarCuenta = (cuenta) => {
     setCorreo(cuenta.correo);
-    setClave(cuenta.clave);
+    claveRef.current?.focus();
   };
 
   return (
@@ -214,7 +211,7 @@ export default function Login({ alIrARegistro }) {
             <div className="flex items-center justify-between mb-2.5">
               <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
-                <span>ACCESO DE DEMOSTRACIÓN</span>
+                <span>Autocompletar acceso rápido</span>
               </span>
               <span className="text-[11px] text-slate-400 dark:text-slate-500">
                 1 clic
@@ -231,7 +228,7 @@ export default function Login({ alIrARegistro }) {
                     type="button"
                     onClick={() => autocompletarCuenta(cuenta)}
                     disabled={enviando}
-                    title={`Acceso de demostración como ${cuenta.titulo} (${cuenta.correo})`}
+                    title={`Autocompletar correo de ${cuenta.titulo} (${cuenta.correo})`}
                     className={`p-2 sm:p-2.5 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between ${cuenta.colorBorde} ${cuenta.colorBg} ${
                       estaSeleccionado
                         ? 'ring-2 ring-sky-500 shadow-sm scale-[1.02]'

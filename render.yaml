@@ -19,11 +19,11 @@ services:
       - key: Cors__FrontendUrl
         value: https://jack964272749.github.io
       - key: Seeder__AdminPassword
-        value: UPLA#Admin$2026!SecOps*9
+        sync: false
       - key: Seeder__RespPassword
-        value: UPLA#Resp$2026!GestAmb*4
+        sync: false
       - key: Seeder__SolicPassword
-        value: UPLA#Solic$2026!AcadUpla*7
+        sync: false
 
 databases:
   - name: reservaupla-db
