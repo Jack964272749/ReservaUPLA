@@ -26,7 +26,15 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? configuration["DATABASE_URL"]
+            ?? configuration["DatabaseUrl"];
+
+        if (!string.IsNullOrWhiteSpace(connectionString) && (connectionString.StartsWith("postgres://") || connectionString.StartsWith("postgresql://")))
+        {
+            connectionString = ConvertirPostgresUrlAConnectionString(connectionString);
+        }
+
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
 
@@ -38,13 +46,25 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddFrontendCors(this IServiceCollection services)
+    public static IServiceCollection AddFrontendCors(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddCors(options =>
         {
             options.AddPolicy("FrontendPolicy", policy =>
             {
-                policy.WithOrigins("http://localhost:5173")
+                var origenes = new List<string>
+                {
+                    "http://localhost:5173",
+                    "https://jack964272749.github.io"
+                };
+
+                var origenPersonalizado = configuration["Cors:FrontendUrl"];
+                if (!string.IsNullOrWhiteSpace(origenPersonalizado))
+                {
+                    origenes.Add(origenPersonalizado.TrimEnd('/'));
+                }
+
+                policy.WithOrigins(origenes.Distinct().ToArray())
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials();
@@ -60,7 +80,8 @@ public static class ServiceCollectionExtensions
             {
                 options.Cookie.Name = ".ReservaUpla.Auth";
                 options.Cookie.HttpOnly = true;
-                options.Cookie.SameSite = SameSiteMode.Lax;
+                // En produccion con dominios cruzados (GitHub Pages -> Render) se requiere SameSite=None y Secure=Always
+                options.Cookie.SameSite = environment.IsDevelopment() ? SameSiteMode.Lax : SameSiteMode.None;
                 options.Cookie.SecurePolicy = environment.IsDevelopment()
                     ? CookieSecurePolicy.SameAsRequest
                     : CookieSecurePolicy.Always;
@@ -100,6 +121,7 @@ public static class ServiceCollectionExtensions
         });
         return services;
     }
+
     private static string ConvertirPostgresUrlAConnectionString(string url)
     {
         var uri = new Uri(url);
