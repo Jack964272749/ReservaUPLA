@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { CalendarPlus, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import {
+  Calendar, CalendarPlus, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import SelectInput from '../components/SelectInput';
 import DateInput from '../components/DateInput';
 import TimeInput from '../components/TimeInput';
@@ -8,9 +9,11 @@ import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import ModalConfirmacion from '../components/ModalConfirmacion';
 import { useReservaForm } from '../hooks/useReservaForm';
+import { obtenerFechaLocalISO } from '../utils/fecha';
+import { recortarHora } from '../utils/reservaMapper';
 
 // Obtener fecha mínima permitida (hoy)
-const hoyStr = new Date().toISOString().split('T')[0];
+const hoyStr = obtenerFechaLocalISO();
 
 // Trazabilidad: RF-03, RF-04 · RN-01 a RN-04 · Nielsen H1, H4, H5, H6, H9 · Shneiderman S1..S5 · ISO 9241-11
 export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas }) {
@@ -55,13 +58,14 @@ export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas 
   }));
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <>
+    <div className="relative z-10 max-w-3xl mx-auto space-y-6">
       <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
           <CalendarPlus className="w-6 h-6 text-sky-700 dark:text-sky-400" aria-hidden="true" />
           <span>Solicitar Reserva de Ambiente</span>
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">
           Complete el formulario institucional. La disponibilidad se valida en tiempo real.
         </p>
       </div>
@@ -141,7 +145,7 @@ export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas 
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-mono text-[11px]"
                     >
                       <AlertCircle className="w-3 h-3 text-rose-500" />
-                      {r.horaInicio} – {r.horaFin} ({r.estado})
+                      {recortarHora(r.horaInicio)} – {recortarHora(r.horaFin)} ({r.estado})
                     </span>
                   ))}
                 </div>
@@ -229,14 +233,33 @@ export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas 
         variant="success"
       >
         {reservaCreada && (
-          <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600 text-xs space-y-1.5 font-medium">
-            <p><strong>Ambiente:</strong> {reservaCreada.ambienteNombre}</p>
-            <p><strong>Fecha:</strong> {reservaCreada.fecha}</p>
-            <p><strong>Horario:</strong> {reservaCreada.horaInicio} – {reservaCreada.horaFin}</p>
-            <p><strong>Estado:</strong> <span className="text-amber-600 dark:text-amber-400 font-bold">{reservaCreada.estado}</span></p>
+          <div className="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs space-y-3 font-medium shadow-xs">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+              <span className="font-bold text-slate-900 dark:text-slate-100">{reservaCreada.ambienteNombre}</span>
+              <span className="text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 px-2 py-0.5 rounded-full text-[11px] font-bold">
+                {reservaCreada.estado}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/50 border border-sky-200/90 dark:border-sky-800 text-sky-800 dark:text-sky-300">
+                <Calendar className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400">Fecha</p>
+                  <p className="font-bold text-sky-950 dark:text-sky-100">{reservaCreada.fecha}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/90 dark:border-indigo-800 text-indigo-800 dark:text-indigo-300">
+                <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">Horario</p>
+                  <p className="font-bold font-mono text-indigo-950 dark:text-indigo-100">{reservaCreada.horaInicio} – {reservaCreada.horaFin}</p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </ModalConfirmacion>
     </div>
+    </>
   );
 }

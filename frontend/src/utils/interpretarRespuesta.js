@@ -50,9 +50,11 @@ export function interpretarRespuesta(estado, datos) {
     };
   }
 
+  // Errores de validación del framework (ProblemDetails: { title, errors })
+  const detalle = datos?.errors ? Object.values(datos.errors).flat().join(' ') : null;
   return {
     errores: datos?.errores || {},
-    errorGeneral: datos?.mensaje || null,
+    errorGeneral: datos?.mensaje || detalle || datos?.title || null,
     accion: 'procesado',
   };
 }

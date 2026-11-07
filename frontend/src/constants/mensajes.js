@@ -10,9 +10,11 @@ export const MENSAJES = {
   LOGIN_FALLIDO: 'Credenciales incorrectas. Verifique correo y contraseña (E-08).',
 
   AMBIENTE_NOMBRE_REQUERIDO: 'El nombre del ambiente es obligatorio (RV-04).',
+  AMBIENTE_NOMBRE_LONGITUD: 'El nombre del ambiente debe tener entre 3 y 100 caracteres (RV-04).',
   AMBIENTE_TIPO_REQUERIDO: 'Seleccione un tipo de ambiente institucional (RV-05).',
   AMBIENTE_CAPACIDAD_INVALIDA: 'La capacidad debe ser un número entero entre 1 y 1000 (RV-06).',
   AMBIENTE_UBICACION_REQUERIDA: 'La ubicación del ambiente es obligatoria (RV-07).',
+  AMBIENTE_UBICACION_LONGITUD: 'La ubicación del ambiente no puede exceder 100 caracteres (RV-07).',
 
   FECHA_REQUERIDA: 'La fecha de la reserva es obligatoria (RV-08).',
   FECHA_PASADA: 'No puede seleccionar una fecha que ya pasó (RV-08, E-16).',

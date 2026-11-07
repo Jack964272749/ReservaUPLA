@@ -130,12 +130,12 @@ INSERT INTO public."__EFMigrationsHistory" VALUES ('20261103175030_Inicial', '8.
 --
 
 INSERT INTO public.ambientes VALUES ('1a7b795e-0617-49a8-8ed1-434e38e97b43', 'Laboratorio de Computo 101', 'LaboratorioComputo', 35, 'Pabellon B - 2do Piso', 'Disponible', '9967ec0c-27ee-4df6-ba3f-e04b3d2fb02f');
-INSERT INTO public.ambientes VALUES ('49074fdc-a303-428d-bbf5-c68205dfbbae', 'Aula Magna de Medicina', 'Auditorio', 120, 'Pabellon de Ciencias de la Salud', 'Disponible', NULL);
+INSERT INTO public.ambientes VALUES ('49074fdc-a303-428d-bbf5-c68205dfbbae', 'Aula Magna de Medicina', 'Auditorio', 120, 'Pabellon de Ciencias de la Salud', 'Disponible', 'e4b2d189-9a7c-4822-b514-648dc829a01f');
 INSERT INTO public.ambientes VALUES ('62b1ee86-76ba-4e06-aff6-ec6e09976975', 'Sala de Grados y Titulos', 'SalaReuniones', 45, 'Pabellon A - 3er Piso', 'Disponible', '74f70257-a1c8-4500-805e-1cc372862ba7');
 INSERT INTO public.ambientes VALUES ('6aa842e9-bb8f-4c64-95b0-3903c3fae8bd', 'Laboratorio de Robotica e IA', 'LaboratorioEspecializado', 25, 'Pabellon C - 1er Piso', 'Disponible', '74f70257-a1c8-4500-805e-1cc372862ba7');
 INSERT INTO public.ambientes VALUES ('a5e3b7b5-ba9f-49ee-a82f-cf919ce4c494', 'Taller de Prototipado y Realidad Virtual', 'LaboratorioEspecializado', 22, 'Pabellon C - 2do Piso', 'Disponible', '74f70257-a1c8-4500-805e-1cc372862ba7');
 INSERT INTO public.ambientes VALUES ('df798811-8cbe-4392-bf19-2778267eed17', 'Auditorio Central Magno', 'Auditorio', 250, 'Edificio Administrativo - Planta Baja', 'Disponible', '9967ec0c-27ee-4df6-ba3f-e04b3d2fb02f');
-INSERT INTO public.ambientes VALUES ('f61b2d25-b048-46f2-a48e-22a8e0a05dc2', 'Sala de Reuniones de Facultad', 'SalaReuniones', 18, 'Pabellon A - 2do Piso', 'Disponible', NULL);
+INSERT INTO public.ambientes VALUES ('f61b2d25-b048-46f2-a48e-22a8e0a05dc2', 'Sala de Reuniones de Facultad', 'SalaReuniones', 18, 'Pabellon A - 2do Piso', 'Disponible', 'e4b2d189-9a7c-4822-b514-648dc829a01f');
 INSERT INTO public.ambientes VALUES ('f6bad81d-b483-43f8-b925-c19d0a1f49f4', 'Laboratorio de Redes Cisco', 'LaboratorioComputo', 30, 'Pabellon B - 3er Piso', 'Disponible', '9967ec0c-27ee-4df6-ba3f-e04b3d2fb02f');
 
 
@@ -156,6 +156,19 @@ INSERT INTO public.reservas VALUES ('e0b5546b-bdac-4e45-b40d-0fddbeae471b', '202
 INSERT INTO public.reservas VALUES ('eea840cf-7578-4f6c-a646-c84bf9a38ca0', '2026-11-02', '14:00:00', '16:00:00', 'Charla de Induccion para Nuevos Ingresantes', 'Aprobada', 'c26cec3f-5ac6-460e-8a1a-90c4c039109c', 'df798811-8cbe-4392-bf19-2778267eed17', '2026-11-03 16:05:13.90974-05');
 INSERT INTO public.reservas VALUES ('f032b336-edaf-48cb-bff5-50a84adb4d7c', '2026-11-03', '08:00:00', '10:00:00', 'Taller de Programacion Concurrente en Java', 'Aprobada', '7b2532ca-88bb-4f6c-b449-a37d9dc7a302', '1a7b795e-0617-49a8-8ed1-434e38e97b43', '2026-11-03 16:05:13.909455-05');
 INSERT INTO public.reservas VALUES ('f69a135f-db07-4fdf-b0da-f39a4ea4ed73', '2026-11-06', '14:00:00', '17:00:00', 'Practica Libre de Programacion de Brazos Roboticos', 'Aprobada', '7b2532ca-88bb-4f6c-b449-a37d9dc7a302', '6aa842e9-bb8f-4c64-95b0-3903c3fae8bd', '2026-11-03 16:05:13.909739-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000001', '2026-11-08', '08:00:00', '10:00:00', 'Clase Magistral de Anatomia Humana y Fisiologia', 'Aprobada', '7b2532ca-88bb-4f6c-b449-a37d9dc7a302', '49074fdc-a303-428d-bbf5-c68205dfbbae', '2026-11-03 16:05:13.909746-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000002', '2026-11-11', '09:00:00', '13:00:00', 'Simposio Internacional de Ingenieria de Software UPLA', 'Aprobada', 'c26cec3f-5ac6-460e-8a1a-90c4c039109c', 'df798811-8cbe-4392-bf19-2778267eed17', '2026-11-03 16:05:13.909747-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000003', '2026-11-06', '10:00:00', '12:00:00', 'Taller Practico de Ciberseguridad y Enrutamiento BGP', 'Aprobada', 'ad4b36f0-485d-4d2e-b862-0951bcb73006', 'f6bad81d-b483-43f8-b925-c19d0a1f49f4', '2026-11-03 16:05:13.909748-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000004', '2026-11-09', '14:00:00', '16:00:00', 'Reunion de Coordinacion de Comite de Calidad e ICACIT', 'Aprobada', 'bc19aca7-03a3-4cfa-b075-e1efb7767e25', 'f61b2d25-b048-46f2-a48e-22a8e0a05dc2', '2026-11-03 16:05:13.909749-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000005', '2026-11-07', '15:00:00', '18:00:00', 'Sesion de Modelado Tridimensional e Impresion 3D', 'Aprobada', 'd5c1a8e2-8924-42b7-a389-72f883b10c9a', 'a5e3b7b5-ba9f-49ee-a82f-cf919ce4c494', '2026-11-03 16:05:13.909750-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000006', '2026-11-10', '08:00:00', '10:00:00', 'Examen Practico de Algoritmos y Estructuras de Datos', 'Aprobada', 'd5c1a8e2-8924-42b7-a389-72f883b10c9a', '1a7b795e-0617-49a8-8ed1-434e38e97b43', '2026-11-03 16:05:13.909751-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000007', '2026-11-12', '14:00:00', '17:00:00', 'Ceremonia de Clausura del Concurso de Innovacion Tecnologica', 'Aprobada', '7b2532ca-88bb-4f6c-b449-a37d9dc7a302', 'df798811-8cbe-4392-bf19-2778267eed17', '2026-11-03 16:05:13.909752-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000008', '2026-11-10', '14:00:00', '17:00:00', 'Taller de Primeros Auxilios y Atencion Prehospitalaria', 'Pendiente', 'c26cec3f-5ac6-460e-8a1a-90c4c039109c', '49074fdc-a303-428d-bbf5-c68205dfbbae', '2026-11-03 16:05:13.909753-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000009', '2026-11-11', '10:00:00', '12:00:00', 'Sesion Ordinaria de Consejo de Facultad de Ingenieria', 'Pendiente', 'ad4b36f0-485d-4d2e-b862-0951bcb73006', 'f61b2d25-b048-46f2-a48e-22a8e0a05dc2', '2026-11-03 16:05:13.909754-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000010', '2026-11-12', '09:00:00', '12:00:00', 'Desarrollo de Algoritmos de Vision Artificial para Drones', 'Pendiente', 'bc19aca7-03a3-4cfa-b075-e1efb7767e25', '6aa842e9-bb8f-4c64-95b0-3903c3fae8bd', '2026-11-03 16:05:13.909755-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000011', '2026-11-08', '14:00:00', '17:00:00', 'Conferencia de Etica en la Inteligencia Artificial y Big Data', 'Pendiente', 'd5c1a8e2-8924-42b7-a389-72f883b10c9a', 'df798811-8cbe-4392-bf19-2778267eed17', '2026-11-03 16:05:13.909756-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000012', '2026-11-11', '11:00:00', '13:00:00', 'Reunion no autorizada de asociacion estudiantil externa', 'Rechazada', 'bc19aca7-03a3-4cfa-b075-e1efb7767e25', '62b1ee86-76ba-4e06-aff6-ec6e09976975', '2026-11-03 16:05:13.909757-05');
+INSERT INTO public.reservas VALUES ('a1010001-1111-4000-8000-000000000013', '2026-11-11', '15:00:00', '17:00:00', 'Sesion de Pruebas de Visores Oculus por Mantenimiento', 'Cancelada', 'd5c1a8e2-8924-42b7-a389-72f883b10c9a', 'a5e3b7b5-ba9f-49ee-a82f-cf919ce4c494', '2026-11-03 16:05:13.909758-05');
 
 
 --
@@ -169,6 +182,8 @@ INSERT INTO public.usuarios VALUES ('a697a0f0-cefc-42a4-a746-7cbacba10dac', 'Adm
 INSERT INTO public.usuarios VALUES ('ad4b36f0-485d-4d2e-b862-0951bcb73006', 'Ana Torres Rojas', 'ana.torres@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Solicitante', true);
 INSERT INTO public.usuarios VALUES ('bc19aca7-03a3-4cfa-b075-e1efb7767e25', 'David Castro Morales', 'david.castro@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Solicitante', true);
 INSERT INTO public.usuarios VALUES ('c26cec3f-5ac6-460e-8a1a-90c4c039109c', 'Juan Perez Huaman', 'juan.perez@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Solicitante', true);
+INSERT INTO public.usuarios VALUES ('e4b2d189-9a7c-4822-b514-648dc829a01f', 'Carlos Benites Vega', 'carlos.benites@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Responsable', true);
+INSERT INTO public.usuarios VALUES ('d5c1a8e2-8924-42b7-a389-72f883b10c9a', 'Elena Morales Ramos', 'elena.morales@upla.edu.pe', 'AQAAAAIAAYagAAAAEPYxUE4d9EBoVRLfRItVM3XkooEI/3EULPMYYSRwUqPsQ3WWofxeQOoDrWKwbEXGyg==', 'Solicitante', true);
 
 
 --

@@ -1,5 +1,6 @@
 import { REGLAS } from '../constants/reglas';
 import { MENSAJES } from '../constants/mensajes';
+import { obtenerFechaLocalISO } from '../utils/fecha';
 
 // Trazabilidad: ISO 9241-11 Eficacia · Validación cliente de primer nivel
 export function validarCorreo(correo) {
@@ -26,7 +27,7 @@ export function validarClave(clave) {
 
 export function validarFormularioReserva({ fecha, horaInicio, horaFin, motivo, ambienteId }) {
   const errores = {};
-  const hoy = new Date().toISOString().split('T')[0];
+  const hoy = obtenerFechaLocalISO();
 
   if (!ambienteId) errores.ambienteId = 'Seleccione el ambiente a reservar.';
   if (!fecha) errores.fecha = MENSAJES.FECHA_REQUERIDA;
@@ -53,6 +54,40 @@ export function validarFormularioReserva({ fecha, horaInicio, horaFin, motivo, a
 
   return {
     esValido: Object.keys(errores).length === 0,
+    errores,
+  };
+}
+
+// Trazabilidad: RF-02 · Validación de creación de ambientes
+export function validarAmbiente({ nombre, tipo, capacidad, ubicacion }) {
+  const errores = {};
+  const nom = nombre ? nombre.trim() : '';
+  const ubi = ubicacion ? ubicacion.trim() : '';
+  const cap = Number(capacidad);
+
+  if (!nom) {
+    errores.nombre = MENSAJES.AMBIENTE_NOMBRE_REQUERIDO;
+  } else if (nom.length < REGLAS.AMBIENTE.MIN_NOMBRE || nom.length > REGLAS.AMBIENTE.MAX_NOMBRE) {
+    errores.nombre = MENSAJES.AMBIENTE_NOMBRE_LONGITUD;
+  }
+
+  if (!tipo) {
+    errores.tipo = MENSAJES.AMBIENTE_TIPO_REQUERIDO;
+  }
+
+  if (isNaN(cap) || cap < REGLAS.AMBIENTE.MIN_CAPACIDAD || cap > REGLAS.AMBIENTE.MAX_CAPACIDAD) {
+    errores.capacidad = MENSAJES.AMBIENTE_CAPACIDAD_INVALIDA;
+  }
+
+  if (!ubi) {
+    errores.ubicacion = MENSAJES.AMBIENTE_UBICACION_REQUERIDA;
+  } else if (ubi.length > REGLAS.AMBIENTE.MAX_UBICACION) {
+    errores.ubicacion = MENSAJES.AMBIENTE_UBICACION_LONGITUD;
+  }
+
+  return {
+    esValido: Object.keys(errores).length === 0,
+    errores,
     errores,
   };
 }

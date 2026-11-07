@@ -50,4 +50,35 @@ public class Usuario
             Act_Usuario = true
         };
     }
+
+    // Trazabilidad: RF-01 · Actualización de perfil administrativo
+    public void Actualizar(string nombre, RolUsuario rol, bool activo)
+    {
+        var nomNorm = ReglasUsuario.NormalizarNombre(nombre);
+
+        if (string.IsNullOrWhiteSpace(nomNorm))
+            throw new DomainException(Mensajes.NombreRequerido);
+        if (nomNorm.Length < ReglasUsuario.MinLongitudNombre || nomNorm.Length > ReglasUsuario.MaxLongitudNombre)
+            throw new DomainException(Mensajes.NombreLongitud);
+        if (!ReglasUsuario.RegexNombreValido.IsMatch(nomNorm))
+            throw new DomainException(Mensajes.NombreInvalido);
+
+        Nom_Usuario = nomNorm;
+        Rol_Usuario = rol;
+        Act_Usuario = activo;
+    }
+
+    // Trazabilidad: Seguridad · Actualización segura de credencial hasheada
+    public void ActualizarClave(string nuevoHash)
+    {
+        if (string.IsNullOrWhiteSpace(nuevoHash))
+            throw new DomainException(Mensajes.ClaveRequerida);
+        Has_Usuario = nuevoHash;
+    }
+
+    // Trazabilidad: RF-01 · Activación y desactivación de cuenta
+    public void CambiarEstado(bool activo)
+    {
+        Act_Usuario = activo;
+    }
 }

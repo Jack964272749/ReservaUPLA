@@ -1,21 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { HelpCircle, X, Clock, ShieldCheck, AlertCircle, Phone } from 'lucide-react';
 
 // Trazabilidad: Nielsen H10 (Ayuda y documentación) · Shneiderman S8 (Reducir carga cognitiva) · ISO 9241-11
 export default function PanelAyuda({ isOpen, onClose }) {
+  // Escape cierra la ventana (Shneiderman S7 · Control del usuario)
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const alTeclear = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', alTeclear);
+    return () => window.removeEventListener('keydown', alTeclear);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
-  return (
+  // Se renderiza en el body: el header usa backdrop-filter y desplazaba la ventana fuera del centro
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-950/55 backdrop-blur-sm animate-ayuda-fondo"
       role="presentation"
+      onClick={onClose}
     >
       <div
         id="panel-ayuda-contenido"
         role="dialog"
         aria-modal="true"
         aria-labelledby="panel-ayuda-titulo"
-        className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto border border-slate-200 dark:border-slate-700 p-6"
+        onClick={(e) => e.stopPropagation()}
+        className="animate-ayuda-caer bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto border border-slate-200 dark:border-slate-700 p-6"
       >
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700">
           <div className="flex items-center gap-2.5 text-sky-700 dark:text-sky-400">
@@ -90,6 +104,7 @@ export default function PanelAyuda({ isOpen, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

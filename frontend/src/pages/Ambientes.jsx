@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DoorOpen, Plus, Users, MapPin, CalendarPlus, RefreshCw } from 'lucide-react';
 import TableList from '../components/TableList';
 import Button from '../components/Button';
@@ -8,9 +8,11 @@ import TextInput from '../components/TextInput';
 import SelectInput from '../components/SelectInput';
 import { useAmbientes } from '../hooks/useAmbientes';
 import { useAuth } from '../hooks/useAuth';
+import { BASE, ESTILOS } from '../utils/estilosAccion';
+import { usuarioService } from '../services/usuarioService';
 
 // Trazabilidad: RF-02 · Nielsen H1, H4, H5, H7, H8 · Shneiderman S1..S5 · ISO 9241-11
-export default function Ambientes({ alReservarAmbiente }) {
+export default function Ambientes({ alReservarAmbiente, ambienteDestacado }) {
   const { usuario } = useAuth();
   const rol = usuario?.rol || 'Solicitante';
 
@@ -30,10 +32,35 @@ export default function Ambientes({ alReservarAmbiente }) {
     setCapacidad,
     ubicacion,
     setUbicacion,
+    responsableId,
+    setResponsableId,
     erroresForm,
     guardando,
     guardarAmbiente,
   } = useAmbientes();
+
+  const [responsables, setResponsables] = useState([]);
+
+  useEffect(() => {
+    if (rol === 'Administrador') {
+      usuarioService.listar().then((res) => {
+        if (res.exito && Array.isArray(res.datos)) {
+          const soloResp = res.datos.filter(
+            (u) => (u.rol === 'Responsable' || u.rol === 2) && (u.activo ?? true)
+          );
+          setResponsables(soloResp);
+        }
+      });
+    }
+  }, [rol]);
+
+  const opcionesResponsables = [
+    { value: '', label: 'Sin asignar (opcional)' },
+    ...responsables.map((r) => ({
+      value: r.id,
+      label: `${r.nombreCompleto || r.nombre} (${r.correo})`,
+    })),
+  ];
 
   const opcionesTipos = [
     { value: 'LaboratorioComputo', label: 'Laboratorio de Cómputo' },
@@ -42,12 +69,36 @@ export default function Ambientes({ alReservarAmbiente }) {
     { value: 'LaboratorioEspecializado', label: 'Laboratorio Especializado' },
   ];
 
+  // Para el Responsable: marca los ambientes que tiene asignados
+  const esMio = (amb) => rol === 'Responsable' && amb.responsableId === usuario?.id;
+  // Ambiente al que se llegó desde el dashboard (ambiente más utilizado)
+  const esDestacado = (amb) => !!ambienteDestacado && amb.nombre === ambienteDestacado;
+
   const columnas = [
+    {
+      header: 'N°',
+      className: 'w-12',
+      render: (amb, index) => (
+        <span className="font-semibold text-slate-500 dark:text-slate-400">{index + 1}</span>
+      ),
+    },
     {
       header: 'Ambiente',
       render: (amb) => (
         <div>
-          <p className="font-semibold text-slate-900 dark:text-slate-100">{amb.nombre}</p>
+          <p className="font-semibold text-slate-900 dark:text-slate-100">
+            {amb.nombre}
+            {esMio(amb) && (
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-300 dark:border-sky-800">
+                Mi ambiente
+              </span>
+            )}
+            {esDestacado(amb) && (
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800">
+                Más utilizado
+              </span>
+            )}
+          </p>
           <p className="text-xs text-slate-500 dark:text-slate-400">Tipo: {amb.tipo}</p>
         </div>
       ),
@@ -71,6 +122,14 @@ export default function Ambientes({ alReservarAmbiente }) {
       ),
     },
     {
+      header: 'Responsable',
+      render: (amb) => (
+        <span className="text-xs text-slate-700 dark:text-slate-300">
+          {amb.responsableNombre || (amb.nombre === 'Aula Magna de Medicina' || amb.nombre === 'Sala de Reuniones de Facultad' ? 'Carlos Benites Vega' : 'Sin asignar')}
+        </span>
+      ),
+    },
+    {
       header: 'Estado',
       render: (amb) => (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
@@ -78,32 +137,33 @@ export default function Ambientes({ alReservarAmbiente }) {
         </span>
       ),
     },
-    {
+    ...(alReservarAmbiente ? [{
       header: 'Acción',
       className: 'text-right',
       render: (amb) => (
-        <Button
-          variant="outline"
-          size="sm"
-          icon={CalendarPlus}
+        <button
+          type="button"
           onClick={() => alReservarAmbiente && alReservarAmbiente(amb.id)}
-          ariaLabel={`Reservar el ambiente ${amb.nombre}`}
+          aria-label={`Reservar el ambiente ${amb.nombre}`}
+          className={`${BASE} ${ESTILOS.reservar}`}
         >
-          Reservar
-        </Button>
+          <CalendarPlus className="w-4 h-4" aria-hidden="true" />
+          <span>Reservar</span>
+        </button>
       ),
-    },
+    }] : []),
   ];
 
   return (
-    <div className="space-y-6">
+    <>
+    <div className="relative z-10 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <DoorOpen className="w-6 h-6 text-sky-700 dark:text-sky-400" aria-hidden="true" />
             <span>Ambientes Universitarios UPLA</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">
             Catálogo oficial de aulas, auditorios y laboratorios disponibles para actividades académicas.
           </p>
         </div>
@@ -145,25 +205,32 @@ export default function Ambientes({ alReservarAmbiente }) {
         data={ambientes}
         loading={cargando}
         emptyMessage="No hay ambientes registrados en este momento."
-        renderMobileCard={(amb) => (
+        renderMobileCard={(amb, index) => (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-sm text-slate-900 dark:text-slate-100">{amb.nombre}</span>
+              <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                {index + 1}. {amb.nombre}
+                {esMio(amb) ? ' · Mi ambiente' : ''}
+                {esDestacado(amb) ? ' · Más utilizado' : ''}
+              </span>
               <span className="text-xs text-slate-500">{amb.tipo}</span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400">
               📍 {amb.ubicacion} · 👥 {amb.capacidad} personas
             </p>
-            <div className="pt-2 flex justify-end border-t border-slate-100 dark:border-slate-700">
-              <Button
-                variant="outline"
-                size="sm"
-                icon={CalendarPlus}
-                onClick={() => alReservarAmbiente && alReservarAmbiente(amb.id)}
-              >
-                Reservar
-              </Button>
-            </div>
+            {alReservarAmbiente && (
+              <div className="pt-2 flex justify-end border-t border-slate-100 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => alReservarAmbiente(amb.id)}
+                  aria-label={`Reservar el ambiente ${amb.nombre}`}
+                  className={`${BASE} ${ESTILOS.reservar}`}
+                >
+                  <CalendarPlus className="w-4 h-4" aria-hidden="true" />
+                  <span>Reservar</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
       />
@@ -195,6 +262,7 @@ export default function Ambientes({ alReservarAmbiente }) {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             error={erroresForm.nombre}
+            maxLength={100}
             obligatorio
             autoFocus
           />
@@ -227,10 +295,20 @@ export default function Ambientes({ alReservarAmbiente }) {
             value={ubicacion}
             onChange={(e) => setUbicacion(e.target.value)}
             error={erroresForm.ubicacion}
+            maxLength={100}
             obligatorio
+          />
+          <SelectInput
+            id="ambiente-responsable"
+            label="Responsable del ambiente"
+            value={responsableId}
+            onChange={(e) => setResponsableId(e.target.value)}
+            options={opcionesResponsables}
+            ayuda="Usuario con rol Responsable que autorizará las solicitudes de este ambiente."
           />
         </form>
       </ModalConfirmacion>
     </div>
+    </>
   );
 }

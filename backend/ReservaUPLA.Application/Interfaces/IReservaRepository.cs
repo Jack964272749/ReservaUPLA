@@ -33,5 +33,7 @@ public interface IReservaRepository
     Task ActualizarAsync(Reserva reserva, CancellationToken cancellationToken = default);
     Task<int> ContarPorEstadoAsync(EstadoReserva? estado, CancellationToken cancellationToken = default);
     Task<(string NombreAmbiente, int Cantidad)?> ObtenerAmbienteMasUtilizadoAsync(CancellationToken cancellationToken = default);
+    Task<Dictionary<string, int>> ObtenerDistribucionPorTipoAmbienteAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<Reserva>> ObtenerReservasDeFechaAsync(DateOnly fecha, int limite = 5, CancellationToken cancellationToken = default);
     Task EjecutarEnTransaccionSerializableAsync(Func<Task> accion, CancellationToken cancellationToken = default);
 }

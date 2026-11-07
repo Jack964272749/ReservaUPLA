@@ -7,6 +7,7 @@ using ReservaUpla.Application.Services;
 using ReservaUpla.Infrastructure.Data;
 using ReservaUpla.Infrastructure.Repositories;
 using ReservaUpla.Infrastructure.Security;
+using ReservaUpla.Infrastructure.Services;
 
 namespace ReservaUpla.API.Extensions;
 
@@ -16,6 +17,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUsuarioService, UsuarioService>();
         services.AddScoped<IAmbienteService, AmbienteService>();
         services.AddScoped<IReservaService, ReservaService>();
         services.AddScoped<IDashboardService, DashboardService>();
@@ -32,6 +34,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAmbienteRepository, AmbienteRepository>();
         services.AddScoped<IReservaRepository, ReservaRepository>();
         services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
+        services.AddSingleton<IRelojService, RelojService>();
         return services;
     }
 

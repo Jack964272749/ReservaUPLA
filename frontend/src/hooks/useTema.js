@@ -9,7 +9,7 @@ export function useTema() {
     } catch {
       // Ignorar fallo de acceso a storage
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return 'light';
   });
 
   useEffect(() => {

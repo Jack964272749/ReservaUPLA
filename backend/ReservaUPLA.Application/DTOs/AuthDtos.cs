@@ -12,3 +12,7 @@ public record UsuarioDto(
     string Rol,
     bool Activo
 );
+
+public record ActualizarUsuarioDto(string NombreCompleto, string Rol, bool Activo);
+
+public record CambiarEstadoUsuarioDto(bool Activo);

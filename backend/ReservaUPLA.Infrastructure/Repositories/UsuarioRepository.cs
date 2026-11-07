@@ -41,4 +41,15 @@ public class UsuarioRepository : IUsuarioRepository
         await _context.Usuarios.AddAsync(usuario, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task ActualizarAsync(Usuario usuario, CancellationToken cancellationToken = default)
+    {
+        var local = _context.Usuarios.Local.FirstOrDefault(u => u.Id_Usuario == usuario.Id_Usuario);
+        if (local != null && !ReferenceEquals(local, usuario))
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+        _context.Usuarios.Update(usuario);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

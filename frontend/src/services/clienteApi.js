@@ -23,7 +23,7 @@ export async function peticion(endpoint, opciones = {}) {
     const respuesta = await fetch(url, config);
     clearTimeout(temporizador);
 
-    const esJson = respuesta.headers.get('content-type')?.includes('application/json');
+    const esJson = respuesta.headers.get('content-type')?.includes('json');
     const datos = esJson ? await respuesta.json() : null;
 
     if (!respuesta.ok) {

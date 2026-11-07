@@ -7,15 +7,60 @@ import {
   AlertTriangle,
   Sun,
   Moon,
+  Shield,
+  UserCheck,
+  User,
+  Sparkles,
 } from 'lucide-react';
 import TextInput from '../components/TextInput';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import Logo from '../components/Logo';
+import FondoModulo from '../components/FondoModulo';
+import LienzoIgloo from '../components/LienzoIgloo';
 import { useLogin } from '../hooks/useLogin';
 import { useTema } from '../hooks/useTema';
 
 const anioActual = new Date().getFullYear();
+
+const CUENTAS_DEMO = [
+  {
+    rol: 'Admin',
+    titulo: 'Administrador',
+    subtitulo: 'Control total',
+    correo: 'admin@upla.edu.pe',
+    clave: 'UPLA#Admin$2026!SecOps*9',
+    icono: Shield,
+    colorBorde: 'border-rose-200 hover:border-rose-400 dark:border-rose-900/60 dark:hover:border-rose-700',
+    colorBg: 'bg-rose-50/60 hover:bg-rose-100/70 dark:bg-rose-950/20 dark:hover:bg-rose-950/40',
+    colorTexto: 'text-rose-700 dark:text-rose-400',
+    colorBadge: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300',
+  },
+  {
+    rol: 'Responsable',
+    titulo: 'Responsable',
+    subtitulo: 'Ambientes y Labs',
+    correo: 'responsable@upla.edu.pe',
+    clave: 'UPLA#Resp$2026!GestAmb*4',
+    icono: UserCheck,
+    colorBorde: 'border-amber-200 hover:border-amber-400 dark:border-amber-900/60 dark:hover:border-amber-700',
+    colorBg: 'bg-amber-50/60 hover:bg-amber-100/70 dark:bg-amber-950/20 dark:hover:bg-amber-950/40',
+    colorTexto: 'text-amber-700 dark:text-amber-400',
+    colorBadge: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+  },
+  {
+    rol: 'Solicitante',
+    titulo: 'Solicitante',
+    subtitulo: 'Docente / Alumno',
+    correo: 'solicitante@upla.edu.pe',
+    clave: 'UPLA#Solic$2026!AcadUpla*7',
+    icono: User,
+    colorBorde: 'border-sky-200 hover:border-sky-400 dark:border-sky-900/60 dark:hover:border-sky-700',
+    colorBg: 'bg-sky-50/60 hover:bg-sky-100/70 dark:bg-sky-950/20 dark:hover:bg-sky-950/40',
+    colorTexto: 'text-sky-700 dark:text-sky-400',
+    colorBadge: 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300',
+  },
+];
 
 // Trazabilidad: Nielsen H1, H2, H3, H4, H5 (BloqMayús), H6, H7, H8, H9 · Shneiderman S1..S5 · ISO 9241-11
 export default function Login({ alIrARegistro }) {
@@ -39,13 +84,29 @@ export default function Login({ alIrARegistro }) {
 
   const { tema, alternarTema } = useTema();
 
+  const autocompletarCuenta = (cuenta) => {
+    setCorreo(cuenta.correo);
+    setClave(cuenta.clave);
+  };
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#EDF3F9] dark:bg-slate-950 transition-colors">
       {/* Panel Izquierdo: Formulario de Autenticación (~35-40% en desktop) */}
       <div className="flex-1 lg:max-w-md xl:max-w-lg w-full flex flex-col justify-between p-6 sm:p-10 lg:p-12 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xl lg:shadow-none z-10">
         <div>
           <div className="mb-8 flex items-center justify-between">
-            <Logo />
+            <div className="flex items-center gap-3">
+              <Logo className="h-10 w-auto" />
+              <div className="border-l border-slate-300 dark:border-slate-700 pl-3">
+                <div className="text-xl font-black tracking-tight leading-none">
+                  <span className="text-sky-600 dark:text-sky-400">Reserva</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-bold">UPLA</span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-none mt-1">
+                  Universidad Peruana Los Andes
+                </p>
+              </div>
+            </div>
             <button
               type="button"
               onClick={alternarTema}
@@ -56,7 +117,7 @@ export default function Login({ alIrARegistro }) {
             </button>
           </div>
 
-          <div className="mb-8">
+          <div className="mb-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
               Iniciar sesión
             </h1>
@@ -75,7 +136,7 @@ export default function Login({ alIrARegistro }) {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
             <TextInput
               inputRef={correoRef}
               id="login-correo"
@@ -148,8 +209,57 @@ export default function Login({ alIrARegistro }) {
             </Button>
           </form>
 
+          {/* Botones de Autocompletado de Usuarios para Pruebas / Demostración */}
+          <div className="mt-6 pt-5 border-t border-slate-200/90 dark:border-slate-800">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
+                <span>ACCESO DE DEMOSTRACIÓN</span>
+              </span>
+              <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                1 clic
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              {CUENTAS_DEMO.map((cuenta) => {
+                const Icono = cuenta.icono;
+                const estaSeleccionado = correo === cuenta.correo;
+                return (
+                  <button
+                    key={cuenta.rol}
+                    type="button"
+                    onClick={() => autocompletarCuenta(cuenta)}
+                    disabled={enviando}
+                    title={`Acceso de demostración como ${cuenta.titulo} (${cuenta.correo})`}
+                    className={`p-2 sm:p-2.5 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between ${cuenta.colorBorde} ${cuenta.colorBg} ${
+                      estaSeleccionado
+                        ? 'ring-2 ring-sky-500 shadow-sm scale-[1.02]'
+                        : 'hover:shadow-xs hover:-translate-y-0.5'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1">
+                      <Icono className={`w-4 h-4 ${cuenta.colorTexto}`} aria-hidden="true" />
+                      {estaSeleccionado && (
+                        <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
+                      )}
+                    </div>
+                    <div>
+                      <p className={`text-xs font-bold leading-tight ${cuenta.colorTexto}`}>
+                        {cuenta.titulo}
+                      </p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                        {cuenta.subtitulo}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {alIrARegistro && (
-            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center text-sm text-slate-600 dark:text-slate-400">
+            <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-sm text-slate-600 dark:text-slate-400">
               <span>¿No cuentas con usuario? </span>
               <button
                 type="button"
@@ -162,21 +272,28 @@ export default function Login({ alIrARegistro }) {
           )}
         </div>
 
-        <div className="mt-8 pt-4 text-center text-xs text-slate-400 dark:text-slate-500">
+        <div className="mt-6 pt-3 text-center text-xs text-slate-400 dark:text-slate-500">
           <p>© {anioActual} Universidad Peruana Los Andes</p>
           <p className="mt-0.5 text-[11px]">Sistema Oficial de Reserva de Ambientes</p>
         </div>
       </div>
 
       {/* Panel Derecho: Imagen / Brand Showcase Institucional (~60-65% en desktop) */}
-      <div className="hidden lg:flex flex-1 flex-col justify-between p-12 xl:p-16 bg-gradient-to-br from-slate-950 via-sky-950 to-slate-900 text-white relative overflow-hidden">
+      <FondoModulo
+        imagen="/backgrounds/bg_login.jpg"
+        className="hidden lg:flex flex-1 flex-col justify-between p-12 xl:p-16 text-white rounded-none border-0"
+        overlayClassName="bg-gradient-to-br from-slate-950/75 via-sky-950/70 to-slate-900/75"
+      >
+        <LienzoIgloo className="absolute inset-0 z-10 pointer-events-none" />
+        <div className="relative z-20 flex flex-col justify-between h-full pointer-events-none *:pointer-events-auto">
+
         {/* Decoración de fondo */}
         <div
-          className="absolute -top-32 -right-32 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"
+          className="absolute -top-32 -right-32 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none z-[1]"
           aria-hidden="true"
         />
         <div
-          className="absolute -bottom-32 -left-32 w-96 h-96 bg-sky-700/15 rounded-full blur-3xl pointer-events-none"
+          className="absolute -bottom-32 -left-32 w-96 h-96 bg-sky-700/15 rounded-full blur-3xl pointer-events-none z-[1]"
           aria-hidden="true"
         />
 
@@ -212,64 +329,64 @@ export default function Login({ alIrARegistro }) {
 
         {/* Mensaje central */}
         <div className="my-auto py-10 z-10 max-w-2xl">
-          <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white leading-tight">
+          <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white leading-tight drop-shadow-lg">
             Tecnología que impulsa la{' '}
             <span className="bg-gradient-to-r from-sky-400 to-cyan-300 bg-clip-text text-transparent">
               gestión académica
             </span>
           </h2>
-          <p className="mt-4 text-slate-300 text-sm xl:text-base leading-relaxed">
+          <p className="mt-4 text-slate-200 text-sm xl:text-base leading-relaxed drop-shadow-md">
             Plataforma oficial para registrar, validar y consultar la disponibilidad de
             auditorios, laboratorios y salas de conferencias en tiempo real con validación
             estricta de cruces horarios.
           </p>
 
-          {/* Tarjetas de características (como en la imagen de referencia) */}
+          {/* Tarjetas de características */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
+            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-700/60 backdrop-blur-md">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-lg bg-sky-500/20 text-sky-400">
                   <CalendarCheck2 className="w-4 h-4" />
                 </div>
                 <h3 className="font-semibold text-sm text-slate-100">Disponibilidad en Vivo</h3>
               </div>
-              <p className="text-xs text-slate-400 leading-normal">
+              <p className="text-xs text-slate-300 leading-normal">
                 Verificación inmediata de ambientes para evitar cruces y reservas duplicadas.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
+            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-700/60 backdrop-blur-md">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400">
                   <Building className="w-4 h-4" />
                 </div>
                 <h3 className="font-semibold text-sm text-slate-100">Gestión de Ambientes</h3>
               </div>
-              <p className="text-xs text-slate-400 leading-normal">
+              <p className="text-xs text-slate-300 leading-normal">
                 Control de laboratorios de cómputo, auditorios institucionales y salas de reuniones.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
+            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-700/60 backdrop-blur-md">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
                   <BarChart3 className="w-4 h-4" />
                 </div>
                 <h3 className="font-semibold text-sm text-slate-100">Panel de Indicadores</h3>
               </div>
-              <p className="text-xs text-slate-400 leading-normal">
+              <p className="text-xs text-slate-300 leading-normal">
                 Métricas de uso, solicitudes pendientes y ambiente de mayor demanda académica.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
+            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-700/60 backdrop-blur-md">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <h3 className="font-semibold text-sm text-slate-100">Seguridad por Roles</h3>
               </div>
-              <p className="text-xs text-slate-400 leading-normal">
+              <p className="text-xs text-slate-300 leading-normal">
                 Permisos diferenciados para Solicitantes, Responsables y Administradores.
               </p>
             </div>
@@ -277,10 +394,11 @@ export default function Login({ alIrARegistro }) {
         </div>
 
         {/* Footer institucional */}
-        <div className="z-10 text-xs text-slate-500">
+        <div className="z-10 text-xs text-slate-400 drop-shadow">
           <p>Campus Universitario Chorrillos · Huancayo, Junín</p>
         </div>
-      </div>
+        </div>
+      </FondoModulo>
     </div>
   );
 }

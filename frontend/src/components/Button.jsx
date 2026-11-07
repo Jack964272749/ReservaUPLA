@@ -15,7 +15,7 @@ export default function Button({
   motivoDeshabilitado,
 }) {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium rounded-lg transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none min-h-[44px]';
+    'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:hover:translate-y-0 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none min-h-[44px]';
 
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-xs gap-1.5',
@@ -25,7 +25,7 @@ export default function Button({
 
   const variantClasses = {
     primary:
-      'bg-sky-700 hover:bg-sky-800 active:bg-sky-900 text-white focus:ring-sky-600 shadow-sky-700/20 dark:bg-sky-600 dark:hover:bg-sky-700',
+      'bg-gradient-to-r from-sky-500 to-sky-700 hover:from-sky-600 hover:to-sky-800 active:from-sky-700 active:to-sky-900 text-white focus:ring-sky-500 shadow-sky-700/25',
     secondary:
       'bg-slate-700 hover:bg-slate-800 active:bg-slate-900 text-white focus:ring-slate-600 dark:bg-slate-600 dark:hover:bg-slate-500',
     success:
@@ -33,7 +33,7 @@ export default function Button({
     danger:
       'bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white focus:ring-rose-500 shadow-rose-600/20',
     outline:
-      'border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 focus:ring-slate-400',
+      'border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 hover:border-sky-400 hover:bg-sky-50 hover:text-sky-700 dark:hover:border-sky-700 dark:hover:bg-sky-950/30 dark:hover:text-sky-300 text-slate-700 dark:text-slate-200 focus:ring-sky-400',
   };
 
   return (

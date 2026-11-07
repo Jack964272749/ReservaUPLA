@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest';
+import { MENSAJES } from '../constants/mensajes';
 import {
   validarCorreo,
   validarNombre,
   validarClave,
   validarFormularioReserva,
+  validarAmbiente,
 } from './validaciones';
 
 describe('Validaciones de Usuario y Reserva', () => {
@@ -82,5 +84,44 @@ describe('Validaciones de Usuario y Reserva', () => {
     });
     expect(res.esValido).toBe(true);
     expect(Object.keys(res.errores).length).toBe(0);
+  });
+
+  describe('validarAmbiente', () => {
+    it('E-11 / RV-07: rechaza ubicación con más de 100 caracteres (101 caracteres)', () => {
+      const ubicacion101 = 'A'.repeat(101);
+      const resultado = validarAmbiente({
+        nombre: 'Laboratorio de Redes',
+        tipo: 'LaboratorioComputo',
+        capacidad: 30,
+        ubicacion: ubicacion101,
+      });
+
+      expect(resultado.esValido).toBe(false);
+      expect(resultado.errores.ubicacion).toBe(MENSAJES.AMBIENTE_UBICACION_LONGITUD);
+    });
+
+    it('E-11 / RV-04: rechaza nombre menor a 3 caracteres', () => {
+      const resultado = validarAmbiente({
+        nombre: 'AB',
+        tipo: 'LaboratorioComputo',
+        capacidad: 30,
+        ubicacion: 'Pabellón A',
+      });
+
+      expect(resultado.esValido).toBe(false);
+      expect(resultado.errores.nombre).toBe(MENSAJES.AMBIENTE_NOMBRE_LONGITUD);
+    });
+
+    it('acepta ambiente con datos válidos', () => {
+      const resultado = validarAmbiente({
+        nombre: 'Auditorio Principal',
+        tipo: 'Auditorio',
+        capacidad: 150,
+        ubicacion: 'Edificio Central - 1er Piso',
+      });
+
+      expect(resultado.esValido).toBe(true);
+      expect(Object.keys(resultado.errores).length).toBe(0);
+    });
   });
 });
