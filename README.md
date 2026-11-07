@@ -6,7 +6,7 @@ Desarrollado bajo **Clean Architecture** en **.NET 8 Web API** y **React + Vite 
 
 ---
 
-## 📋 Requisitos del Sistema
+## Requisitos del Sistema
 
 - **.NET SDK**: Versión 8.0 o superior (`dotnet --version`)
 - **Node.js**: Versión 18.x o 20.x LTS y npm (`node -v`, `npm -v`)
@@ -15,7 +15,7 @@ Desarrollado bajo **Clean Architecture** en **.NET 8 Web API** y **React + Vite 
 
 ---
 
-## ⚙️ Configuración y Cadena de Conexión
+## Configuración y Cadena de Conexión
 
 ### Opción A: Usando .NET User-Secrets (Recomendado para desarrollo)
 
@@ -57,7 +57,7 @@ Editar `backend/ReservaUPLA.API/appsettings.Development.json`:
 
 ---
 
-## 🗄️ Base de Datos y Migraciones
+## Base de Datos y Migraciones
 
 ### Opción 1: Aplicar migraciones mediante EF Core
 
@@ -80,7 +80,7 @@ psql -U postgres -d ReservaUPLADB -f database.sql
 
 ---
 
-## 🚀 Ejecución del Sistema
+## Ejecución del Sistema
 
 ### 1. Iniciar Backend (.NET 8 Web API)
 
@@ -106,7 +106,7 @@ npm run dev
 
 ---
 
-## 🧪 Ejecución de Pruebas Automatizadas
+## Ejecución de Pruebas Automatizadas
 
 ### Pruebas Unitarias del Backend (xUnit)
 
@@ -122,7 +122,7 @@ npm test --prefix frontend -- --run
 
 ---
 
-## 👥 Cuentas de Prueba del Seeder
+## Cuentas de Prueba del Seeder
 
 | Rol | Nombre | Correo Institucional | Contraseña | Ambientes Asignados |
 | :--- | :--- | :--- | :--- | :--- |
@@ -136,7 +136,7 @@ npm test --prefix frontend -- --run
 
 ---
 
-## 📁 Estructura del Repositorio
+## Estructura del Repositorio
 
 ```
 ReservaUPLA/
@@ -162,7 +162,7 @@ ReservaUPLA/
 
 ---
 
-## 📦 Cómo empaquetar el proyecto
+## Cómo empaquetar el proyecto
 
 Para generar el entregable en archivo comprimido `.zip` excluyendo carpetas transitorias de compilación (`bin/`, `obj/`, `node_modules/`, `dist/`, `.vs/`) pero preservando el código fuente y `database.sql`:
 
