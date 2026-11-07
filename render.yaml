@@ -25,6 +25,6 @@ services:
 databases:
   - name: reservaupla-db
     databaseName: reservaupladb
-    user: postgres
+    user: upla_user
     plan: free
     region: oregon
