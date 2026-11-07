@@ -54,7 +54,7 @@ public static class DatabaseSeeder
             admin = Usuario.Crear("Administrador Central", "admin@upla.edu.pe", adminHash, RolUsuario.Administrador);
             await context.Usuarios.AddAsync(admin);
         }
-        else if (esDesarrollo)
+        else
         {
             admin.ActualizarClave(adminHash);
         }
@@ -65,7 +65,7 @@ public static class DatabaseSeeder
             resp1 = Usuario.Crear("Roberto Salazar Mendoza", "responsable@upla.edu.pe", respHash, RolUsuario.Responsable);
             await context.Usuarios.AddAsync(resp1);
         }
-        else if (esDesarrollo)
+        else
         {
             resp1.ActualizarClave(respHash);
         }
@@ -76,7 +76,7 @@ public static class DatabaseSeeder
             resp2 = Usuario.Crear("Maria Quispe Condori", "maria.quispe@upla.edu.pe", respHash, RolUsuario.Responsable);
             await context.Usuarios.AddAsync(resp2);
         }
-        else if (esDesarrollo)
+        else
         {
             resp2.ActualizarClave(respHash);
         }
@@ -87,7 +87,7 @@ public static class DatabaseSeeder
             resp3 = Usuario.Crear("Carlos Benites Vega", "carlos.benites@upla.edu.pe", respHash, RolUsuario.Responsable);
             await context.Usuarios.AddAsync(resp3);
         }
-        else if (esDesarrollo)
+        else
         {
             resp3.ActualizarClave(respHash);
         }
@@ -98,7 +98,7 @@ public static class DatabaseSeeder
             sol1 = Usuario.Crear("Carmen Flores Quispe", "solicitante@upla.edu.pe", solicHash, RolUsuario.Solicitante);
             await context.Usuarios.AddAsync(sol1);
         }
-        else if (esDesarrollo)
+        else
         {
             sol1.ActualizarClave(solicHash);
         }
@@ -109,7 +109,7 @@ public static class DatabaseSeeder
             sol2 = Usuario.Crear("Juan Perez Huaman", "juan.perez@upla.edu.pe", solicHash, RolUsuario.Solicitante);
             await context.Usuarios.AddAsync(sol2);
         }
-        else if (esDesarrollo)
+        else
         {
             sol2.ActualizarClave(solicHash);
         }
@@ -120,7 +120,7 @@ public static class DatabaseSeeder
             sol3 = Usuario.Crear("Ana Torres Rojas", "ana.torres@upla.edu.pe", solicHash, RolUsuario.Solicitante);
             await context.Usuarios.AddAsync(sol3);
         }
-        else if (esDesarrollo)
+        else
         {
             sol3.ActualizarClave(solicHash);
         }
@@ -131,7 +131,7 @@ public static class DatabaseSeeder
             sol4 = Usuario.Crear("David Castro Morales", "david.castro@upla.edu.pe", solicHash, RolUsuario.Solicitante);
             await context.Usuarios.AddAsync(sol4);
         }
-        else if (esDesarrollo)
+        else
         {
             sol4.ActualizarClave(solicHash);
         }
@@ -142,7 +142,7 @@ public static class DatabaseSeeder
             sol5 = Usuario.Crear("Elena Morales Ramos", "elena.morales@upla.edu.pe", solicHash, RolUsuario.Solicitante);
             await context.Usuarios.AddAsync(sol5);
         }
-        else if (esDesarrollo)
+        else
         {
             sol5.ActualizarClave(solicHash);
         }
