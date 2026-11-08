@@ -434,9 +434,18 @@ export default function LienzoIgloo({ className = '' }) {
     window.addEventListener('blur', manejarMouseLeave);
     document.addEventListener('visibilitychange', manejarVisibilidad);
 
+    const observerTema = new MutationObserver(() => {
+      renderizarCuadro(performance.now());
+    });
+    observerTema.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme'],
+    });
+
     return () => {
       if (animId) cancelAnimationFrame(animId);
       resizeObserver.disconnect();
+      observerTema.disconnect();
       window.removeEventListener('mousemove', manejarMouseMove);
       window.removeEventListener('blur', manejarMouseLeave);
       document.removeEventListener('visibilitychange', manejarVisibilidad);
