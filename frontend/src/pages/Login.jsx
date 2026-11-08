@@ -292,7 +292,8 @@ export default function Login({ alIrARegistro }) {
                 error={errores.clave}
                 placeholder="••••••••"
                 autoComplete="current-password"
-                permitirVerClave={!esClaveDemo}
+                mostrarAlternarClave={true}
+                bloquearMostrarClave={esClaveDemo}
                 helperText={
                   esClaveDemo
                     ? 'Acceso de demostración cargado (contraseña protegida).'
