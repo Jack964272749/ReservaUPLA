@@ -64,9 +64,15 @@ export default function Reservas({ alIrANuevaReserva, estadoInicial }) {
     }
   }, [estadoInicial]);
 
-  // Numeración por orden de registro (solo Administrador)
+  // Orden correlativo: Administrador ve primero las solicitudes Pendientes
   const esAdmin = rol === 'Administrador';
-  const numerosRegistro = useNumeroRegistro(esAdmin, totalRegistros);
+  const reservasOrdenadas = useMemo(() => {
+    return [...reservas].sort((a, b) => {
+      if (a.estado === 'Pendiente' && b.estado !== 'Pendiente') return -1;
+      if (a.estado !== 'Pendiente' && b.estado === 'Pendiente') return 1;
+      return 0;
+    });
+  }, [reservas]);
 
   // Mejora para el Responsable: resumen de uso de los ambientes que tiene asignados
   const esResponsable = rol === 'Responsable';
@@ -98,13 +104,13 @@ export default function Reservas({ alIrANuevaReserva, estadoInicial }) {
       ? [
           {
             header: 'N°',
-            className: 'w-14',
-            render: (r) => (
+            className: 'w-14 text-center',
+            render: (r, index) => (
               <span
-                className="font-bold text-slate-500 dark:text-slate-400"
-                title="Orden de registro de la reserva"
+                className="font-bold text-slate-700 dark:text-slate-300"
+                title="Número correlativo de registro"
               >
-                {numerosRegistro[r.id] ?? '—'}
+                {(paginaActual - 1) * 10 + index + 1}
               </span>
             ),
           },
@@ -349,14 +355,14 @@ export default function Reservas({ alIrANuevaReserva, estadoInicial }) {
       <TableList
         caption="Listado de reservas de ambientes institucionales"
         columns={columnas}
-        data={reservas}
+        data={reservasOrdenadas}
         loading={cargando}
         emptyMessage="No se encontraron reservas con los criterios seleccionados."
-        renderMobileCard={(r) => (
+        renderMobileCard={(r, index) => (
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                {esAdmin && numerosRegistro[r.id] ? `N° ${numerosRegistro[r.id]} · ` : ''}
+                {esAdmin ? `N° ${(paginaActual - 1) * 10 + index + 1} · ` : ''}
                 {r.ambienteNombre}
               </span>
               {badgeEstado(r.estado)}

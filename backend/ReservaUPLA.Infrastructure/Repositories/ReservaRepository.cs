@@ -65,7 +65,8 @@ public class ReservaRepository : IReservaRepository
         var tamanoValido = tamanoPagina < 1 ? 10 : (tamanoPagina > 50 ? 50 : tamanoPagina);
 
         var items = await query
-            .OrderByDescending(r => r.Fre_Reserva)
+            .OrderBy(r => r.Est_Reserva == EstadoReserva.Pendiente ? 0 : 1)
+            .ThenByDescending(r => r.Fre_Reserva)
             .ThenByDescending(r => r.Id_Reserva)
             .Skip((paginaValida - 1) * tamanoValido)
             .Take(tamanoValido)
