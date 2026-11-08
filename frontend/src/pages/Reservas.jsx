@@ -51,14 +51,14 @@ export default function Reservas({ alIrANuevaReserva, estadoInicial }) {
     motivoRechazo,
     setMotivoRechazo,
     ultimoBotonAccionRef,
-  } = useReservas();
+  } = useReservas(estadoInicial);
 
   // Modal para Detalle de Reserva (RF-06)
   const [reservaDetalle, setReservaDetalle] = useState(null);
 
   // Estado preseleccionado (p. ej. al llegar desde la alerta de pendientes del Administrador)
   useEffect(() => {
-    if (estadoInicial) {
+    if (estadoInicial !== undefined && estadoInicial !== null) {
       setFiltroEstado(estadoInicial);
       setPaginaActual(1);
     }

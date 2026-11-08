@@ -137,6 +137,8 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva, alIrAAmbie
             icon={CalendarDays}
             color="sky"
             className="lg:col-span-2"
+            onClick={alIrAReservas ? () => alIrAReservas('') : undefined}
+            pista="Ver todas"
           />
           <CardIndicador
             titulo="Reservas pendientes"
@@ -145,6 +147,8 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva, alIrAAmbie
             icon={Clock}
             color="amber"
             className="lg:col-span-2"
+            onClick={alIrAReservas ? () => alIrAReservas('Pendiente') : undefined}
+            pista="Ver pendientes"
           />
           <CardIndicador
             titulo="Reservas aprobadas"
@@ -153,6 +157,8 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva, alIrAAmbie
             icon={CheckCircle2}
             color="emerald"
             className="sm:col-span-2 lg:col-span-2"
+            onClick={alIrAReservas ? () => alIrAReservas('Aprobada') : undefined}
+            pista="Ver aprobadas"
           />
           <CardIndicador
             titulo="Reservas rechazadas"
@@ -161,6 +167,8 @@ export default function Dashboard({ alIrAReservas, alIrANuevaReserva, alIrAAmbie
             icon={XCircle}
             color="rose"
             className="lg:col-span-3"
+            onClick={alIrAReservas ? () => alIrAReservas('Rechazada') : undefined}
+            pista="Ver rechazadas"
           />
           <CardIndicador
             titulo="Ambiente más utilizado"

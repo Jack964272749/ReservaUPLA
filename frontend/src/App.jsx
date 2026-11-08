@@ -83,7 +83,10 @@ function ContenidoApp() {
 
       {tabActual === 'dashboard' && rol === 'Administrador' && (
         <Dashboard
-          alIrAReservas={() => setActiveTab('reservas')}
+          alIrAReservas={(estado) => {
+            setEstadoInicialReservas(estado !== undefined ? estado : '');
+            setActiveTab('reservas');
+          }}
           alIrAAmbientes={(nombre) => {
             setAmbienteDestacado(nombre || null);
             setActiveTab('ambientes');

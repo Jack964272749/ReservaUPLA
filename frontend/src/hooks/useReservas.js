@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { reservaService } from '../services/reservaService';
 
 // Trazabilidad: RF-05, RF-06, RF-07 · RN-05, RN-06 · Nielsen H1, H3, H5, H9
-export function useReservas() {
+export function useReservas(estadoInicial = '') {
   const [reservas, setReservas] = useState([]);
   const [totalRegistros, setTotalRegistros] = useState(0);
   const [paginaActual, setPaginaActual] = useState(1);
@@ -13,7 +13,7 @@ export function useReservas() {
   // Filtros
   const [filtroFecha, setFiltroFecha] = useState('');
   const [filtroAmbiente, setFiltroAmbiente] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState(estadoInicial || '');
 
   // Modal de acción (Aprobar, Rechazar, Cancelar)
   const [modalAccion, setModalAccion] = useState(null); // { id, nuevoEstado, titulo, mensaje, variante }
