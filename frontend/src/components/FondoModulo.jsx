@@ -4,8 +4,10 @@ import React from 'react';
 function resolverRuta(ruta) {
   if (!ruta) return ruta;
   if (ruta.startsWith('/') && !ruta.startsWith('//')) {
-    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
-    return base ? `${base}${ruta}` : ruta;
+    const base = import.meta.env.BASE_URL;
+    if (!base || base === './' || base === '.' || base === '/') return ruta;
+    const baseLimpia = base.replace(/\/$/, '');
+    return `${baseLimpia}${ruta}`;
   }
   return ruta;
 }
