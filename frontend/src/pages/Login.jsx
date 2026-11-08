@@ -20,6 +20,7 @@ import FondoModulo from '../components/FondoModulo';
 import LienzoIgloo from '../components/LienzoIgloo';
 import { useLogin } from '../hooks/useLogin';
 import { useTema } from '../hooks/useTema';
+import { useAnimacionFondo } from '../hooks/useAnimacionFondo';
 
 const anioActual = new Date().getFullYear();
 
@@ -83,6 +84,7 @@ export default function Login({ alIrARegistro }) {
   } = useLogin();
 
   const { tema, alternarTema } = useTema();
+  const { animacionActiva, alternarAnimacion } = useAnimacionFondo();
   const [esClaveDemo, setEsClaveDemo] = useState(false);
 
   const autocompletarCuenta = (cuenta) => {
@@ -319,23 +321,35 @@ export default function Login({ alIrARegistro }) {
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={alternarTema}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-xs font-medium text-slate-200 transition-colors"
-          >
-            {tema === 'dark' ? (
-              <>
-                <Sun className="w-4 h-4 text-amber-400" />
-                <span>Modo claro</span>
-              </>
-            ) : (
-              <>
-                <Moon className="w-4 h-4 text-sky-300" />
-                <span>Modo oscuro</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={alternarAnimacion}
+              aria-label={animacionActiva ? 'Desactivar animación de fondo' : 'Activar animación de fondo'}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-xs font-medium text-slate-200 transition-colors shadow-sm"
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${animacionActiva ? 'text-amber-400' : 'text-slate-400'}`} />
+              <span>Animación: {animacionActiva ? 'sí' : 'no'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={alternarTema}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-xs font-medium text-slate-200 transition-colors shadow-sm"
+            >
+              {tema === 'dark' ? (
+                <>
+                  <Sun className="w-4 h-4 text-amber-400" />
+                  <span>Modo claro</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-4 h-4 text-sky-300" />
+                  <span>Modo oscuro</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mensaje central */}

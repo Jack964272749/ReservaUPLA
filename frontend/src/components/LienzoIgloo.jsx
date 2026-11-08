@@ -3,7 +3,7 @@ import { useAnimacionFondo } from '../hooks/useAnimacionFondo';
 
 // Trazabilidad: Inspirado en estética de igloo.inc (cristales de hielo, filamentos glaciares, aura etérea)
 // Optimizado para consumo mínimo de CPU y GPU: sin shadowBlur costoso, renderizado por lotes y física fluida.
-// Cumple con WCAG 2.2.2 (Control de movimiento) y compatibilidad móvil/batería.
+// Cumple con WCAG 2.2.2 (Control de movimiento) adaptando la velocidad ante prefers-reduced-motion sin congelar la experiencia.
 export default function LienzoIgloo({ className = '' }) {
   const canvasRef = useRef(null);
   const { animacionActiva } = useAnimacionFondo();
@@ -20,21 +20,21 @@ export default function LienzoIgloo({ className = '' }) {
     let alto = 0;
     let dpr = 1;
 
-    // WCAG 2.2.2: Verificar preferencia de movimiento reducido
+    // WCAG 2.2.2: Detección de preferencia de movimiento reducido (atenúa velocidad en lugar de congelar)
     const mediaQueryMotion =
       typeof window !== 'undefined'
         ? window.matchMedia('(prefers-reduced-motion: reduce)')
         : { matches: false };
-    const prefiereReduccion = mediaQueryMotion.matches;
+    let prefiereReduccion = mediaQueryMotion.matches;
 
-    // Interpolación suave del cursor (física inercial estilo igloo.inc)
+    // Interpolación suave del cursor (física inercial fluida estilo igloo.inc)
     const targetMouse = { x: -1000, y: -1000, activo: false };
-    const mouse = { x: -1000, y: -1000, radio: 190, activo: false };
+    const mouse = { x: -1000, y: -1000, radio: 220, activo: false };
 
     let cristales = [];
     let motasHielo = [];
 
-    // Paletas glaciares (Cyan ártico, blanco diamante, índigo escarcha)
+    // Paletas glaciares árticas (Cyan luminoso, blanco diamante, índigo escarcha)
     const coloresOscuro = [
       { r: 56, g: 189, b: 248 },  // Sky 400
       { r: 125, g: 211, b: 252 }, // Sky 300
@@ -59,43 +59,46 @@ export default function LienzoIgloo({ className = '' }) {
       reset(w, h, aleatorio = false) {
         this.x = aleatorio ? Math.random() * w : Math.random() * w;
         this.y = aleatorio ? Math.random() * h : (Math.random() > 0.5 ? 0 : h);
-        // Movimiento flotante y suave (baja velocidad para serenidad y rendimiento)
-        this.vx = (Math.random() - 0.5) * 0.45;
-        this.vy = (Math.random() - 0.5) * 0.45;
-        this.tamBase = Math.random() * 3.5 + 2.5;
+        // Velocidad perceptible y orgánica para flotación serena
+        this.vx = (Math.random() - 0.5) * 0.85;
+        this.vy = (Math.random() - 0.5) * 0.85;
+        this.tamBase = Math.random() * 3.6 + 2.8;
         this.tam = this.tamBase;
-        this.esRombo = Math.random() > 0.40;
+        this.esRombo = Math.random() > 0.35;
         this.colorIdx = Math.floor(Math.random() * coloresOscuro.length);
-        this.alfaBase = Math.random() * 0.35 + 0.45;
+        this.alfaBase = Math.random() * 0.35 + 0.50;
         this.alfa = this.alfaBase;
         this.angulo = Math.random() * Math.PI * 2;
-        this.velRotacion = (Math.random() - 0.5) * 0.015;
-        this.fasePulso = Math.random() * Math.PI * 2;
-        this.velPulso = Math.random() * 0.02 + 0.01;
-        // Efecto pseudo-3D de volteo cristalino
+        this.velRotacion = (Math.random() - 0.5) * 0.02;
+        this.fase = Math.random() * Math.PI * 2;
+        this.velPulso = Math.random() * 0.025 + 0.012;
+        // Efecto pseudo-3D de rotación cristalina
         this.factorVolteo = 1;
         this.faseVolteo = Math.random() * Math.PI * 2;
-        this.velVolteo = Math.random() * 0.018 + 0.008;
+        this.velVolteo = Math.random() * 0.02 + 0.01;
       }
 
-      actualizar(w, h) {
-        this.x += this.vx;
-        this.y += this.vy;
+      actualizar(w, h, tiempo, factorVel) {
+        // Ondulación senoidal orgánica
+        const ondaX = Math.sin(tiempo * 0.0015 + this.fase) * 0.5;
+        const ondaY = Math.cos(tiempo * 0.0012 + this.fase) * 0.5;
 
-        // Rebote suave en los bordes
-        if (this.x < 0) { this.x = 0; this.vx *= -1; }
-        if (this.x > w) { this.x = w; this.vx *= -1; }
-        if (this.y < 0) { this.y = 0; this.vy *= -1; }
-        if (this.y > h) { this.y = h; this.vy *= -1; }
+        this.x += (this.vx + ondaX) * factorVel;
+        this.y += (this.vy + ondaY) * factorVel;
 
-        this.angulo += this.velRotacion;
-        this.fasePulso += this.velPulso;
-        this.alfa = this.alfaBase + Math.sin(this.fasePulso) * 0.18;
+        // Rebote elástico en los límites
+        if (this.x < 0) { this.x = 0; this.vx = Math.abs(this.vx); }
+        if (this.x > w) { this.x = w; this.vx = -Math.abs(this.vx); }
+        if (this.y < 0) { this.y = 0; this.vy = Math.abs(this.vy); }
+        if (this.y > h) { this.y = h; this.vy = -Math.abs(this.vy); }
 
-        this.faseVolteo += this.velVolteo;
+        this.angulo += this.velRotacion * factorVel;
+        this.alfa = this.alfaBase + Math.sin(tiempo * 0.002 + this.fase) * 0.20;
+
+        this.faseVolteo += this.velVolteo * factorVel;
         this.factorVolteo = Math.cos(this.faseVolteo);
 
-        // Interacción fluida con el cursor (repulsión magnética ligera)
+        // Interacción magnética con el cursor
         if (mouse.activo) {
           const dx = this.x - mouse.x;
           const dy = this.y - mouse.y;
@@ -105,11 +108,11 @@ export default function LienzoIgloo({ className = '' }) {
           if (distSq < radioSq && distSq > 0) {
             const dist = Math.sqrt(distSq);
             const factor = 1 - dist / mouse.radio;
-            const fuerza = factor * 2.2;
+            const fuerza = factor * 2.8 * factorVel;
             this.x += (dx / dist) * fuerza;
             this.y += (dy / dist) * fuerza;
-            this.tam = this.tamBase * (1 + factor * 0.7);
-            this.alfa = Math.min(1, this.alfa + factor * 0.35);
+            this.tam = this.tamBase * (1 + factor * 0.8);
+            this.alfa = Math.min(1, this.alfa + factor * 0.40);
           } else {
             this.tam = this.tamBase;
           }
@@ -121,47 +124,48 @@ export default function LienzoIgloo({ className = '' }) {
       dibujar(context, esOscuro) {
         const paleta = esOscuro ? coloresOscuro : coloresClaro;
         const { r, g, b } = paleta[this.colorIdx];
-        const a = Math.max(0.15, Math.min(1, this.alfa));
+        const a = Math.max(0.18, Math.min(1, this.alfa));
 
         context.save();
         context.translate(this.x, this.y);
         context.rotate(this.angulo);
-        // Escala X simula rotación tridimensional del cristal
-        context.scale(Math.abs(this.factorVolteo) * 0.7 + 0.3, 1);
+        // Volteo en eje X simula rotación tridimensional del cristal
+        context.scale(Math.abs(this.factorVolteo) * 0.75 + 0.25, 1);
 
         if (this.esRombo) {
-          // Cristal en forma de romboide / shard ártico
-          const t = this.tam * 2.4;
-          // Halo exterior sutil sin usar shadowBlur costoso
-          context.fillStyle = `rgba(${r}, ${g}, ${b}, ${a * 0.22})`;
+          // Cristal facetado estilo igloo.inc
+          const t = this.tam * 2.5;
+
+          // Halo exterior cristalino
+          context.fillStyle = `rgba(${r}, ${g}, ${b}, ${a * 0.25})`;
           context.beginPath();
-          context.moveTo(0, -t * 1.5);
-          context.lineTo(t, 0);
-          context.lineTo(0, t * 1.5);
-          context.lineTo(-t, 0);
+          context.moveTo(0, -t * 1.6);
+          context.lineTo(t * 1.1, 0);
+          context.lineTo(0, t * 1.6);
+          context.lineTo(-t * 1.1, 0);
           context.closePath();
           context.fill();
 
-          // Núcleo cristalino denso
+          // Núcleo denso
           context.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
           context.beginPath();
           context.moveTo(0, -t);
-          context.lineTo(t * 0.65, 0);
+          context.lineTo(t * 0.7, 0);
           context.lineTo(0, t);
-          context.lineTo(-t * 0.65, 0);
+          context.lineTo(-t * 0.7, 0);
           context.closePath();
           context.fill();
 
-          // Destello central blanco escarcha
-          context.fillStyle = esOscuro ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.95)';
+          // Destello central escarcha
+          context.fillStyle = esOscuro ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.95)';
           context.beginPath();
-          context.arc(0, 0, this.tam * 0.35, 0, Math.PI * 2);
+          context.arc(0, 0, this.tam * 0.38, 0, Math.PI * 2);
           context.fill();
         } else {
-          // Partícula nodal circular con doble anillo
-          context.fillStyle = `rgba(${r}, ${g}, ${b}, ${a * 0.25})`;
+          // Partícula nodal con doble anillo ártico
+          context.fillStyle = `rgba(${r}, ${g}, ${b}, ${a * 0.28})`;
           context.beginPath();
-          context.arc(0, 0, this.tam * 1.8, 0, Math.PI * 2);
+          context.arc(0, 0, this.tam * 2.0, 0, Math.PI * 2);
           context.fill();
 
           context.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
@@ -169,9 +173,9 @@ export default function LienzoIgloo({ className = '' }) {
           context.arc(0, 0, this.tam, 0, Math.PI * 2);
           context.fill();
 
-          context.fillStyle = esOscuro ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.95)';
+          context.fillStyle = esOscuro ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.95)';
           context.beginPath();
-          context.arc(0, 0, this.tam * 0.4, 0, Math.PI * 2);
+          context.arc(0, 0, this.tam * 0.45, 0, Math.PI * 2);
           context.fill();
         }
 
@@ -183,24 +187,26 @@ export default function LienzoIgloo({ className = '' }) {
       constructor(w, h) {
         this.x = Math.random() * w;
         this.y = Math.random() * h;
-        this.radio = Math.random() * 1.2 + 0.6;
-        this.vx = (Math.random() - 0.5) * 0.2;
-        this.vy = -Math.random() * 0.25 - 0.05; // Leve flotación ascendente
-        this.alfa = Math.random() * 0.4 + 0.15;
+        this.radio = Math.random() * 1.3 + 0.6;
+        this.vx = (Math.random() - 0.5) * 0.35;
+        this.vy = -Math.random() * 0.40 - 0.10; // Flotación ascendente continua
+        this.alfaBase = Math.random() * 0.45 + 0.20;
+        this.fase = Math.random() * Math.PI * 2;
       }
 
-      actualizar(w, h) {
-        this.x += this.vx;
-        this.y += this.vy;
+      actualizar(w, h, tiempo, factorVel) {
+        this.x += this.vx * factorVel;
+        this.y += this.vy * factorVel;
         if (this.y < 0) this.y = h;
         if (this.x < 0) this.x = w;
         if (this.x > w) this.x = 0;
+        this.alfa = this.alfaBase + Math.sin(tiempo * 0.003 + this.fase) * 0.15;
       }
 
       dibujar(context, esOscuro) {
         context.fillStyle = esOscuro
-          ? `rgba(224, 242, 254, ${this.alfa})`
-          : `rgba(2, 132, 199, ${this.alfa * 0.7})`;
+          ? `rgba(224, 242, 254, ${Math.max(0.1, this.alfa)})`
+          : `rgba(2, 132, 199, ${Math.max(0.1, this.alfa * 0.75)})`;
         context.beginPath();
         context.arc(this.x, this.y, this.radio, 0, Math.PI * 2);
         context.fill();
@@ -218,29 +224,35 @@ export default function LienzoIgloo({ className = '' }) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       const esPantallaPequena = ancho < 768;
-      // Densidad controlada: 40 en desktop, 20 en móvil (rendimiento óptimo O(N^2))
-      const maxCristales = esPantallaPequena ? 20 : 42;
-      const divisor = esPantallaPequena ? 16000 : 9000;
-      const cantCristales = Math.min(maxCristales, Math.max(esPantallaPequena ? 14 : 26, Math.floor((ancho * alto) / divisor)));
+      // Cantidad balanceada para mantener 60 FPS estables con mínimo consumo
+      const maxCristales = esPantallaPequena ? 22 : 46;
+      const divisor = esPantallaPequena ? 14000 : 8500;
+      const cantCristales = Math.min(
+        maxCristales,
+        Math.max(esPantallaPequena ? 16 : 28, Math.floor((ancho * alto) / divisor))
+      );
 
       cristales = [];
       for (let i = 0; i < cantCristales; i++) {
         cristales.push(new Cristal(ancho, alto));
       }
 
-      const cantMotas = esPantallaPequena ? 15 : 35;
+      const cantMotas = esPantallaPequena ? 18 : 38;
       motasHielo = [];
       for (let i = 0; i < cantMotas; i++) {
         motasHielo.push(new MotaHielo(ancho, alto));
       }
     };
 
-    const renderizarCuadro = () => {
+    const renderizarCuadro = (tiempo) => {
       if (ancho <= 0 || alto <= 0) return;
       const esOscuro = document.documentElement.classList.contains('dark');
       ctx.clearRect(0, 0, ancho, alto);
 
-      // Suavizar la posición del cursor (física inercial)
+      // Factor de velocidad: atenuado suave si el sistema pide reduced motion
+      const factorVel = prefiereReduccion ? 0.38 : 1.0;
+
+      // Inercia suave del cursor
       if (targetMouse.activo) {
         mouse.x += (targetMouse.x - mouse.x) * 0.12;
         mouse.y += (targetMouse.y - mouse.y) * 0.12;
@@ -250,47 +262,47 @@ export default function LienzoIgloo({ className = '' }) {
       }
 
       // Aura glacial etérea alrededor del cursor (estilo igloo.inc)
-      if (mouse.activo && !prefiereReduccion && animacionActiva) {
+      if (mouse.activo && animacionActiva) {
         const aura = ctx.createRadialGradient(
           mouse.x,
           mouse.y,
           0,
           mouse.x,
           mouse.y,
-          mouse.radio * 1.4
+          mouse.radio * 1.5
         );
         if (esOscuro) {
-          aura.addColorStop(0, 'rgba(56, 189, 248, 0.22)');
-          aura.addColorStop(0.35, 'rgba(129, 140, 248, 0.10)');
-          aura.addColorStop(0.7, 'rgba(14, 165, 233, 0.03)');
+          aura.addColorStop(0, 'rgba(56, 189, 248, 0.25)');
+          aura.addColorStop(0.35, 'rgba(129, 140, 248, 0.12)');
+          aura.addColorStop(0.7, 'rgba(14, 165, 233, 0.04)');
           aura.addColorStop(1, 'rgba(2, 6, 23, 0)');
         } else {
-          aura.addColorStop(0, 'rgba(14, 165, 233, 0.18)');
-          aura.addColorStop(0.35, 'rgba(79, 70, 229, 0.08)');
-          aura.addColorStop(0.7, 'rgba(2, 132, 199, 0.02)');
+          aura.addColorStop(0, 'rgba(14, 165, 233, 0.20)');
+          aura.addColorStop(0.35, 'rgba(79, 70, 229, 0.09)');
+          aura.addColorStop(0.7, 'rgba(2, 132, 199, 0.03)');
           aura.addColorStop(1, 'rgba(255, 255, 255, 0)');
         }
 
         ctx.fillStyle = aura;
         ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, mouse.radio * 1.4, 0, Math.PI * 2);
+        ctx.arc(mouse.x, mouse.y, mouse.radio * 1.5, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Dibujar motas de escarcha sutiles
+      // Dibujar motas de nieve ascendentes
       for (let i = 0; i < motasHielo.length; i++) {
-        if (animacionActiva && !prefiereReduccion) {
-          motasHielo[i].actualizar(ancho, alto);
+        if (animacionActiva) {
+          motasHielo[i].actualizar(ancho, alto, tiempo, factorVel);
         }
         motasHielo[i].dibujar(ctx, esOscuro);
       }
 
-      // Conexiones de filamentos cristalinos (renderizado optimizado por lotes)
-      const distConexion = ancho < 768 ? 120 : 155;
+      // Conexiones de filamentos cristalinos
+      const distConexion = ancho < 768 ? 125 : 160;
       const distConexionSq = distConexion * distConexion;
 
       ctx.save();
-      // Dibujar filamentos estándar en un solo trazo para minimizar cambios de contexto
+      // Filamentos estándar por lotes
       ctx.beginPath();
       for (let i = 0; i < cristales.length; i++) {
         const c1 = cristales[i];
@@ -307,13 +319,13 @@ export default function LienzoIgloo({ className = '' }) {
         }
       }
       ctx.strokeStyle = esOscuro
-        ? 'rgba(56, 189, 248, 0.22)'
-        : 'rgba(14, 165, 233, 0.20)';
+        ? 'rgba(56, 189, 248, 0.24)'
+        : 'rgba(14, 165, 233, 0.22)';
       ctx.lineWidth = 1.0;
       ctx.stroke();
 
-      // Si el cursor está activo, resaltar filamentos cercanos con brillo glacial
-      if (mouse.activo && !prefiereReduccion) {
+      // Iluminación intensa en filamentos cercanos al cursor
+      if (mouse.activo) {
         ctx.beginPath();
         for (let i = 0; i < cristales.length; i++) {
           const c1 = cristales[i];
@@ -331,25 +343,25 @@ export default function LienzoIgloo({ className = '' }) {
           }
         }
         ctx.strokeStyle = esOscuro
-          ? 'rgba(165, 243, 252, 0.65)'
-          : 'rgba(2, 132, 199, 0.55)';
-        ctx.lineWidth = 1.5;
+          ? 'rgba(165, 243, 252, 0.70)'
+          : 'rgba(2, 132, 199, 0.60)';
+        ctx.lineWidth = 1.6;
         ctx.stroke();
       }
       ctx.restore();
 
-      // Dibujar cada cristal de hielo
+      // Dibujar cada cristal
       for (let i = 0; i < cristales.length; i++) {
-        if (animacionActiva && !prefiereReduccion) {
-          cristales[i].actualizar(ancho, alto);
+        if (animacionActiva) {
+          cristales[i].actualizar(ancho, alto, tiempo, factorVel);
         }
         cristales[i].dibujar(ctx, esOscuro);
       }
     };
 
-    const animar = () => {
-      renderizarCuadro();
-      if (animacionActiva && !prefiereReduccion && !document.hidden) {
+    const animar = (tiempo) => {
+      renderizarCuadro(tiempo || performance.now());
+      if (animacionActiva && !document.hidden) {
         animId = requestAnimationFrame(animar);
       }
     };
@@ -360,8 +372,8 @@ export default function LienzoIgloo({ className = '' }) {
         animId = null;
       }
 
-      if (!animacionActiva || prefiereReduccion) {
-        renderizarCuadro();
+      if (!animacionActiva) {
+        renderizarCuadro(performance.now());
         return;
       }
 
@@ -399,12 +411,13 @@ export default function LienzoIgloo({ className = '' }) {
     };
 
     const manejarMouseMove = (e) => {
-      if (!animacionActiva || prefiereReduccion) return;
+      if (!animacionActiva) return;
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      if (x >= -60 && x <= rect.width + 60 && y >= -60 && y <= rect.height + 60) {
+      // Detectar movimiento en todo el viewport o ventana
+      if (x >= -120 && x <= rect.width + 120 && y >= -120 && y <= rect.height + 120) {
         targetMouse.x = Math.max(0, Math.min(rect.width, x));
         targetMouse.y = Math.max(0, Math.min(rect.height, y));
         targetMouse.activo = true;
