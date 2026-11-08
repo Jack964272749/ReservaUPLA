@@ -35,9 +35,20 @@ body {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  button:not(:disabled):active {
+  button:not(:disabled):not(.btn-estatico):active {
     transform: scale(0.97);
   }
+}
+
+/* Ocultar botón nativo de contraseña de Edge/IE para evitar colisión con el botón de alternar clave */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+/* Botones estáticos que nunca cambian de posición ni escala al hacer clic */
+.btn-estatico:not(:disabled):active {
+  transform: none !important;
 }
 
 /* Ventanas emergentes: el fondo aparece difuminado y el cuadro cae desde arriba hasta el centro */
@@ -51,17 +62,10 @@ body {
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes menu-entrar {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+.anim-ayuda-fondo {
+  animation: ayuda-fondo 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes deslizar-izq {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
+.anim-ayuda-caer {
+  animation: ayuda-caer 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-
-.animate-ayuda-fondo { animation: ayuda-fondo 250ms ease-out both; }
-.animate-ayuda-caer { animation: ayuda-caer 450ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-menu-entrar { animation: menu-entrar 180ms ease-out both; }
-.animate-deslizar-izq { animation: deslizar-izq 280ms cubic-bezier(0.22, 1, 0.36, 1) both; }

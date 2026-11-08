@@ -41,7 +41,7 @@ export default function TextInput({
       error={error}
       className={className}
     >
-      <div className="relative w-full">
+      <div className="relative w-full h-11">
         <input
           ref={inputRef}
           id={id}
@@ -62,7 +62,7 @@ export default function TextInput({
           aria-invalid={Boolean(error)}
           aria-describedby={descripcionId}
           aria-required={obligatorio}
-          className={`w-full h-11 min-h-[44px] px-3.5 py-2 text-sm rounded-xl border transition-colors shadow-sm focus:outline-none focus:ring-2 ${
+          className={`w-full h-11 px-3.5 py-2 text-sm rounded-xl border transition-colors shadow-sm focus:outline-none focus:ring-2 ${
             mostrarAlternarClave && type === 'password' ? 'pr-12' : ''
           } ${
             error
@@ -73,11 +73,17 @@ export default function TextInput({
         {type === 'password' && mostrarAlternarClave && (
           <button
             type="button"
-            onClick={() => {
+            tabIndex={-1}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               if (bloquearMostrarClave) return;
               setMostrarClave((prev) => !prev);
             }}
-            onMouseDown={(e) => e.preventDefault()}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
             disabled={bloquearMostrarClave || disabled}
             aria-label={
               bloquearMostrarClave
@@ -94,10 +100,10 @@ export default function TextInput({
                 : 'Mostrar contraseña'
             }
             aria-pressed={mostrarClave}
-            className={`absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg transition-colors select-none ${
+            className={`btn-estatico absolute right-2 top-1.5 h-8 w-8 flex items-center justify-center rounded-lg select-none pointer-events-auto ${
               bloquearMostrarClave
                 ? 'opacity-40 cursor-not-allowed text-slate-400 dark:text-slate-500'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 focus:outline-none focus:ring-2 focus:ring-sky-500'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer'
             }`}
           >
             {mostrarClave && !bloquearMostrarClave ? (
