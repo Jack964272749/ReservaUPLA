@@ -145,14 +145,15 @@ public class ReservaRepository : IReservaRepository
 
     public async Task<Dictionary<string, int>> ObtenerDistribucionPorTipoAmbienteAsync(CancellationToken cancellationToken = default)
     {
+        // Se agrupa por el enum y la conversión a texto se realiza en memoria:
+        // traducir ToString() dentro de la consulta no está garantizado por todos los proveedores.
         var grupos = await _context.Reservas
-            .Include(r => r.Ambiente)
             .Where(r => r.Ambiente != null)
             .GroupBy(r => r.Ambiente!.Tip_Ambiente)
-            .Select(g => new { Tipo = g.Key.ToString(), Cantidad = g.Count() })
+            .Select(g => new { Tipo = g.Key, Cantidad = g.Count() })
             .ToListAsync(cancellationToken);
 
-        return grupos.ToDictionary(g => g.Tipo, g => g.Cantidad);
+        return grupos.ToDictionary(g => g.Tipo.ToString(), g => g.Cantidad);
     }
 
     public async Task<IEnumerable<Reserva>> ObtenerReservasDeFechaAsync(DateOnly fecha, int limite = 5, CancellationToken cancellationToken = default)

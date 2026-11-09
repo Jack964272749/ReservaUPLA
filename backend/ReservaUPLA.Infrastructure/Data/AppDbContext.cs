@@ -59,7 +59,7 @@ public class AppDbContext : DbContext
             entity.Property(r => r.Fec_Reserva).HasColumnName("fec_reserva").HasColumnType("date").IsRequired();
             entity.Property(r => r.Hin_Reserva).HasColumnName("hin_reserva").HasColumnType("interval").IsRequired();
             entity.Property(r => r.Hfi_Reserva).HasColumnName("hfi_reserva").HasColumnType("interval").IsRequired();
-            entity.Property(r => r.Mot_Reserva).HasColumnType("text").IsRequired();
+            entity.Property(r => r.Mot_Reserva).HasColumnName("mot_reserva").HasColumnType("text").IsRequired();
             entity.Property(r => r.Est_Reserva).HasColumnName("est_reserva").HasConversion<string>().HasMaxLength(30);
             entity.Property(r => r.Idu_Reserva).HasColumnName("idu_reserva").IsRequired();
             entity.Property(r => r.Ida_Reserva).HasColumnName("ida_reserva").IsRequired();
