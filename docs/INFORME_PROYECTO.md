@@ -1,4 +1,4 @@
-# Informe Técnico de Construcción de Software: Sistema ReservaUPLA
+﻿# Informe Técnico de Construcción de Software: Sistema ReservaUPLA
 
 **Asignatura:** Construcción de Software (Semanas 01 a 09)  
 **Institución:** Universidad Peruana Los Andes (UPLA)  
@@ -43,7 +43,8 @@ La Universidad Peruana Los Andes (UPLA) cuenta con una amplia infraestructura ac
 ### 1.3. Matriz de Requerimientos Funcionales (RF-01 a RF-08)
 | Código | Requerimiento Funcional | Estado | Componente / Servicio |
 |:---:|---|:---:|---|
-| **RF-01** | Registrar usuarios solicitantes | **100% Implementado** | `RegistroSolicitante.jsx` / `AuthService.cs` |
+| **RF-01** | Registrar usuarios solicitantes con validación institucional | **100% Implementado** | `RegistroSolicitante.jsx` / `AuthService.cs` — Registro con código institucional, cuenta creada como **pendiente de validación** (`activo = false`) hasta aprobación del Administrador. |
+| **RF-09** | Validación institucional de cuentas por Administrador | **100% Implementado** | `Usuarios.jsx` / `UsuarioService.cs` — Filtro de cuentas pendientes, botón "Validar Cuenta" y registro directo de usuarios con código y rol. |
 | **RF-02** | Registrar ambientes universitarios | **100% Implementado** | `Ambientes.jsx` / `AmbienteService.cs` |
 | **RF-03** | Registrar solicitudes de reserva | **100% Implementado** | `CrearReserva.jsx` / `ReservaService.cs` |
 | **RF-04** | Validar disponibilidad antes de registrar | **100% Implementado** | Algoritmo anti-traslape en `ReservaService.cs` |
@@ -63,7 +64,7 @@ flowchart LR
     A["Iteración 1: Dominio y Persistencia"] --> B["Iteración 2: Reglas Anti-Traslape y API"]
     B --> C["Iteración 3: Módulos de Entrada e Interfaces"]
     C --> D["Iteración 4: Componentes Reutilizables y WCAG"]
-    D --> E["Iteración 5: Refinamiento, 75 Tests y Salida"]
+    D --> E["Iteración 5: Refinamiento, 80 Tests y Salida"]
 ```
 
 ### Justificación Técnica de la Elección:
@@ -84,6 +85,7 @@ flowchart LR
 Cada avance en el repositorio utiliza el estándar semántico internacional (`feat`, `fix`, `refactor`, `docs`, `test`, `style`):
 
 ```bash
+* 965de2d feat(auth): agrega validacion institucional de cuentas y registro administrativo de usuarios con codigo
 * 3ed23d7 feat(dashboard): agrega navegacion filtrada por estado desde tarjetas de indicadores a reservas
 * 9dc5faf docs: actualiza informe tecnico alineado a rubrica y caso practico de semanas 01 a 09
 * 3e17277 docs: agrega capturas de pantalla de modulos e informe tecnico del sistema
@@ -288,6 +290,38 @@ Cumpliendo rigurosamente con el punto 10 de la guía práctica, el panel de cont
 
 ---
 
+
+### 9.3. Validación Institucional de Cuentas y Registro Administrativo (RF-09)
+
+Al tratarse de un **sistema universitario institucional**, no cualquier persona puede registrarse y acceder libremente. Se implementó un flujo completo de validación de cuentas:
+
+#### Flujo de Auto-Registro (Solicitante)
+1. El usuario se registra desde `RegistroSolicitante.jsx` proporcionando su **código institucional / matrícula**, nombre, correo institucional y contraseña.
+2. La cuenta se crea con `activo = false` (**Pendiente de Validación**) — no puede iniciar sesión hasta que el Administrador la valide.
+3. Se muestra un mensaje claro: *"Tu solicitud fue enviada correctamente. Tu cuenta está PENDIENTE DE VALIDACIÓN por parte de la administración."*
+
+#### Panel de Validación del Administrador
+4. En el módulo **Usuarios**, el Administrador ve una alerta prominente indicando la cantidad de cuentas pendientes de validación.
+5. Se puede filtrar por pestaña: **Todos** / **Pendientes de Validación** (con badge de conteo) / **Activos**.
+6. Cada cuenta pendiente muestra un botón **"Validar Cuenta"** (verde, con ícono de escudo) que activa la cuenta tras confirmación modal.
+
+#### Registro Directo por Administrador
+7. El botón **"+ Registrar Usuario"** permite al Administrador crear usuarios directamente con:
+   - Código Institucional / Matrícula
+   - Nombre Completo
+   - Correo Institucional
+   - Rol en el Sistema (Administrador, Responsable, Solicitante)
+   - Contraseña (con generador de clave aleatoria)
+8. Los usuarios creados por el Administrador se activan **inmediatamente** (`activo = true`), ya que la validación institucional la realiza el propio Administrador al momento del registro.
+
+#### Implementación Técnica
+- **Backend:** Nuevo campo `cod_usuario` en la entidad `Usuario.cs`, endpoint `POST /api/usuarios/crear` protegido con `[Authorize(Roles = "Administrador")]`, y `CrearPorAdminAsync()` en `UsuarioService.cs` con validación de duplicados, roles y longitud de contraseña.
+- **Frontend:** Módulo `Usuarios.jsx` completamente renovado (~600 líneas) con modales de creación, validación y edición; filtros por estado de activación.
+- **Tests:** 4 nuevos tests unitarios en `UsuarioServiceTests.cs` (datos válidos, correo duplicado, rol inválido, clave corta) + 1 nuevo test frontend para `crearPorAdmin`.
+
+![Módulo de Usuarios con Validación Institucional](capturas/Alerta Reservas Pendientes.png)
+---
+
 ## 10. Pregunta de Reflexión Final (Punto 13 del Caso Práctico)
 
 > **Pregunta:**  
@@ -305,7 +339,7 @@ Cumpliendo rigurosamente con el punto 10 de la guía práctica, el panel de cont
    El desarrollo modular basado en los 9 componentes reutilizables (`TextInput`, `SelectInput`, `DateInput`, `TimeInput`, `Button`, `AlertMessage`, `ModalConfirmacion`, `TableList`, `CardIndicador`) reduce drásticamente la duplicación de código (*DRY - Don't Repeat Yourself*). Además, centraliza los lineamientos de accesibilidad universal (**WCAG 2.1 AA**) y la coherencia visual del sistema, permitiendo que cualquier ajuste de diseño o corrección de comportamiento se propague de manera instantánea a todos los formularios del campus.
 
 4. **Refinamiento Continuo Respaldado por Pruebas Automatizadas:**
-   Un código sin pruebas es código heredado difícil de modificar. Contar con una suite de **75 pruebas automatizadas al 100%** proporciona una red de seguridad (*safety net*) que permite a los desarrolladores refactorizar la lógica (como la optimización del rendimiento en consultas de dashboard o la gestión de sesiones concurrentes) con absoluta certeza de que no se introducirán regresiones en las funcionalidades ya aprobadas. El refinamiento constante transforma un prototipo funcional en una solución de grado de producción institucional, escalable, robusta y con alta mantenibilidad a lo largo del tiempo.
+   Un código sin pruebas es código heredado difícil de modificar. Contar con una suite de **80 pruebas automatizadas al 100%** proporciona una red de seguridad (*safety net*) que permite a los desarrolladores refactorizar la lógica (como la optimización del rendimiento en consultas de dashboard o la gestión de sesiones concurrentes) con absoluta certeza de que no se introducirán regresiones en las funcionalidades ya aprobadas. El refinamiento constante transforma un prototipo funcional en una solución de grado de producción institucional, escalable, robusta y con alta mantenibilidad a lo largo del tiempo.
 
 ---
 
