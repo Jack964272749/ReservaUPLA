@@ -109,6 +109,7 @@ ALTER TABLE public.reservas OWNER TO postgres;
 CREATE TABLE public.usuarios (
     id_usuario uuid NOT NULL,
     nom_usuario character varying(150) NOT NULL,
+    cod_usuario character varying(50),
     cor_usuario character varying(150) NOT NULL,
     has_usuario text NOT NULL,
     rol_usuario character varying(50) NOT NULL,
@@ -274,4 +275,5 @@ REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 --
 
 \unrestrict fWCWDcxEXytgmwPnFXf9CgOEkla59cPRb9pgm6Orfga01gFYLdaOuOzXlD2OAZV
+
 

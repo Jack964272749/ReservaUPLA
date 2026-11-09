@@ -28,6 +28,15 @@ public class UsuariosController : ControllerBase
         return CreatedAtAction(nameof(Registrar), new { id = creado.Id }, creado);
     }
 
+    // Trazabilidad: RF-01 · Creación de usuario por Administrador (con código, rol y activación)
+    [HttpPost("crear")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<ActionResult<UsuarioDto>> CrearPorAdmin([FromBody] CrearUsuarioPorAdminDto dto, CancellationToken cancellationToken)
+    {
+        var creado = await _usuarioService.CrearPorAdminAsync(dto, cancellationToken);
+        return CreatedAtAction(nameof(CrearPorAdmin), new { id = creado.Id }, creado);
+    }
+
     // Trazabilidad: RF-01 · Listado exclusivo de Administrador
     [HttpGet]
     [Authorize(Roles = "Administrador")]
@@ -37,7 +46,7 @@ public class UsuariosController : ControllerBase
         return Ok(usuarios);
     }
 
-    // Trazabilidad: RF-01 · Modificar datos de usuario (nombre, rol, estado)
+    // Trazabilidad: RF-01 · Modificar datos de usuario (nombre, rol, estado, código)
     [HttpPut("{id:guid}")]
     [Authorize(Roles = "Administrador")]
     public async Task<ActionResult<UsuarioDto>> Actualizar(Guid id, [FromBody] ActualizarUsuarioDto dto, CancellationToken cancellationToken)
@@ -49,7 +58,7 @@ public class UsuariosController : ControllerBase
         return Ok(actualizado);
     }
 
-    // Trazabilidad: RF-01 · Activar o desactivar cuenta de usuario
+    // Trazabilidad: RF-01 · Activar o desactivar cuenta de usuario (Validación institucional)
     [HttpPatch("{id:guid}/estado")]
     [Authorize(Roles = "Administrador")]
     public async Task<ActionResult<UsuarioDto>> CambiarEstado(Guid id, [FromBody] CambiarEstadoUsuarioDto dto, CancellationToken cancellationToken)

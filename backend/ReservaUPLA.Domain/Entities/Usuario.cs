@@ -9,6 +9,7 @@ public class Usuario
 {
     public Guid Id_Usuario { get; private set; }
     public string Nom_Usuario { get; private set; } = string.Empty;
+    public string? Cod_Usuario { get; private set; }
     public string Cor_Usuario { get; private set; } = string.Empty;
     public string Has_Usuario { get; private set; } = string.Empty;
     public RolUsuario Rol_Usuario { get; private set; }
@@ -20,7 +21,13 @@ public class Usuario
     private Usuario() { }
 
     // Trazabilidad: Nielsen H5 - Prevención de errores · Factory estática con validaciones
-    public static Usuario Crear(string nombre, string correo, string hash, RolUsuario rol = RolUsuario.Solicitante)
+    public static Usuario Crear(
+        string nombre,
+        string correo,
+        string hash,
+        RolUsuario rol = RolUsuario.Solicitante,
+        string? codigo = null,
+        bool activo = true)
     {
         var nomNorm = ReglasUsuario.NormalizarNombre(nombre);
         var corNorm = ReglasUsuario.NormalizarCorreo(correo);
@@ -40,19 +47,22 @@ public class Usuario
         if (string.IsNullOrWhiteSpace(hash))
             throw new DomainException(Mensajes.ClaveRequerida);
 
+        var codNorm = string.IsNullOrWhiteSpace(codigo) ? null : codigo.Trim().ToUpperInvariant();
+
         return new Usuario
         {
             Id_Usuario = Guid.NewGuid(),
             Nom_Usuario = nomNorm,
+            Cod_Usuario = codNorm,
             Cor_Usuario = corNorm,
             Has_Usuario = hash,
             Rol_Usuario = rol,
-            Act_Usuario = true
+            Act_Usuario = activo
         };
     }
 
     // Trazabilidad: RF-01 · Actualización de perfil administrativo
-    public void Actualizar(string nombre, RolUsuario rol, bool activo)
+    public void Actualizar(string nombre, RolUsuario rol, bool activo, string? codigo = null)
     {
         var nomNorm = ReglasUsuario.NormalizarNombre(nombre);
 
@@ -66,6 +76,10 @@ public class Usuario
         Nom_Usuario = nomNorm;
         Rol_Usuario = rol;
         Act_Usuario = activo;
+        if (!string.IsNullOrWhiteSpace(codigo))
+        {
+            Cod_Usuario = codigo.Trim().ToUpperInvariant();
+        }
     }
 
     // Trazabilidad: Seguridad · Actualización segura de credencial hasheada

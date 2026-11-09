@@ -14,12 +14,103 @@ namespace ReservaUpla.Tests;
 public class UsuarioServiceTests
 {
     private readonly Mock<IUsuarioRepository> _mockUsuarioRepo;
+    private readonly Mock<IPasswordHasherService> _mockPasswordHasher;
     private readonly UsuarioService _usuarioService;
 
     public UsuarioServiceTests()
     {
         _mockUsuarioRepo = new Mock<IUsuarioRepository>();
-        _usuarioService = new UsuarioService(_mockUsuarioRepo.Object);
+        _mockPasswordHasher = new Mock<IPasswordHasherService>();
+        _mockPasswordHasher.Setup(h => h.Hash(It.IsAny<string>())).Returns("hash_simulado_123");
+        _usuarioService = new UsuarioService(_mockUsuarioRepo.Object, _mockPasswordHasher.Object);
+    }
+
+    [Fact]
+    public async Task CrearPorAdminAsync_DatosValidos_RegistraCorrectamente()
+    {
+        var dto = new CrearUsuarioPorAdminDto(
+            "Ing. Marco Aurelio Torres",
+            "mtorres@upla.edu.pe",
+            "Responsable",
+            "ClaveSegura123*",
+            "DOC-4921",
+            true);
+
+        _mockUsuarioRepo.Setup(r => r.ObtenerPorCorreoAsync(dto.Correo, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Usuario?)null);
+
+        var resultado = await _usuarioService.CrearPorAdminAsync(dto);
+
+        Assert.NotNull(resultado);
+        Assert.Equal("Ing. Marco Aurelio Torres", resultado.NombreCompleto);
+        Assert.Equal("mtorres@upla.edu.pe", resultado.Correo);
+        Assert.Equal("Responsable", resultado.Rol);
+        Assert.Equal("DOC-4921", resultado.Codigo);
+        Assert.True(resultado.Activo);
+        _mockUsuarioRepo.Verify(r => r.AgregarAsync(It.IsAny<Usuario>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CrearPorAdminAsync_CorreoDuplicado_LanzaDomainException409()
+    {
+        var dto = new CrearUsuarioPorAdminDto(
+            "Marco Torres",
+            "duplicado@upla.edu.pe",
+            "Solicitante",
+            "Clave123*",
+            "DOC-001",
+            true);
+
+        var existente = Usuario.Crear("Existente", dto.Correo, "hash", RolUsuario.Solicitante);
+        _mockUsuarioRepo.Setup(r => r.ObtenerPorCorreoAsync(dto.Correo, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existente);
+
+        var ex = await Assert.ThrowsAsync<DomainException>(() =>
+            _usuarioService.CrearPorAdminAsync(dto));
+
+        Assert.Equal(409, ex.CodigoEstadoHttp);
+    }
+
+    [Fact]
+    public async Task CrearPorAdminAsync_RolInvalido_LanzaDomainException400()
+    {
+        var dto = new CrearUsuarioPorAdminDto(
+            "Marco Torres",
+            "mtorres2@upla.edu.pe",
+            "RolInexistente",
+            "Clave123*",
+            "DOC-002",
+            true);
+
+        _mockUsuarioRepo.Setup(r => r.ObtenerPorCorreoAsync(dto.Correo, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Usuario?)null);
+
+        var ex = await Assert.ThrowsAsync<DomainException>(() =>
+            _usuarioService.CrearPorAdminAsync(dto));
+
+        Assert.Equal(400, ex.CodigoEstadoHttp);
+        Assert.Equal(Mensajes.RolInvalido, ex.Message);
+    }
+
+    [Fact]
+    public async Task CrearPorAdminAsync_ClaveCorta_LanzaDomainException400()
+    {
+        var dto = new CrearUsuarioPorAdminDto(
+            "Marco Torres",
+            "mtorres3@upla.edu.pe",
+            "Solicitante",
+            "123", // Menor a 6 caracteres
+            "DOC-003",
+            true);
+
+        _mockUsuarioRepo.Setup(r => r.ObtenerPorCorreoAsync(dto.Correo, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Usuario?)null);
+
+        var ex = await Assert.ThrowsAsync<DomainException>(() =>
+            _usuarioService.CrearPorAdminAsync(dto));
+
+        Assert.Equal(400, ex.CodigoEstadoHttp);
+        Assert.Equal(Mensajes.ClaveLongitud, ex.Message);
     }
 
     [Fact]

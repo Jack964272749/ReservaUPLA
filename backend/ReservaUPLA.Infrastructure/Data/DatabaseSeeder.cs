@@ -19,7 +19,23 @@ public static class DatabaseSeeder
         bool? isDevelopment = null,
         ILogger? logger = null)
     {
-        await context.Database.MigrateAsync();
+        try
+        {
+            await context.Database.MigrateAsync();
+        }
+        catch (Exception ex)
+        {
+            logger?.LogWarning("MigrateAsync: {Message}", ex.Message);
+        }
+
+        try
+        {
+            await context.Database.ExecuteSqlRawAsync("ALTER TABLE IF EXISTS usuarios ADD COLUMN IF NOT EXISTS cod_usuario character varying(50);");
+        }
+        catch (Exception ex)
+        {
+            logger?.LogDebug("Aseguramiento de columna cod_usuario: {Message}", ex.Message);
+        }
 
         var esDesarrollo = isDevelopment.HasValue
             ? isDevelopment.Value
@@ -70,15 +86,15 @@ public static class DatabaseSeeder
 
             var usuariosIniciales = new[]
             {
-                Usuario.Crear("Administrador Central", "admin@upla.edu.pe", adminHash, RolUsuario.Administrador),
-                Usuario.Crear("Roberto Salazar Mendoza", "responsable@upla.edu.pe", respHash, RolUsuario.Responsable),
-                Usuario.Crear("Maria Quispe Condori", "maria.quispe@upla.edu.pe", respHash, RolUsuario.Responsable),
-                Usuario.Crear("Carlos Benites Vega", "carlos.benites@upla.edu.pe", respHash, RolUsuario.Responsable),
-                Usuario.Crear("Carmen Flores Quispe", "solicitante@upla.edu.pe", solicHash, RolUsuario.Solicitante),
-                Usuario.Crear("Juan Perez Huaman", "juan.perez@upla.edu.pe", solicHash, RolUsuario.Solicitante),
-                Usuario.Crear("Ana Torres Rojas", "ana.torres@upla.edu.pe", solicHash, RolUsuario.Solicitante),
-                Usuario.Crear("David Castro Morales", "david.castro@upla.edu.pe", solicHash, RolUsuario.Solicitante),
-                Usuario.Crear("Elena Morales Ramos", "elena.morales@upla.edu.pe", solicHash, RolUsuario.Solicitante)
+                Usuario.Crear("Administrador Central", "admin@upla.edu.pe", adminHash, RolUsuario.Administrador, "ADM-001"),
+                Usuario.Crear("Roberto Salazar Mendoza", "responsable@upla.edu.pe", respHash, RolUsuario.Responsable, "DOC-1001"),
+                Usuario.Crear("Maria Quispe Condori", "maria.quispe@upla.edu.pe", respHash, RolUsuario.Responsable, "DOC-1002"),
+                Usuario.Crear("Carlos Benites Vega", "carlos.benites@upla.edu.pe", respHash, RolUsuario.Responsable, "DOC-1003"),
+                Usuario.Crear("Carmen Flores Quispe", "solicitante@upla.edu.pe", solicHash, RolUsuario.Solicitante, "EST-202401"),
+                Usuario.Crear("Juan Perez Huaman", "juan.perez@upla.edu.pe", solicHash, RolUsuario.Solicitante, "EST-202402"),
+                Usuario.Crear("Ana Torres Rojas", "ana.torres@upla.edu.pe", solicHash, RolUsuario.Solicitante, "EST-202403"),
+                Usuario.Crear("David Castro Morales", "david.castro@upla.edu.pe", solicHash, RolUsuario.Solicitante, "EST-202404"),
+                Usuario.Crear("Elena Morales Ramos", "elena.morales@upla.edu.pe", solicHash, RolUsuario.Solicitante, "EST-202405")
             };
 
             await context.Usuarios.AddRangeAsync(usuariosIniciales);

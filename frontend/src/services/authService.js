@@ -18,9 +18,9 @@ export const authService = {
       method: 'GET',
     }),
 
-  registrarSolicitante: (nombreCompleto, correo, contrasena) =>
+  registrarSolicitante: (nombreCompleto, correo, contrasena, codigo) =>
     peticion('/usuarios', {
       method: 'POST',
-      body: JSON.stringify({ nombreCompleto, correo, contrasena }),
+      body: JSON.stringify({ nombreCompleto, correo, contrasena, codigo }),
     }),
 };

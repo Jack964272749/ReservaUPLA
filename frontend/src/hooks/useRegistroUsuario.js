@@ -6,6 +6,7 @@ import { normalizarTexto, normalizarCorreo } from '../utils/normalizar';
 // Trazabilidad: RF-01 · Nielsen H5, H9 · Shneiderman S4, S5 · ISO 9241-11
 export function useRegistroUsuario({ onRegistroExitoso }) {
   const [nombreCompleto, setNombreCompleto] = useState('');
+  const [codigo, setCodigo] = useState('');
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [errores, setErrores] = useState({});
@@ -14,6 +15,7 @@ export function useRegistroUsuario({ onRegistroExitoso }) {
   const [exito, setExito] = useState(false);
 
   const nombreRef = useRef(null);
+  const codigoRef = useRef(null);
   const correoRef = useRef(null);
   const contrasenaRef = useRef(null);
 
@@ -25,10 +27,17 @@ export function useRegistroUsuario({ onRegistroExitoso }) {
     const errs = {};
 
     const nombreLimpio = normalizarTexto(nombreCompleto);
+    const codigoLimpio = (codigo || '').trim().toUpperCase();
     const correoLimpio = normalizarCorreo(correo);
 
     const errNombre = validarNombre(nombreLimpio);
     if (errNombre) errs.nombreCompleto = errNombre;
+
+    if (!codigoLimpio) {
+      errs.codigo = 'El código institucional o matrícula es requerido.';
+    } else if (codigoLimpio.length < 4 || codigoLimpio.length > 20) {
+      errs.codigo = 'El código debe tener entre 4 y 20 caracteres.';
+    }
 
     const errCorreo = validarCorreo(correoLimpio);
     if (errCorreo) errs.correo = errCorreo;
@@ -40,6 +49,8 @@ export function useRegistroUsuario({ onRegistroExitoso }) {
       setErrores(errs);
       if (errs.nombreCompleto && nombreRef.current) {
         nombreRef.current.focus();
+      } else if (errs.codigo && codigoRef.current) {
+        codigoRef.current.focus();
       } else if (errs.correo && correoRef.current) {
         correoRef.current.focus();
       } else if (errs.contrasena && contrasenaRef.current) {
@@ -55,7 +66,8 @@ export function useRegistroUsuario({ onRegistroExitoso }) {
       const res = await authService.registrarSolicitante(
         nombreLimpio,
         correoLimpio,
-        contrasena
+        contrasena,
+        codigoLimpio
       );
 
       if (res.exito) {
@@ -72,6 +84,8 @@ export function useRegistroUsuario({ onRegistroExitoso }) {
   return {
     nombreCompleto,
     setNombreCompleto,
+    codigo,
+    setCodigo,
     correo,
     setCorreo,
     contrasena,
@@ -82,6 +96,7 @@ export function useRegistroUsuario({ onRegistroExitoso }) {
     exito,
     handleSubmit,
     nombreRef,
+    codigoRef,
     correoRef,
     contrasenaRef,
   };

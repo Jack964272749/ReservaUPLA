@@ -6,6 +6,7 @@ namespace ReservaUpla.Application.Interfaces;
 public interface IUsuarioService
 {
     Task<IEnumerable<UsuarioDto>> ObtenerTodosAsync(CancellationToken cancellationToken = default);
+    Task<UsuarioDto> CrearPorAdminAsync(CrearUsuarioPorAdminDto dto, CancellationToken cancellationToken = default);
     Task<UsuarioDto> ActualizarAsync(Guid id, ActualizarUsuarioDto dto, Guid adminEjecutorId, CancellationToken cancellationToken = default);
     Task<UsuarioDto> CambiarEstadoAsync(Guid id, bool activo, Guid adminEjecutorId, CancellationToken cancellationToken = default);
 }

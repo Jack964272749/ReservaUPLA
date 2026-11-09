@@ -11,6 +11,7 @@ public static class UsuarioMapper
         u.Nom_Usuario,
         u.Cor_Usuario,
         u.Rol_Usuario.ToString(),
-        u.Act_Usuario
+        u.Act_Usuario,
+        u.Cod_Usuario
     );
 }

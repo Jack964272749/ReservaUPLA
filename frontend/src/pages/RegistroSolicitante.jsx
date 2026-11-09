@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, UserPlus } from 'lucide-react';
+import { ArrowLeft, UserPlus, Clock } from 'lucide-react';
 import TextInput from '../components/TextInput';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
@@ -13,6 +13,8 @@ export default function RegistroSolicitante({ alVolverALogin }) {
   const {
     nombreCompleto,
     setNombreCompleto,
+    codigo,
+    setCodigo,
     correo,
     setCorreo,
     contrasena,
@@ -23,6 +25,7 @@ export default function RegistroSolicitante({ alVolverALogin }) {
     exito,
     handleSubmit,
     nombreRef,
+    codigoRef,
     correoRef,
     contrasenaRef,
   } = useRegistroUsuario({
@@ -53,22 +56,30 @@ export default function RegistroSolicitante({ alVolverALogin }) {
             Registro de Solicitante
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-            Cree su cuenta institucional para solicitar la reserva de ambientes universitarios.
+            Cree su solicitud de cuenta institucional para reservar ambientes universitarios en la UPLA.
           </p>
         </div>
 
         {exito ? (
           <div className="space-y-4">
-            <AlertMessage
-              type="success"
-              message="¡Registro completado con éxito! Ahora puede iniciar sesión con sus credenciales."
-            />
+            <div className="p-4 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-200 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <Clock className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <span>¡Registro recibido exitosamente!</span>
+              </div>
+              <p className="text-xs text-sky-800 dark:text-sky-300">
+                Su cuenta institucional ha sido registrada con el código <strong>{codigo}</strong> y se encuentra en estado <strong>PENDIENTE DE VALIDACIÓN</strong> por el Administrador Central.
+              </p>
+              <p className="text-xs text-sky-700 dark:text-sky-400">
+                Al ser un software universitario oficial, la administración validará sus datos antes de habilitar el acceso al sistema de reservas.
+              </p>
+            </div>
             <Button
               variant="primary"
               className="w-full"
               onClick={alVolverALogin}
             >
-              Ir a Iniciar Sesión
+              Volver al Inicio de Sesión
             </Button>
           </div>
         ) : (
@@ -97,13 +108,27 @@ export default function RegistroSolicitante({ alVolverALogin }) {
             />
 
             <TextInput
+              inputRef={codigoRef}
+              id="registro-codigo"
+              name="codigo"
+              label="Código institucional / Matrícula"
+              placeholder="Ej. 202110452 o DOC-4921"
+              ayuda="Código de estudiante o carnet docente asignado por la UPLA."
+              value={codigo}
+              onChange={(e) => setCodigo(e.target.value)}
+              error={errores.codigo}
+              obligatorio
+              disabled={enviando}
+            />
+
+            <TextInput
               inputRef={correoRef}
               id="registro-correo"
               name="correo"
               type="email"
               label="Correo electrónico institucional"
               placeholder="usuario@upla.edu.pe"
-              ayuda="Debe ser un correo válido."
+              ayuda="Debe ser su correo universitario (@upla.edu.pe)."
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
               error={errores.correo}
@@ -139,7 +164,7 @@ export default function RegistroSolicitante({ alVolverALogin }) {
                 icon={UserPlus}
                 className="w-full font-semibold"
               >
-                {enviando ? 'Registrando…' : 'Crear Cuenta'}
+                {enviando ? 'Registrando…' : 'Enviar Solicitud de Registro'}
               </Button>
             </div>
           </form>

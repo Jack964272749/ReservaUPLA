@@ -6,6 +6,53 @@ describe('usuarioService', () => {
     vi.restoreAllMocks();
   });
 
+  it('crearPorAdmin envía solicitud POST a /usuarios/crear con todos los datos institucionales', async () => {
+    const mockRespuesta = {
+      id: 'usr-999',
+      nombreCompleto: 'Ing. Marco Aurelio Torres',
+      codigo: 'DOC-4921',
+      correo: 'mtorres@upla.edu.pe',
+      rol: 'Responsable',
+      activo: true,
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      headers: {
+        get: (h) => (h === 'content-type' ? 'application/json' : null),
+      },
+      json: async () => mockRespuesta,
+    });
+
+    const res = await usuarioService.crearPorAdmin({
+      nombreCompleto: 'Ing. Marco Aurelio Torres',
+      codigo: 'DOC-4921',
+      correo: 'mtorres@upla.edu.pe',
+      rol: 'Responsable',
+      contrasena: 'ClaveSegura123*',
+      activo: true,
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/usuarios/crear'),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          nombreCompleto: 'Ing. Marco Aurelio Torres',
+          correo: 'mtorres@upla.edu.pe',
+          rol: 'Responsable',
+          contrasena: 'ClaveSegura123*',
+          codigo: 'DOC-4921',
+          activo: true,
+        }),
+      })
+    );
+    expect(res.exito).toBe(true);
+    expect(res.datos.codigo).toBe('DOC-4921');
+    expect(res.datos.activo).toBe(true);
+  });
+
   it('actualizar envía solicitud PUT con id y datos en el cuerpo', async () => {
     const mockRespuesta = {
       id: 'usr-123',

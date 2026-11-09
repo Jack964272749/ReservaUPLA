@@ -52,7 +52,16 @@ public class AuthService : IAuthService
             throw new DomainException(Mensajes.ClaveLongitud);
 
         var hash = _passwordHasher.Hash(dto.Contrasena);
-        var usuario = Usuario.Crear(dto.NombreCompleto, corNorm, hash, RolUsuario.Solicitante);
+
+        // Al ser un software universitario, el auto-registro queda en estado PENDIENTE DE VALIDACIÓN (activo = false)
+        // hasta que el Administrador Central lo valide y active en el módulo de Usuarios.
+        var usuario = Usuario.Crear(
+            dto.NombreCompleto,
+            corNorm,
+            hash,
+            RolUsuario.Solicitante,
+            dto.Codigo,
+            activo: false);
 
         await _usuarioRepository.AgregarAsync(usuario, cancellationToken);
         return UsuarioMapper.ToDto(usuario);
