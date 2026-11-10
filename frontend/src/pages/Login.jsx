@@ -11,6 +11,7 @@ import {
   UserCheck,
   User,
   Sparkles,
+  ArrowLeftRight,
 } from 'lucide-react';
 import TextInput from '../components/TextInput';
 import Button from '../components/Button';
@@ -21,6 +22,7 @@ import LienzoIgloo from '../components/LienzoIgloo';
 import { useLogin } from '../hooks/useLogin';
 import { useTema } from '../hooks/useTema';
 import { useAnimacionFondo } from '../hooks/useAnimacionFondo';
+import { useZurdo } from '../hooks/useZurdo';
 
 const anioActual = new Date().getFullYear();
 
@@ -87,6 +89,9 @@ export default function Login({ alIrARegistro }) {
 
   const { tema, alternarTema } = useTema();
   const { animacionActiva, alternarAnimacion } = useAnimacionFondo();
+  // Trazabilidad: Nielsen H7 (Flexibilidad y eficiencia) · ISO 9241-110 (Adaptabilidad)
+  // Permite mover el formulario al lado izquierdo para personas zurdas.
+  const { zurdo, alternarZurdo } = useZurdo();
   const [esClaveDemo, setEsClaveDemo] = useState(false);
 
   const autocompletarCuenta = (cuenta) => {
@@ -97,7 +102,7 @@ export default function Login({ alIrARegistro }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#EDF3F9] dark:bg-slate-950 transition-colors">
+    <div className={`min-h-screen flex flex-col ${zurdo ? 'lg:flex-row-reverse' : 'lg:flex-row'} bg-[#EDF3F9] dark:bg-slate-950 transition-colors`}>
       
       {/* Panel Izquierdo: Hero Institucional con fondo de campus y animación Igloo */}
       <FondoModulo
@@ -188,10 +193,26 @@ export default function Login({ alIrARegistro }) {
       </FondoModulo>
 
       {/* Panel Derecho: Formulario centrado en tarjeta sin puntas (rounded-3xl) */}
-      <div className="w-full lg:w-[480px] xl:w-[540px] flex flex-col justify-between p-6 sm:p-8 lg:p-10 bg-slate-50 dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-20 flex-shrink-0 min-h-screen">
+      <div className={`w-full lg:w-[480px] xl:w-[540px] flex flex-col justify-between p-6 sm:p-8 lg:p-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 ${zurdo ? 'lg:border-r' : 'lg:border-l'} shadow-2xl z-20 flex-shrink-0 min-h-screen`}>
         
-        {/* Controles superiores (Animación y Tema) */}
-        <div className="flex items-center justify-end gap-2 mb-4">
+        {/* Controles superiores (Modo zurdo, Animación y Tema) */}
+        <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
+          <button
+            type="button"
+            onClick={alternarZurdo}
+            aria-pressed={zurdo}
+            aria-label={zurdo ? 'Desactivar modo zurdo' : 'Activar modo zurdo: mover el formulario a la izquierda'}
+            title="Modo zurdo: coloca el formulario en el lado izquierdo de la pantalla"
+            className={`btn-estatico inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors shadow-xs cursor-pointer ${
+              zurdo
+                ? 'bg-sky-600 border-sky-600 text-white hover:bg-sky-700 dark:bg-sky-500 dark:border-sky-500 dark:hover:bg-sky-400'
+                : 'bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+            }`}
+          >
+            <ArrowLeftRight className={`w-3.5 h-3.5 ${zurdo ? 'text-white' : 'text-slate-400'}`} aria-hidden="true" />
+            <span>Modo zurdo{zurdo ? ': sí' : ''}</span>
+          </button>
+
           <button
             type="button"
             onClick={alternarAnimacion}
