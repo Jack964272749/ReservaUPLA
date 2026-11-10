@@ -29,7 +29,7 @@ public class UsuarioServiceTests
     public async Task CrearPorAdminAsync_DatosValidos_RegistraCorrectamente()
     {
         var dto = new CrearUsuarioPorAdminDto(
-            "Ing. Marco Aurelio Torres",
+            "Marco Aurelio Torres",
             "mtorres@upla.edu.pe",
             "Responsable",
             "ClaveSegura123*",
@@ -42,7 +42,7 @@ public class UsuarioServiceTests
         var resultado = await _usuarioService.CrearPorAdminAsync(dto);
 
         Assert.NotNull(resultado);
-        Assert.Equal("Ing. Marco Aurelio Torres", resultado.NombreCompleto);
+        Assert.Equal("Marco Aurelio Torres", resultado.NombreCompleto);
         Assert.Equal("mtorres@upla.edu.pe", resultado.Correo);
         Assert.Equal("Responsable", resultado.Rol);
         Assert.Equal("DOC-4921", resultado.Codigo);
