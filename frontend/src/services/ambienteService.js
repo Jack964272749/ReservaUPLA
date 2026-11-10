@@ -40,7 +40,7 @@ export const ambienteService = {
 
   consultarDisponibilidad: (ambienteId, fecha) => {
     const qs = fecha ? `?fecha=${encodeURIComponent(fecha)}` : '';
-    return peticion(`/ambientes/disponibilidad/${ambienteId}${qs}`, {
+    return peticion(`/ambientes/${ambienteId}/disponibilidad${qs}`, {
       method: 'GET',
     });
   },
