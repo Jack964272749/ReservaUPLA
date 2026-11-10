@@ -59,8 +59,9 @@ export function useReservaForm({ ambientePreseleccionadoId, onReservaExitosa }) 
       setValidandoDisponibilidad(true);
       const res = await ambienteService.consultarDisponibilidad(ambienteId, fecha);
       if (montado) {
-        if (res.exito && res.datos?.reservas) {
-          setReservasExistentes(res.datos.reservas);
+        if (res.exito && res.datos) {
+          const lista = Array.isArray(res.datos) ? res.datos : res.datos.reservas;
+          setReservasExistentes(Array.isArray(lista) ? lista : []);
         } else {
           setReservasExistentes([]);
         }
