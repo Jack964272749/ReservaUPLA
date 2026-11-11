@@ -1,0 +1,35 @@
+name: Keep Alive API
+
+# El plan gratuito de Render suspende el servicio tras ~15 minutos sin tráfico
+# y el siguiente arranque en frío tarda hasta ~60 segundos. Este latido evita
+# esa espera durante la jornada de uso (06:00-23:00 hora de Lima = 11:00-04:00 UTC).
+on:
+  schedule:
+    - cron: '*/14 11-23 * * *'
+    - cron: '*/14 0-3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-alive-api
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Despertar la API de ReservaUPLA
+        continue-on-error: true
+        run: |
+          set +e
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 120 \
+            -H 'User-Agent: ReservaUPLA-keep-alive' \
+            https://reservaupla-api.onrender.com/api/ambientes)
+          echo "Codigo HTTP: $code"
+          # Cualquier respuesta (401 incluido) demuestra que el contenedor esta despierto.
+          if [ "$code" = "000" ]; then
+            echo "La API no respondio en 120 s."
+          fi

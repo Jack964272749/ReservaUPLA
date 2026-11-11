@@ -4,9 +4,15 @@ import { interpretarRespuesta } from '../utils/interpretarRespuesta';
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:5159/api';
 
+// Trazabilidad: Nielsen H1 (Visibilidad) · H9 (Recuperación) · ISO 9241-11
+// El plan gratuito de Render suspende la API tras ~15 min sin tráfico y el
+// primer arranque en frío puede tardar hasta ~60 s. Un corte a los 10 s
+// mostraba el E-23 aunque la conexión del usuario fuese correcta.
+export const TIEMPO_ESPERA_MS = 90000;
+
 export async function peticion(endpoint, opciones = {}) {
   const controlador = new AbortController();
-  const temporizador = setTimeout(() => controlador.abort(), 10000);
+  const temporizador = setTimeout(() => controlador.abort(), TIEMPO_ESPERA_MS);
 
   const url = `${API_BASE_URL}${endpoint}`;
   const config = {
