@@ -90,7 +90,7 @@ public static class DatabaseSeeder
                 Usuario.Crear("Roberto Salazar Mendoza", "responsable@upla.edu.pe", respHash, RolUsuario.Responsable, "DOC-1001"),
                 Usuario.Crear("Maria Quispe Condori", "maria.quispe@upla.edu.pe", respHash, RolUsuario.Responsable, "DOC-1002"),
                 Usuario.Crear("Carlos Benites Vega", "carlos.benites@upla.edu.pe", respHash, RolUsuario.Responsable, "DOC-1003"),
-                Usuario.Crear("Carmen Flores Quispe", "solicitante@upla.edu.pe", solicHash, RolUsuario.Solicitante, "EST-202401"),
+                Usuario.Crear("Coronel Guevara Jack", "solicitante@upla.edu.pe", solicHash, RolUsuario.Solicitante, "EST-202401"),
                 Usuario.Crear("Juan Perez Huaman", "juan.perez@upla.edu.pe", solicHash, RolUsuario.Solicitante, "EST-202402"),
                 Usuario.Crear("Ana Torres Rojas", "ana.torres@upla.edu.pe", solicHash, RolUsuario.Solicitante, "EST-202403"),
                 Usuario.Crear("David Castro Morales", "david.castro@upla.edu.pe", solicHash, RolUsuario.Solicitante, "EST-202404"),

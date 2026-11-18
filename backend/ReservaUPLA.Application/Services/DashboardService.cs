@@ -37,8 +37,8 @@ public class DashboardService : IDashboardService
             r.Id_Reserva,
             r.Ambiente?.Nom_Ambiente ?? "Ambiente sin nombre",
             r.Usuario?.Nom_Usuario ?? "Solicitante",
-            r.Hin_Reserva.ToString(@"hh\:mm"),
-            r.Hfi_Reserva.ToString(@"hh\:mm"),
+            $"{r.Hin_Reserva.Hours:D2}:{r.Hin_Reserva.Minutes:D2}",
+            $"{r.Hfi_Reserva.Hours:D2}:{r.Hfi_Reserva.Minutes:D2}",
             r.Est_Reserva.ToString(),
             r.Mot_Reserva
         )).ToList();

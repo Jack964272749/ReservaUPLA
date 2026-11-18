@@ -11,6 +11,7 @@ import ModalConfirmacion from '../components/ModalConfirmacion';
 import { useReservaForm } from '../hooks/useReservaForm';
 import { obtenerFechaLocalISO } from '../utils/fecha';
 import { recortarHora } from '../utils/reservaMapper';
+import { obtenerImagenAmbiente } from '../utils/ambienteImagenes';
 
 // Obtener fecha mínima permitida (hoy)
 const hoyStr = obtenerFechaLocalISO();
@@ -57,6 +58,8 @@ export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas 
     label: `${amb.nombre} (${amb.ubicacion} · Cap: ${amb.capacidad})`,
   }));
 
+  const ambienteSeleccionado = ambientes.find((a) => String(a.id) === String(ambienteId));
+
   return (
     <>
     <div className="relative z-10 max-w-3xl mx-auto space-y-6">
@@ -93,6 +96,31 @@ export default function CrearReserva({ ambientePreseleccionadoId, alVerReservas 
           obligatorio
           disabled={cargandoAmbientes || enviando}
         />
+
+        {/* Imagen de referencia del ambiente seleccionado */}
+        {ambienteSeleccionado && (
+          <div className="flex flex-col sm:flex-row items-center gap-4 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 animate-fadeIn">
+            <img
+              src={obtenerImagenAmbiente(ambienteSeleccionado.nombre, ambienteSeleccionado.tipo)}
+              alt={ambienteSeleccionado.nombre}
+              className="w-full sm:w-44 h-28 object-cover rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 shrink-0"
+            />
+            <div className="flex-1 min-w-0 space-y-1 text-center sm:text-left">
+              <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300">
+                {ambienteSeleccionado.tipo}
+              </span>
+              <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                {ambienteSeleccionado.nombre}
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-300">
+                📍 {ambienteSeleccionado.ubicacion}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                👥 Capacidad: <span className="font-semibold text-slate-700 dark:text-slate-200">{ambienteSeleccionado.capacidad} personas</span>
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Selección de Fecha */}
         <DateInput

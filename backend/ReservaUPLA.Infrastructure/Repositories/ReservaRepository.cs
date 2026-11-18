@@ -132,28 +132,32 @@ public class ReservaRepository : IReservaRepository
 
     public async Task<(string NombreAmbiente, int Cantidad)?> ObtenerAmbienteMasUtilizadoAsync(CancellationToken cancellationToken = default)
     {
-        var resultado = await _context.Reservas
-            .Include(r => r.Ambiente)
+        var nombres = await _context.Reservas
             .Where(r => r.Ambiente != null)
-            .GroupBy(r => r.Ambiente!.Nom_Ambiente)
-            .Select(g => new { Nombre = g.Key, Cantidad = g.Count() })
-            .OrderByDescending(x => x.Cantidad)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Select(r => r.Ambiente!.Nom_Ambiente)
+            .ToListAsync(cancellationToken);
 
-        return resultado is null ? null : (resultado.Nombre, resultado.Cantidad);
+        if (nombres.Count == 0)
+            return null;
+
+        var grupo = nombres
+            .GroupBy(n => n)
+            .OrderByDescending(g => g.Count())
+            .FirstOrDefault();
+
+        return grupo is null ? null : (grupo.Key, grupo.Count());
     }
 
     public async Task<Dictionary<string, int>> ObtenerDistribucionPorTipoAmbienteAsync(CancellationToken cancellationToken = default)
     {
-        // Se agrupa por el enum y la conversión a texto se realiza en memoria:
-        // traducir ToString() dentro de la consulta no está garantizado por todos los proveedores.
-        var grupos = await _context.Reservas
+        var tipos = await _context.Reservas
             .Where(r => r.Ambiente != null)
-            .GroupBy(r => r.Ambiente!.Tip_Ambiente)
-            .Select(g => new { Tipo = g.Key, Cantidad = g.Count() })
+            .Select(r => r.Ambiente!.Tip_Ambiente)
             .ToListAsync(cancellationToken);
 
-        return grupos.ToDictionary(g => g.Tipo.ToString(), g => g.Cantidad);
+        return tipos
+            .GroupBy(t => t.ToString())
+            .ToDictionary(g => g.Key, g => g.Count());
     }
 
     public async Task<IEnumerable<Reserva>> ObtenerReservasDeFechaAsync(DateOnly fecha, int limite = 5, CancellationToken cancellationToken = default)

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DoorOpen, Plus, Users, MapPin, CalendarPlus, RefreshCw } from 'lucide-react';
+import { DoorOpen, Plus, Users, MapPin, CalendarPlus, RefreshCw, X, Eye } from 'lucide-react';
 import TableList from '../components/TableList';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
@@ -10,6 +10,7 @@ import { useAmbientes } from '../hooks/useAmbientes';
 import { useAuth } from '../hooks/useAuth';
 import { BASE, ESTILOS } from '../utils/estilosAccion';
 import { usuarioService } from '../services/usuarioService';
+import { obtenerImagenAmbiente } from '../utils/ambienteImagenes';
 
 // Trazabilidad: RF-02 · Nielsen H1, H4, H5, H7, H8 · Shneiderman S1..S5 · ISO 9241-11
 export default function Ambientes({ alReservarAmbiente, ambienteDestacado }) {
@@ -40,6 +41,7 @@ export default function Ambientes({ alReservarAmbiente, ambienteDestacado }) {
   } = useAmbientes();
 
   const [responsables, setResponsables] = useState([]);
+  const [ambienteModalFoto, setAmbienteModalFoto] = useState(null);
 
   useEffect(() => {
     if (rol === 'Administrador') {
@@ -84,24 +86,65 @@ export default function Ambientes({ alReservarAmbiente, ambienteDestacado }) {
     },
     {
       header: 'Ambiente',
-      render: (amb) => (
-        <div>
-          <p className="font-semibold text-slate-900 dark:text-slate-100">
-            {amb.nombre}
-            {esMio(amb) && (
-              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-300 dark:border-sky-800">
-                Mi ambiente
+      render: (amb) => {
+        const imagenUrl = obtenerImagenAmbiente(amb.nombre, amb.tipo);
+        const nombresTipos = {
+          LaboratorioComputo: 'Laboratorio de Cómputo',
+          Auditorio: 'Auditorio',
+          SalaReuniones: 'Sala de Reuniones',
+          LaboratorioEspecializado: 'Laboratorio Especializado',
+        };
+        const tipoLegible = nombresTipos[amb.tipo] || amb.tipo;
+
+        return (
+          <div className="flex items-center gap-3.5 py-1">
+            <button
+              type="button"
+              onClick={() => setAmbienteModalFoto(amb)}
+              title={`Ver fotografía ampliada de ${amb.nombre}`}
+              className="relative w-16 h-12 sm:w-20 sm:h-14 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200/90 dark:border-slate-700/80 shadow-2xs bg-slate-100 dark:bg-slate-800 group focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+            >
+              <img
+                src={imagenUrl}
+                alt={`Fotografía institucional de ${amb.nombre}`}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                loading="lazy"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/backgrounds/bg_ambientes.jpg';
+                }}
+              />
+              <span className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                <Eye className="w-4 h-4 drop-shadow-sm" />
               </span>
-            )}
-            {esDestacado(amb) && (
-              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800">
-                Más utilizado
-              </span>
-            )}
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Tipo: {amb.tipo}</p>
-        </div>
-      ),
+            </button>
+            <div>
+              <p className="font-semibold text-slate-900 dark:text-slate-100 flex items-center flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setAmbienteModalFoto(amb)}
+                  className="hover:text-sky-600 dark:hover:text-sky-400 text-left transition-colors cursor-pointer"
+                >
+                  {amb.nombre}
+                </button>
+                {esMio(amb) && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-300 dark:border-sky-800">
+                    Mi ambiente
+                  </span>
+                )}
+                {esDestacado(amb) && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800">
+                    Más utilizado
+                  </span>
+                )}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Tipo: <span className="font-medium text-slate-700 dark:text-slate-300">{tipoLegible}</span>
+              </p>
+            </div>
+          </div>
+        );
+      },
     },
     {
       header: 'Capacidad',
@@ -308,6 +351,106 @@ export default function Ambientes({ alReservarAmbiente, ambienteDestacado }) {
           />
         </form>
       </ModalConfirmacion>
+
+      {/* Modal Fotografía Institucional y Ficha del Ambiente */}
+      {ambienteModalFoto && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-foto-titulo"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setAmbienteModalFoto(null)}
+        >
+          <div
+            className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-950">
+              <img
+                src={obtenerImagenAmbiente(ambienteModalFoto.nombre, ambienteModalFoto.tipo)}
+                alt={ambienteModalFoto.nombre}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/backgrounds/bg_ambientes.jpg';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
+              <button
+                type="button"
+                onClick={() => setAmbienteModalFoto(null)}
+                aria-label="Cerrar vista de fotografía"
+                className="absolute top-4 right-4 p-2 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white backdrop-blur-md border border-white/20 transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="absolute bottom-4 left-6 right-6">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/90 text-white border border-sky-300/40 backdrop-blur-md mb-1.5">
+                  {ambienteModalFoto.tipo}
+                </span>
+                <h2 id="modal-foto-titulo" className="text-xl sm:text-2xl font-extrabold text-white drop-shadow-sm">
+                  {ambienteModalFoto.nombre}
+                </h2>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Capacidad</span>
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 mt-0.5">
+                    <Users className="w-4 h-4 text-sky-600" />
+                    <span>{ambienteModalFoto.capacidad} personas</span>
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Ubicación</span>
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 mt-0.5 truncate">
+                    <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span className="truncate">{ambienteModalFoto.ubicacion}</span>
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Estado</span>
+                  <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    {ambienteModalFoto.estado}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-slate-200/70 dark:border-slate-800">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Responsable: <span className="font-semibold text-slate-800 dark:text-slate-200">{ambienteModalFoto.responsableNombre || 'Sin asignar'}</span>
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAmbienteModalFoto(null)}
+                  >
+                    Cerrar
+                  </Button>
+                  {alReservarAmbiente && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={CalendarPlus}
+                      onClick={() => {
+                        const id = ambienteModalFoto.id;
+                        setAmbienteModalFoto(null);
+                        alReservarAmbiente(id);
+                      }}
+                    >
+                      Reservar Ambiente
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </>
   );
