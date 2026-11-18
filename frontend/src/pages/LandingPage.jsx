@@ -21,6 +21,7 @@ import {
 import Logo from '../components/Logo';
 import Button from '../components/Button';
 import LienzoIgloo from '../components/LienzoIgloo';
+import FondoModulo from '../components/FondoModulo';
 import { useTema } from '../hooks/useTema';
 import { useAnimacionFondo } from '../hooks/useAnimacionFondo';
 import { useAuth } from '../hooks/useAuth';
@@ -34,28 +35,28 @@ const ESTADOS_RESERVA = [
     descripcion: 'La solicitud fue registrada y espera revisión del Administrador.',
     icono: Hourglass,
     color: 'text-amber-600 dark:text-amber-400',
-    bg: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800',
+    bg: 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-200/90 dark:border-amber-800/80',
   },
   {
     nombre: 'Aprobada',
     descripcion: 'La reserva fue aceptada y el ambiente queda asignado.',
     icono: CheckCircle2,
     color: 'text-emerald-600 dark:text-emerald-400',
-    bg: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800',
+    bg: 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-200/90 dark:border-emerald-800/80',
   },
   {
     nombre: 'Rechazada',
     descripcion: 'La solicitud fue denegada con una justificación formal.',
     icono: XCircle,
     color: 'text-rose-600 dark:text-rose-400',
-    bg: 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800',
+    bg: 'bg-rose-50/90 dark:bg-rose-950/40 border-rose-200/90 dark:border-rose-800/80',
   },
   {
     nombre: 'Cancelada',
     descripcion: 'El solicitante anuló la reserva antes de su aprobación.',
     icono: Ban,
-    color: 'text-slate-500 dark:text-slate-400',
-    bg: 'bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-700',
+    color: 'text-slate-600 dark:text-slate-400',
+    bg: 'bg-slate-50/90 dark:bg-slate-900/50 border-slate-200/90 dark:border-slate-700/80',
   },
 ];
 
@@ -65,21 +66,21 @@ const ROLES = [
     descripcion: 'Crea reservas de ambientes universitarios y consulta el estado de las suyas.',
     icono: ClipboardList,
     color: 'text-sky-600 dark:text-sky-400',
-    bg: 'from-sky-50 to-sky-100/50 dark:from-sky-950/40 dark:to-sky-900/20 border-sky-200 dark:border-sky-800',
+    bg: 'border-sky-200/90 dark:border-sky-800/80',
   },
   {
     nombre: 'Responsable de Ambiente',
     descripcion: 'Consulta las reservas de los ambientes asignados a su cargo.',
     icono: Eye,
     color: 'text-violet-600 dark:text-violet-400',
-    bg: 'from-violet-50 to-violet-100/50 dark:from-violet-950/40 dark:to-violet-900/20 border-violet-200 dark:border-violet-800',
+    bg: 'border-violet-200/90 dark:border-violet-800/80',
   },
   {
     nombre: 'Administrador',
     descripcion: 'Aprueba o rechaza reservas y gestiona usuarios y ambientes.',
     icono: ShieldCheck,
     color: 'text-rose-600 dark:text-rose-400',
-    bg: 'from-rose-50 to-rose-100/50 dark:from-rose-950/40 dark:to-rose-900/20 border-rose-200 dark:border-rose-800',
+    bg: 'border-rose-200/90 dark:border-rose-800/80',
   },
 ];
 
@@ -104,15 +105,15 @@ export default function LandingPage({ alIrALogin, alIrARegistro }) {
       {/* ───── Header ───── */}
       <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <Logo className="h-9 min-w-[25px]" />
-            <span className="hidden sm:inline font-bold text-sm text-slate-700 dark:text-slate-300 tracking-tight">
-              ReservaUPLA
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <Logo className="h-9 w-auto" />
+            <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-tight">
+              Reserva<span className="text-sky-600 dark:text-sky-400">UPLA</span>
             </span>
           </div>
 
-          <nav aria-label="Navigation" className="flex items-center gap-2 sm:gap-3">
-            {/* Theme + animation controls */}
+          <nav aria-label="Navegación principal" className="flex items-center gap-2 sm:gap-3">
+            {/* Control accesible de animación de fondo */}
             <button
               type="button"
               onClick={alternarAnimacion}
@@ -121,6 +122,7 @@ export default function LandingPage({ alIrALogin, alIrARegistro }) {
             >
               <Sparkles className={`w-4 h-4 ${animacionActiva ? 'text-amber-500' : 'text-slate-400'}`} aria-hidden="true" />
             </button>
+            {/* Alternar modo claro/oscuro */}
             <button
               type="button"
               onClick={alternarTema}
@@ -158,14 +160,14 @@ export default function LandingPage({ alIrALogin, alIrARegistro }) {
 
         {/* ── Hero ── */}
         <section className="relative overflow-hidden" aria-labelledby="hero-titulo">
-          {/* Background animation */}
+          {/* Fondo animado interactivo */}
           <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
             <LienzoIgloo />
           </div>
           <div className="absolute inset-0 z-0 pointer-events-none bg-gradient-to-b from-white/60 via-transparent to-white/80 dark:from-slate-950/70 dark:via-transparent dark:to-slate-950/80" aria-hidden="true" />
 
           <div className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6 py-20 sm:py-28 lg:py-36">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-100/80 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 text-xs font-semibold mb-6 border border-sky-200 dark:border-sky-800">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100/80 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 text-xs font-semibold mb-6 border border-sky-200 dark:border-sky-800 shadow-xs">
               <Building2 className="w-3.5 h-3.5" aria-hidden="true" />
               Universidad Peruana Los Andes
             </div>
@@ -177,7 +179,7 @@ export default function LandingPage({ alIrALogin, alIrARegistro }) {
               </span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
               Sistema institucional para registrar, validar y consultar reservas de ambientes
               universitarios, evitando duplicidades y cruces de horarios.
             </p>
@@ -205,23 +207,24 @@ export default function LandingPage({ alIrALogin, alIrARegistro }) {
           </div>
         </section>
 
-        {/* ── Horario Institucional ── */}
-        <section
-          className="py-16 sm:py-20 bg-white dark:bg-slate-900/60 border-y border-slate-200 dark:border-slate-800"
-          aria-labelledby="horario-titulo"
+        {/* ── Horario Institucional con Imagen de Fondo ── */}
+        <FondoModulo
+          imagen="/backgrounds/bg_dashboard.jpg"
+          className="border-y border-slate-200 dark:border-slate-800"
+          overlayClassName="bg-slate-50/85 dark:bg-slate-950/85 backdrop-blur-[2px]"
         >
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-sky-100 dark:bg-sky-900/40 mb-5">
+          <section className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center" aria-labelledby="horario-titulo">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-sky-100/90 dark:bg-sky-900/60 backdrop-blur-md mb-5 shadow-sm border border-sky-200/60 dark:border-sky-800/60">
               <Clock className="w-7 h-7 text-sky-600 dark:text-sky-400" aria-hidden="true" />
             </div>
-            <h2 id="horario-titulo" className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+            <h2 id="horario-titulo" className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
               Horario Institucional
             </h2>
-            <p className="text-slate-600 dark:text-slate-300 max-w-xl mx-auto mb-8">
+            <p className="text-slate-600 dark:text-slate-300 max-w-xl mx-auto mb-8 font-medium">
               Las reservas de ambientes están habilitadas exclusivamente dentro del
               horario operativo de la universidad.
             </p>
-            <div className="inline-flex items-center gap-4 px-6 py-4 rounded-2xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800">
+            <div className="inline-flex items-center gap-4 px-6 py-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-sky-200 dark:border-sky-800 shadow-md">
               <span className="text-3xl sm:text-4xl font-extrabold text-sky-700 dark:text-sky-300" data-testid="hora-apertura">
                 {horaApertura}
               </span>
@@ -230,20 +233,24 @@ export default function LandingPage({ alIrALogin, alIrARegistro }) {
                 {horaCierre}
               </span>
             </div>
-            <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-4 text-sm text-slate-600 dark:text-slate-400 font-medium">
               Fuera de este rango, el sistema no permitirá crear ni aprobar reservas.
             </p>
-          </div>
-        </section>
+          </section>
+        </FondoModulo>
 
-        {/* ── Estados de una Reserva ── */}
-        <section className="py-16 sm:py-20" aria-labelledby="estados-titulo">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        {/* ── Estados de una Reserva con Imagen de Fondo ── */}
+        <FondoModulo
+          imagen="/backgrounds/bg_listado.jpg"
+          className="border-b border-slate-200 dark:border-slate-800"
+          overlayClassName="bg-slate-50/85 dark:bg-slate-950/85 backdrop-blur-[2px]"
+        >
+          <section className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20" aria-labelledby="estados-titulo">
             <div className="text-center mb-12">
-              <h2 id="estados-titulo" className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+              <h2 id="estados-titulo" className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
                 Estados de una Reserva
               </h2>
-              <p className="text-slate-600 dark:text-slate-300 max-w-xl mx-auto">
+              <p className="text-slate-600 dark:text-slate-300 max-w-xl mx-auto font-medium">
                 Cada solicitud de reserva pasa por un ciclo de vida claro y auditable.
               </p>
             </div>
@@ -252,33 +259,34 @@ export default function LandingPage({ alIrALogin, alIrARegistro }) {
               {ESTADOS_RESERVA.map(({ nombre, descripcion, icono: Icono, color, bg }) => (
                 <div
                   key={nombre}
-                  className={`rounded-2xl p-5 border transition-all hover:shadow-md ${bg}`}
+                  className={`rounded-2xl p-5 border backdrop-blur-md transition-all hover:shadow-lg ${bg}`}
                 >
                   <Icono className={`w-8 h-8 mb-3 ${color}`} aria-hidden="true" />
                   <h3 className={`font-bold text-base mb-1 ${color}`}>{nombre}</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                     {descripcion}
                   </p>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
+          </section>
+        </FondoModulo>
 
-        {/* ── Roles del Sistema ── */}
-        <section
-          className="py-16 sm:py-20 bg-white dark:bg-slate-900/60 border-y border-slate-200 dark:border-slate-800"
-          aria-labelledby="roles-titulo"
+        {/* ── Roles del Sistema con Imagen de Fondo ── */}
+        <FondoModulo
+          imagen="/backgrounds/bg_ambientes.jpg"
+          className="border-b border-slate-200 dark:border-slate-800"
+          overlayClassName="bg-slate-50/85 dark:bg-slate-950/85 backdrop-blur-[2px]"
         >
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <section className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20" aria-labelledby="roles-titulo">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900/40 mb-5">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-violet-100/90 dark:bg-violet-900/60 backdrop-blur-md mb-5 shadow-sm border border-violet-200/60 dark:border-violet-800/60">
                 <Users className="w-7 h-7 text-violet-600 dark:text-violet-400" aria-hidden="true" />
               </div>
-              <h2 id="roles-titulo" className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+              <h2 id="roles-titulo" className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
                 Roles del Sistema
               </h2>
-              <p className="text-slate-600 dark:text-slate-300 max-w-xl mx-auto">
+              <p className="text-slate-600 dark:text-slate-300 max-w-xl mx-auto font-medium">
                 Cada usuario accede a las funcionalidades correspondientes a su rol institucional.
               </p>
             </div>
@@ -287,28 +295,32 @@ export default function LandingPage({ alIrALogin, alIrARegistro }) {
               {ROLES.map(({ nombre, descripcion, icono: Icono, color, bg }) => (
                 <div
                   key={nombre}
-                  className={`rounded-2xl p-6 border bg-gradient-to-br transition-all hover:shadow-lg ${bg}`}
+                  className={`rounded-2xl p-6 border bg-white/90 dark:bg-slate-900/90 backdrop-blur-md transition-all hover:shadow-xl ${bg}`}
                 >
-                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/80 dark:bg-slate-800/60 mb-4`}>
+                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 shadow-xs mb-4`}>
                     <Icono className={`w-6 h-6 ${color}`} aria-hidden="true" />
                   </div>
                   <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">{nombre}</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                     {descripcion}
                   </p>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
+          </section>
+        </FondoModulo>
 
-        {/* ── CTA Final ── */}
-        <section className="py-16 sm:py-20" aria-labelledby="cta-titulo">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-            <h2 id="cta-titulo" className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-4">
+        {/* ── Comienza a reservar ambientes con Imagen de Fondo ── */}
+        <FondoModulo
+          imagen="/backgrounds/bg_nueva_reserva.jpg"
+          className=""
+          overlayClassName="bg-slate-50/85 dark:bg-slate-950/85 backdrop-blur-[2px]"
+        >
+          <section className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center" aria-labelledby="cta-titulo">
+            <h2 id="cta-titulo" className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
               Comienza a reservar ambientes
             </h2>
-            <p className="text-slate-600 dark:text-slate-300 mb-8">
+            <p className="text-slate-600 dark:text-slate-300 mb-8 font-medium">
               Accede al sistema con tu cuenta institucional o solicita tu registro como solicitante.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -327,8 +339,8 @@ export default function LandingPage({ alIrALogin, alIrARegistro }) {
                 </>
               )}
             </div>
-          </div>
-        </section>
+          </section>
+        </FondoModulo>
       </main>
 
       {/* ───── Footer ───── */}
