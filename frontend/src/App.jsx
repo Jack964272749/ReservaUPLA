@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import Shell from './components/Shell';
 import AlertaPendientes from './components/AlertaPendientes';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import RegistroSolicitante from './pages/RegistroSolicitante';
 import Dashboard from './pages/Dashboard';
@@ -11,14 +12,42 @@ import CrearReserva from './pages/CrearReserva';
 import Ambientes from './pages/Ambientes';
 import Usuarios from './pages/Usuarios';
 
+// Utility: read the first segment of the pathname (hash‐free)
+function leerRuta() {
+  return window.location.pathname.replace(/\/+$/, '') || '/';
+}
+
+function navegarA(ruta) {
+  if (leerRuta() !== ruta) {
+    window.history.pushState(null, '', ruta);
+  }
+}
+
 // Trazabilidad: Nielsen H1, H4, H7 · Shneiderman S1, S2 · ISO 9241-11
 function ContenidoApp() {
   const { usuario, cargando } = useAuth();
-  const [vistaAuth, setVistaAuth] = useState('login'); // 'login' | 'registro'
+  const [vistaAuth, setVistaAuth] = useState(() => {
+    const ruta = leerRuta();
+    if (ruta === '/registro') return 'registro';
+    if (ruta === '/login') return 'login';
+    return 'landing';
+  });
   const [activeTab, setActiveTab] = useState('dashboard');
   const [ambientePreseleccionado, setAmbientePreseleccionado] = useState(null);
   const [estadoInicialReservas, setEstadoInicialReservas] = useState(null);
   const [ambienteDestacado, setAmbienteDestacado] = useState(null);
+
+  // Sync browser back/forward with internal state
+  useEffect(() => {
+    const onPopState = () => {
+      const ruta = leerRuta();
+      if (ruta === '/registro') setVistaAuth('registro');
+      else if (ruta === '/login') setVistaAuth('login');
+      else if (ruta === '/') setVistaAuth('landing');
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   // Al iniciar sesión: el Administrador entra al Dashboard y el resto a sus reservas
   useEffect(() => {
@@ -27,6 +56,21 @@ function ContenidoApp() {
       setEstadoInicialReservas(null);
     }
   }, [usuario?.id]);
+
+  const irALogin = useCallback(() => {
+    navegarA('/login');
+    setVistaAuth('login');
+  }, []);
+
+  const irARegistro = useCallback(() => {
+    navegarA('/registro');
+    setVistaAuth('registro');
+  }, []);
+
+  const irALanding = useCallback(() => {
+    navegarA('/');
+    setVistaAuth('landing');
+  }, []);
 
   // Cambio de sección desde el menú: descarta filtros preseleccionados
   const cambiarTab = (id) => {
@@ -56,9 +100,18 @@ function ContenidoApp() {
   // Vista de usuarios no autenticados
   if (!usuario) {
     if (vistaAuth === 'registro') {
-      return <RegistroSolicitante alVolverALogin={() => setVistaAuth('login')} />;
+      return <RegistroSolicitante alVolverALogin={irALogin} />;
     }
-    return <Login alIrARegistro={() => setVistaAuth('registro')} />;
+    if (vistaAuth === 'login') {
+      return <Login alIrARegistro={irARegistro} alIrALanding={irALanding} />;
+    }
+    // Landing page (default for "/")
+    return <LandingPage alIrALogin={irALogin} alIrARegistro={irARegistro} />;
+  }
+
+  // If authenticated user lands on "/" or "/login", redirect to app
+  if (vistaAuth === 'landing' || vistaAuth === 'login') {
+    // Show the app shell — do not redirect URL to keep it clean
   }
 
   // Manejo de tabs según rol

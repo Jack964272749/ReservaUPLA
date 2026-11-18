@@ -68,7 +68,7 @@ const CUENTAS_DEMO = [
 // Trazabilidad: Nielsen H1..H9 · Shneiderman S1..S5 · ISO 9241-11
 // Panel izquierdo: Campus UPLA inmersivo con lienzo glacial estilo igloo.inc.
 // Panel derecho: Formulario centrado en tarjeta redondeada ("sin puntas").
-export default function Login({ alIrARegistro }) {
+export default function Login({ alIrARegistro, alIrALanding }) {
   const {
     correo,
     setCorreo,
@@ -414,6 +414,18 @@ export default function Login({ alIrARegistro }) {
                 className="font-semibold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
               >
                 Regístrate como Solicitante
+              </button>
+            </div>
+          )}
+
+          {alIrALanding && (
+            <div className="mt-2 text-center">
+              <button
+                type="button"
+                onClick={alIrALanding}
+                className="text-xs text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:underline cursor-pointer"
+              >
+                ← Volver al inicio
               </button>
             </div>
           )}
